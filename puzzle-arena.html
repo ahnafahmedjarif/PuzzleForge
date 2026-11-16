@@ -4,177 +4,436 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PuzzleForge - Puzzle Arena</title>
+<title>PuzzleForge — Puzzle Arena</title>
 
 <style>
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
-  padding: 20px;
-  background: #101820;
-  color: white;
+  background: #10131a;
+  color: #f1f3f7;
   font-family: Arial, sans-serif;
-  text-align: center;
+  padding: 20px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+header a {
+  color: #b8c0ce;
+  text-decoration: none;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
 }
 
 h1 {
-  color: #55d6a7;
+  font-size: 30px;
   margin-bottom: 8px;
 }
 
 .subtitle {
-  color: #aab7c4;
+  color: #929baa;
   margin-bottom: 25px;
 }
 
-.board {
-  width: min(90vw, 480px);
-  aspect-ratio: 1 / 1;
-  margin: 20px auto;
+.layout {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  border: 4px solid #293744;
-  border-radius: 5px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.8fr);
+  gap: 25px;
+  align-items: start;
+}
+
+.card {
+  background: #1a1f29;
+  border: 1px solid #2b3240;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.board {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
   overflow: hidden;
+  border-radius: 6px;
+  border: 3px solid #343c49;
 }
 
 .square {
   display: flex;
-  align-items: center;
   justify-content: center;
-  font-size: clamp(22px, 8vw, 48px);
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: clamp(22px, 5vw, 48px);
+  cursor: pointer;
+  user-select: none;
+  position: relative;
 }
 
 .light {
-  background: #e8e3d5;
+  background: #e5e1d5;
 }
 
 .dark {
-  background: #628b78;
+  background: #789477;
+}
+
+.square.selected {
+  background: #e6d45b;
+}
+
+.square.possible {
+  box-shadow: inset 0 0 0 5px #d9bd55;
+}
+
+.piece {
+  line-height: 1;
+  pointer-events: none;
 }
 
 .white-piece {
-  color: #ffffff;
-  text-shadow: 1px 2px 3px #222;
+  color: #fff;
+  text-shadow: 1px 2px 3px #333;
 }
 
 .black-piece {
-  color: #172027;
-  text-shadow: 1px 1px 2px #aaa;
+  color: #171717;
+  text-shadow: 0 1px 1px #aaa;
 }
 
-.info {
-  color: #c4ced8;
-  margin-top: 20px;
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
 }
 
 button {
-  background: #55d6a7;
-  color: #102019;
-  border: none;
-  padding: 12px 25px;
+  background: #303a4b;
+  color: white;
+  border: 1px solid #414d61;
+  padding: 11px 16px;
   border-radius: 8px;
-  font-size: 16px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover {
+  background: #43516a;
+}
+
+.primary {
+  background: #b6a05a;
+  color: #111;
+  border: none;
   font-weight: bold;
+}
+
+.primary:hover {
+  background: #d0b96c;
+}
+
+.info-title {
+  font-size: 17px;
+  margin-bottom: 14px;
+}
+
+.stat {
+  background: #222936;
+  padding: 14px;
+  border-radius: 9px;
+  margin-bottom: 12px;
+}
+
+.stat small {
+  color: #9da7b6;
+}
+
+.stat strong {
+  display: block;
+  font-size: 22px;
+  margin-top: 5px;
+}
+
+.status {
+  color: #c5cbd5;
   margin-top: 15px;
+  line-height: 1.5;
+}
+
+.hint-box {
+  background: #222936;
+  padding: 14px;
+  border-radius: 9px;
+  margin-top: 15px;
+  color: #c5cbd5;
+  line-height: 1.5;
+  min-height: 55px;
+}
+
+.note {
+  color: #8e99a9;
+  font-size: 12px;
+  margin-top: 20px;
+  line-height: 1.5;
+}
+
+@media (max-width: 750px) {
+  body {
+    padding: 14px;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: 25px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<h1>♟ PuzzleForge</h1>
-<p class="subtitle">Chess Puzzle Arena</p>
+<header>
+  <div class="logo">♟ PuzzleForge</div>
+  <a href="index.html">← Dashboard</a>
+</header>
 
-<div class="board">
+<div class="container">
 
-<!-- Rank 8 -->
-<div class="square light black-piece">♜</div>
-<div class="square dark black-piece">♞</div>
-<div class="square light black-piece">♝</div>
-<div class="square dark black-piece">♛</div>
-<div class="square light black-piece">♚</div>
-<div class="square dark black-piece">♝</div>
-<div class="square light black-piece">♞</div>
-<div class="square dark black-piece">♜</div>
+  <h1>Puzzle Arena</h1>
+  <p class="subtitle">Train your chess skills, one puzzle at a time.</p>
 
-<!-- Rank 7 -->
-<div class="square dark black-piece">♟</div>
-<div class="square light black-piece">♟</div>
-<div class="square dark black-piece">♟</div>
-<div class="square light black-piece">♟</div>
-<div class="square dark black-piece">♟</div>
-<div class="square light black-piece">♟</div>
-<div class="square dark black-piece">♟</div>
-<div class="square light black-piece">♟</div>
+  <div class="layout">
 
-<!-- Rank 6 -->
-<div class="square light"></div>
-<div class="square dark"></div>
-<div class="square light"></div>
-<div class="square dark"></div>
-<div class="square light"></div>
-<div class="square dark"></div>
-<div class="square light"></div>
-<div class="square dark"></div>
+    <section class="card">
 
-<!-- Rank 5 -->
-<div class="square dark"></div>
-<div class="square light"></div>
-<div class="square dark"></div>
-<div class="square light"></div>
-<div class="square dark"></div>
-<div class="square light"></div>
-<div class="square dark"></div>
-<div class="square light"></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:15px;">
+        <strong>Daily Challenge</strong>
+        <span style="color:#b6a05a;">Puzzle 001 / 280</span>
+      </div>
 
-<!-- Rank 4 -->
-<div class="square light"></div>
-<div class="square dark"></div>
-<div class="square light"></div>
-<div class="square dark"></div>
-<div class="square light"></div>
-<div class="square dark"></div>
-<div class="square light"></div>
-<div class="square dark"></div>
+      <div id="board" class="board"></div>
 
-<!-- Rank 3 -->
-<div class="square dark"></div>
-<div class="square light"></div>
-<div class="square dark"></div>
-<div class="square light"></div>
-<div class="square dark"></div>
-<div class="square light"></div>
-<div class="square dark"></div>
-<div class="square light"></div>
+      <div class="controls">
+        <button onclick="showHint()">💡 Hint</button>
+        <button onclick="flipBoard()">⇅ Flip Board</button>
+        <button onclick="resetBoard()">↻ Reset</button>
+        <button class="primary" onclick="nextPuzzle()">Next Puzzle →</button>
+      </div>
 
-<!-- Rank 2 -->
-<div class="square light white-piece">♙</div>
-<div class="square dark white-piece">♙</div>
-<div class="square light white-piece">♙</div>
-<div class="square dark white-piece">♙</div>
-<div class="square light white-piece">♙</div>
-<div class="square dark white-piece">♙</div>
-<div class="square light white-piece">♙</div>
-<div class="square dark white-piece">♙</div>
+      <p id="status" class="status">
+        Select a piece to begin.
+      </p>
 
-<!-- Rank 1 -->
-<div class="square dark white-piece">♖</div>
-<div class="square light white-piece">♘</div>
-<div class="square dark white-piece">♗</div>
-<div class="square light white-piece">♕</div>
-<div class="square dark white-piece">♔</div>
-<div class="square light white-piece">♗</div>
-<div class="square dark white-piece">♘</div>
-<div class="square light white-piece">♖</div>
+      <div id="hint" class="hint-box">
+        Your hint will appear here.
+      </div>
 
+    </section>
+
+    <aside class="card">
+
+      <h2 class="info-title">Puzzle Information</h2>
+
+      <div class="stat">
+        <small>Difficulty</small>
+        <strong>Intermediate</strong>
+      </div>
+
+      <div class="stat">
+        <small>Rating</small>
+        <strong>1950–2050</strong>
+      </div>
+
+      <div class="stat">
+        <small>Puzzles Completed</small>
+        <strong id="completed">0 / 280</strong>
+      </div>
+
+      <div class="stat">
+        <small>Hints Used</small>
+        <strong id="hintsUsed">0</strong>
+      </div>
+
+      <p class="note">
+        Select a chess piece and then select another square.
+        This prototype currently demonstrates the board interface.
+        Full puzzle validation and legal chess moves are not implemented yet.
+      </p>
+
+    </aside>
+
+  </div>
 </div>
 
-<p class="info">Welcome to PuzzleForge Chess Arena.</p>
-<p class="info">Your chess puzzle board is ready!</p>
+<script>
+const initialPosition = [
+  ["♜","♞","♝","♛","♚","♝","♞","♜"],
+  ["♟","♟","♟","♟","♟","♟","♟","♟"],
+  ["","","","","","","",""],
+  ["","","","","","","",""],
+  ["","","","","","","",""],
+  ["","","","","","","",""],
+  ["♙","♙","♙","♙","♙","♙","♙","♙"],
+  ["♖","♘","♗","♕","♔","♗","♘","♖"]
+];
+
+let board = initialPosition.map(row => [...row]);
+let selected = null;
+let flipped = false;
+let hintCount = 0;
+let completedCount = 0;
+
+const boardElement = document.getElementById("board");
+
+function renderBoard() {
+  boardElement.innerHTML = "";
+
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+
+      let actualRow = flipped ? 7 - row : row;
+      let actualCol = flipped ? 7 - col : col;
+
+      const square = document.createElement("div");
+
+      square.className =
+        "square " +
+        ((row + col) % 2 === 0 ? "light" : "dark");
+
+      if (
+        selected &&
+        selected.row === actualRow &&
+        selected.col === actualCol
+      ) {
+        square.classList.add("selected");
+      }
+
+      const piece = board[actualRow][actualCol];
+
+      if (piece) {
+        const pieceElement = document.createElement("span");
+        pieceElement.className = "piece";
+
+        const whitePieces = "♙♖♘♗♕♔";
+
+        pieceElement.classList.add(
+          whitePieces.includes(piece) ? "white-piece" : "black-piece"
+        );
+
+        pieceElement.textContent = piece;
+        square.appendChild(pieceElement);
+      }
+
+      square.addEventListener("click", () => {
+        handleSquareClick(actualRow, actualCol);
+      });
+
+      boardElement.appendChild(square);
+    }
+  }
+}
+
+function handleSquareClick(row, col) {
+
+  if (selected === null) {
+
+    if (board[row][col] !== "") {
+      selected = { row, col };
+
+      document.getElementById("status").textContent =
+        "Piece selected. Now select a destination square.";
+
+      renderBoard();
+    }
+
+    return;
+  }
+
+  const fromRow = selected.row;
+  const fromCol = selected.col;
+
+  if (fromRow === row && fromCol === col) {
+    selected = null;
+    renderBoard();
+    return;
+  }
+
+  board[row][col] = board[fromRow][fromCol];
+  board[fromRow][fromCol] = "";
+
+  selected = null;
+
+  document.getElementById("status").textContent =
+    "Move displayed. This demo does not check legal moves.";
+
+  renderBoard();
+}
+
+function resetBoard() {
+  board = initialPosition.map(row => [...row]);
+  selected = null;
+
+  document.getElementById("status").textContent =
+    "Board reset to starting position.";
+
+  document.getElementById("hint").textContent =
+    "Your hint will appear here.";
+
+  renderBoard();
+}
+
+function flipBoard() {
+  flipped = !flipped;
+  renderBoard();
+}
+
+function showHint() {
+  hintCount++;
+
+  document.getElementById("hintsUsed").textContent = hintCount;
+
+  document.getElementById("hint").textContent =
+    "Hint: Look for checks, captures, and threats. Try to find the strongest forcing move.";
+}
+
+function nextPuzzle() {
+  completedCount++;
+
+  document.getElementById("completed").textContent =
+    completedCount + " / 280";
+
+  resetBoard();
+
+  document.getElementById("status").textContent =
+    "Next puzzle selected. Puzzle data will be connected in a future update.";
+}
+
+renderBoard();
+</script>
 
 </body>
 </html>
