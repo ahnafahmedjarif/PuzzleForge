@@ -9,7 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <style>
-• {
+* {
 box-sizing: border-box;
 margin: 0;
 padding: 0;
@@ -130,10 +130,6 @@ background: #c9c45b;
 background: #e6bd42;
 }
 
-
-
-/* Lichess-inspired Staunton-style pieces */
-
 .piece {
 font-family: "DejaVu Sans", "Segoe UI Symbol",
 "Noto Sans Symbols 2", sans-serif;
@@ -149,7 +145,6 @@ position: relative;
 z-index: 2;
 }
 
-/* White pieces */
 .white-piece {
 color: #ffffff;
 -webkit-text-stroke: 0.7px #333333;
@@ -157,7 +152,6 @@ text-shadow: 0 2px 2px rgba(0,0,0,0.28);
 filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
 }
 
-/* Black pieces */
 .black-piece {
 color: #222222;
 -webkit-text-stroke: 0.6px #eeeeee;
@@ -165,8 +159,6 @@ text-shadow: 0 2px 2px rgba(0,0,0,0.25);
 filter: drop-shadow(0 1px 1px rgba(0,0,0,0.25));
 }
 
-
-/* Mobile */
 @media (max-width: 720px) {
 .piece {
 width: 92%;
@@ -175,20 +167,16 @@ font-size: clamp(26px, 7vw, 44px);
 }
 }
 
-/* Subtle hover effect */
 .piece:hover {
 transform: scale(1.06);
 }
 
-/* Mobile adjustment */
 @media(max-width: 720px) {
 .piece {
 font-size: clamp(34px, 10vw, 58px);
 transform: scale(1.05);
 }
 }
-
-
 
 .square.possible::after {
 content: "";
@@ -315,6 +303,40 @@ line-height: 1.5;
 margin-top: 18px;
 }
 
+/* Stockfish explanation panel */
+.analysis-panel {
+background: #222936;
+border: 1px solid #465166;
+border-radius: 10px;
+padding: 14px;
+margin-top: 14px;
+line-height: 1.6;
+display: none;
+}
+
+.analysis-panel h3 {
+color: #d7bd70;
+font-size: 17px;
+margin-bottom: 10px;
+}
+
+.analysis-panel p {
+font-size: 14px;
+color: #e1e6ee;
+margin-top: 7px;
+}
+
+.analysis-panel .engine-line {
+color: #9da7b6;
+font-size: 12px;
+margin-top: 10px;
+}
+
+.analysis-panel .best-move {
+color: #75f0a4;
+font-weight: bold;
+}
+
 @media(max-width: 720px) {
 .layout {
 grid-template-columns: 1fr;
@@ -372,6 +394,16 @@ Bobby Fischer: "Chess is life."
 Loading puzzle database...
 </p>
 
+<div id="analysisPanel" class="analysis-panel">
+<h3>♟ Stockfish Move Analysis</h3>
+<p id="analysisText">Waiting for analysis...</p>
+<p id="bestMoveText"></p>
+<p id="evalText"></p>
+<p class="engine-line" id="engineLine">
+Analysis powered by Stockfish
+</p>
+</div>
+
 <div class="themes" id="themes"></div>
 
 </section>
@@ -427,13 +459,6 @@ Puzzle data is loaded from puzzles.json.
 const game = new Chess();
 const boardElement = document.getElementById("board");
 
-/*
-IMPORTANT:
-Both sides use the filled black chess glyph shapes.
-White pieces are colored white using CSS.
-Black pieces are colored black using CSS.
-*/
-
 const symbols = {
 wk: "♚",
 wq: "♛",
@@ -473,6 +498,251 @@ let wrongMovePending = false;
 let solvedIds = [];
 let noHintIds = [];
 let totalHints = 0;
+
+/* ---------------------------------
+   STOCKFISH ENGINE
+---------------------------------- */
+
+let stockfishWorker = null;
+let stockfishReady = false;
+let stockfishQueue = [];
+let stockfishBusy = false;
+let currentAnalysisId = 0;
+
+function initStockfish() {
+try {
+const workerCode = `
+self.Module = {
+  locateFile: function(path) {
+    return "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/" + path;
+  }
+};
+importScripts(
+  "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16-single.js"
+);
+`;
+
+const blob = new Blob([workerCode], {
+type: "application/javascript"
+});
+
+const workerUrl = URL.createObjectURL(blob);
+stockfishWorker = new Worker(workerUrl);
+
+stockfishWorker.onmessage = function(event) {
+handleStockfishMessage(
+String(event.data || "")
+);
+};
+
+stockfishWorker.onerror = function() {
+stockfishReady = false;
+document.getElementById("engineLine").textContent =
+"Stockfish could not load. Check your internet connection.";
+};
+
+stockfishWorker.postMessage("uci");
+
+} catch (error) {
+console.error("Stockfish initialization error:", error);
+document.getElementById("engineLine").textContent =
+"Stockfish is unavailable in this browser.";
+}
+}
+
+function handleStockfishMessage(message) {
+if (message === "uciok") {
+stockfishWorker.postMessage("isready");
+return;
+}
+
+if (message === "readyok") {
+stockfishReady = true;
+document.getElementById("engineLine").textContent =
+"Stockfish engine ready.";
+runNextAnalysis();
+return;
+}
+
+if (message.startsWith("info ")) {
+const cpMatch = message.match(/score cp (-?\d+)/);
+const mateMatch = message.match(/score mate (-?\d+)/);
+const pvMatch = message.match(/\bpv (.+)$/);
+
+if (stockfishQueue.length) {
+const task = stockfishQueue[0];
+
+if (cpMatch) {
+task.score = parseInt(cpMatch[1], 10);
+}
+
+if (mateMatch) {
+task.mate = parseInt(mateMatch[1], 10);
+}
+
+if (pvMatch) {
+task.pv = pvMatch[1];
+}
+}
+
+return;
+}
+
+if (message.startsWith("bestmove ")) {
+const task = stockfishQueue.shift();
+
+if (task) {
+task.bestMove = message.split(/\s+/)[1];
+task.resolve(task);
+}
+
+stockfishBusy = false;
+runNextAnalysis();
+}
+}
+
+function runNextAnalysis() {
+if (!stockfishReady || stockfishBusy || !stockfishQueue.length) {
+return;
+}
+
+const task = stockfishQueue[0];
+stockfishBusy = true;
+
+task.score = null;
+task.mate = null;
+task.pv = "";
+task.bestMove = "";
+
+stockfishWorker.postMessage(
+"position fen " + task.fen
+);
+
+stockfishWorker.postMessage(
+"go depth 13"
+);
+
+}
+
+function analysePosition(fen) {
+return new Promise(function(resolve) {
+if (!stockfishWorker) {
+resolve(null);
+return;
+}
+
+stockfishQueue.push({
+fen: fen,
+resolve: resolve,
+score: null,
+mate: null,
+pv: "",
+bestMove: ""
+});
+
+runNextAnalysis();
+});
+}
+
+function uciToSan(fen, uci) {
+if (!uci || uci.length < 4) return uci || "--";
+
+try {
+const tempGame = new Chess(fen);
+
+const move = tempGame.move({
+from: uci.substring(0, 2),
+to: uci.substring(2, 4),
+promotion: uci.length > 4 ? uci[4] : "q"
+});
+
+return move ? move.san : uci;
+} catch (error) {
+return uci;
+}
+}
+
+function showAnalysisLoading() {
+const panel = document.getElementById("analysisPanel");
+panel.style.display = "block";
+
+document.getElementById("analysisText").textContent =
+"Stockfish is analysing the position...";
+
+document.getElementById("bestMoveText").textContent = "";
+document.getElementById("evalText").textContent = "";
+}
+
+async function analyseWrongMove(beforeFen, playedMove, analysisId) {
+showAnalysisLoading();
+
+const result = await analysePosition(beforeFen);
+
+if (analysisId !== currentAnalysisId) return;
+
+const panel = document.getElementById("analysisPanel");
+
+if (!result || !result.bestMove || result.bestMove === "(none)") {
+document.getElementById("analysisText").textContent =
+"Stockfish analysis could not be completed.";
+
+document.getElementById("engineLine").textContent =
+"Please check your internet connection and reload the page.";
+
+return;
+}
+
+const bestSan = uciToSan(beforeFen, result.bestMove);
+const bestUci = result.bestMove;
+
+const playedSan = playedMove.san;
+
+let explanation =
+"You played " + playedSan +
+", but Stockfish found a stronger move: " + bestSan + ".";
+
+if (bestUci.substring(0, 2) === playedMove.from &&
+bestUci.substring(2, 4) === playedMove.to) {
+explanation =
+"Stockfish's preferred move matches your move. The puzzle may require a different continuation or promotion choice.";
+}
+
+document.getElementById("analysisText").textContent =
+explanation;
+
+document.getElementById("bestMoveText").innerHTML =
+'<span class="best-move">Best move: ' +
+bestSan + " (" + bestUci + ")</span>";
+
+let evalText = "Evaluation: ";
+
+if (result.mate !== null) {
+evalText += "Mate in " + Math.abs(result.mate);
+} else if (result.score !== null) {
+const pawns = (result.score / 100).toFixed(2);
+evalText += (result.score > 0 ? "+" : "") + pawns +
+" pawns from the side-to-move perspective.";
+} else {
+evalText += "Evaluation unavailable.";
+}
+
+document.getElementById("evalText").textContent = evalText;
+
+if (result.pv) {
+const pvMoves = result.pv.split(" ").slice(0, 6);
+document.getElementById("engineLine").textContent =
+"Stockfish line: " + pvMoves.join(" ");
+} else {
+document.getElementById("engineLine").textContent =
+"Analysis powered by Stockfish.";
+}
+
+panel.style.display = "block";
+}
+
+/* ---------------------------------
+   ORIGINAL PUZZLE FUNCTIONS
+---------------------------------- */
 
 function loadProgress() {
 try {
@@ -569,7 +839,7 @@ startPuzzle(currentIndex);
 
 } catch (error) {
 setMessage(
-"Could not load puzzles.json. Check that it is in the same folder as puzzle-arena.html.",
+"Could not load puzzles.json. Check that it is in the same folder as arena.html.",
 "wrong"
 );
 
@@ -580,6 +850,9 @@ document.getElementById("gameStatus").textContent =
 
 function startPuzzle(index) {
 if (!puzzles.length) return;
+
+currentAnalysisId++;
+document.getElementById("analysisPanel").style.display = "none";
 
 currentIndex = index;
 currentPuzzle = puzzles[currentIndex];
@@ -766,6 +1039,9 @@ return;
 }
 }
 
+/* Capture the position before the user's incorrect move */
+const beforeWrongFen = game.fen();
+
 const wrongMove = game.move({
 from: selected,
 to: square,
@@ -787,8 +1063,17 @@ legalTargets = [];
 hintSquare = null;
 wrongMovePending = true;
 
+const thisAnalysisId = ++currentAnalysisId;
+
+/* Ask Stockfish to analyse the position before the wrong move */
+analyseWrongMove(
+beforeWrongFen,
+wrongMove,
+thisAnalysisId
+);
+
 renderBoard();
-setMessage("❌ WRONG MOVE! Try again.", "wrong");
+setMessage("❌ WRONG MOVE! Stockfish is analysing your move.", "wrong");
 
 setTimeout(() => {
 game.undo();
@@ -856,115 +1141,4 @@ puzzleMoveIndex++;
 
 renderBoard();
 
-if (puzzleMoveIndex >= currentPuzzle.moves.length) {
-finishPuzzle();
-} else {
-setMessage("Your turn. Find the next correct move!");
-}
-}
-
-function finishPuzzle() {
-puzzleSolved = true;
-opponentThinking = false;
-wrongMovePending = false;
-
-const id = currentPuzzle.id;
-
-if (!solvedIds.includes(id)) {
-solvedIds.push(id);
-
-if (hintCount === 0) {
-noHintIds.push(id);
-}
-
-saveProgress();
-}
-
-document.getElementById("gameStatus").textContent =
-"Puzzle Solved!";
-
-setMessage(
-hintCount === 0
-? "🍅 PUZZLE SOLVED! Excellent work — no hints used!"
-: "🍅 PUZZLE SOLVED! Great job!",
-"success"
-);
-
-updateStats();
-}
-
-function getHint() {
-if (
-puzzleSolved ||
-opponentThinking ||
-wrongMovePending ||
-!currentPuzzle
-) return;
-
-const expected = currentPuzzle.moves[puzzleMoveIndex];
-
-if (!expected) return;
-
-if (hintLevel < 2) {
-hintLevel++;
-hintCount++;
-totalHints++;
-}
-
-const from = expected.substring(0, 2);
-const to = expected.substring(2, 4);
-
-if (hintLevel === 1) {
-hintSquare = from;
-setMessage("Hint 1: Look at the highlighted starting square.");
-} else {
-hintSquare = to;
-setMessage("Hint 2: Move the piece to the highlighted square.");
-}
-
-saveProgress();
-updateStats();
-renderBoard();
-}
-
-function nextPuzzle() {
-if (!puzzles.length) return;
-
-const nextIndex = (currentIndex + 1) % puzzles.length;
-
-startPuzzle(nextIndex);
-saveProgress();
-}
-
-function restartPuzzle() {
-if (!puzzles.length) return;
-
-startPuzzle(currentIndex);
-}
-
-function flipBoard() {
-flipped = !flipped;
-renderBoard();
-}
-
-function updateInfo() {
-document.getElementById("turn").textContent =
-game.turn() === "w" ? "White" : "Black";
-
-if (puzzleSolved) {
-document.getElementById("gameStatus").textContent =
-"Puzzle Solved!";
-} else if (opponentThinking) {
-document.getElementById("gameStatus").textContent =
-"Opponent Moving";
-} else {
-document.getElementById("gameStatus").textContent =
-game.in_check() ? "Check" : "In Progress";
-}
-}
-
-loadPuzzles();
-</script>
-
-</body>
-</html>
+if (puzzleMoveIndex >= currentPuzzle.moves.le
