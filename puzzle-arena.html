@@ -125,20 +125,22 @@ h1 {
   z-index: 1;
 }
 
-/* Solid white pieces */
+/* White pieces: filled white with visible details */
 .white-piece {
-  color: #fff;
-  filter: brightness(0) invert(1)
-          drop-shadow(0 2px 2px #111);
-  -webkit-text-stroke: 1px #fff;
-  text-shadow: 0 1px 3px #111;
+  color: #ffffff;
+  -webkit-text-stroke: 1.2px #303030;
+  text-shadow:
+    0 1px 2px #111,
+    0 0 2px #555;
+  filter: none;
 }
 
-/* Solid black pieces */
+/* Black pieces */
 .black-piece {
-  color: #111;
-  filter: brightness(0)
-          drop-shadow(0 1px 1px #777);
+  color: #171717;
+  -webkit-text-stroke: .5px #111;
+  text-shadow: 0 1px 1px #777;
+  filter: none;
 }
 
 .square.possible::after {
@@ -378,11 +380,21 @@ button:disabled {
 const game = new Chess();
 const boardElement = document.getElementById("board");
 
+/* Correct white and black chess piece glyphs */
 const symbols = {
-  wk: "♚", wq: "♛", wr: "♜",
-  wb: "♝", wn: "♞", wp: "♟",
-  bk: "♚", bq: "♛", br: "♜",
-  bb: "♝", bn: "♞", bp: "♟"
+  wk: "♔",
+  wq: "♕",
+  wr: "♖",
+  wb: "♗",
+  wn: "♘",
+  wp: "♙",
+
+  bk: "♚",
+  bq: "♛",
+  br: "♜",
+  bb: "♝",
+  bn: "♞",
+  bp: "♟"
 };
 
 const STORAGE_KEY = "puzzleforge_progress_v1";
@@ -539,7 +551,6 @@ function startPuzzle(index) {
       throw new Error("Invalid puzzle moves.");
     }
 
-    // Lichess first move is the opponent's setup move.
     const setupMove = applyUci(moves[0]);
 
     if (!setupMove) {
@@ -553,7 +564,6 @@ function startPuzzle(index) {
 
     puzzleMoveIndex = 1;
 
-    // The solving side is placed at the bottom.
     flipped = game.turn() === "b";
 
     document.getElementById("puzzleNumber").textContent =
@@ -703,7 +713,6 @@ function handleClick(square) {
       }
     }
 
-    // Show a wrong legal move briefly, then undo it.
     const wrongMove = game.move({
       from: selected,
       to: square,
@@ -744,7 +753,6 @@ function handleClick(square) {
       return;
     }
 
-    // If another friendly piece is selected, switch selection.
     if (piece && piece.color === game.turn()) {
       selectPiece(square);
       return;
@@ -844,12 +852,10 @@ function getHint() {
 
   if (!expected) return;
 
-  hintLevel = Math.min(hintLevel + 1, 2);
-
-  if (hintLevel <= 2) {
+  if (hintLevel < 2) {
+    hintLevel++;
     hintCount++;
     totalHints++;
-    saveProgress();
   }
 
   const from = expected.substring(0, 2);
@@ -863,6 +869,7 @@ function getHint() {
     setMessage("Hint 2: Move the piece to the highlighted square.");
   }
 
+  saveProgress();
   updateStats();
   renderBoard();
 }
