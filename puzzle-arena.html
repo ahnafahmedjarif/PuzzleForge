@@ -126,21 +126,19 @@ h1 {
 }
 
 
-/* Clear and detailed white chess pieces */
+/* Improved White Chess Pieces */
 .white-piece {
   color: #ffffff;
-  -webkit-text-fill-color: #ffffff;
-  -webkit-text-stroke: 1.7px #252525;
-  paint-order: stroke fill;
-  font-weight: 900;
+
+  -webkit-text-stroke: 1.3px #292929;
 
   text-shadow:
-    0 0 1px #111111,
-    0 1px 1px #111111,
-    1px 2px 2px #333333,
+    0 0 1px #ffffff,
+    0 0 2px #ffffff,
+    0 1px 2px #111111,
     0 0 3px #555555;
 
-  filter: drop-shadow(0 1px 1px #111);
+  filter: brightness(1.08);
 }
 
 /* Sharp black chess pieces */
