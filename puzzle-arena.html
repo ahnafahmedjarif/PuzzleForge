@@ -130,7 +130,13 @@ h1 {
   background: #e6bd42;
 }
 
-/* Chess pieces */
+.square.feedback-from {
+  background: #e6bd42 !important;
+}
+
+.square.feedback-to {
+  background: #e28b42 !important;
+}
 
 .piece {
   font-family: "DejaVu Sans", "Segoe UI Symbol",
@@ -290,6 +296,49 @@ button:disabled {
   margin-top: 18px;
 }
 
+#feedbackPanel {
+  background: #202a37;
+  border-color: #8b6540;
+  margin-top: 14px;
+}
+
+#feedbackPanel h3 {
+  color: #e8c878;
+  margin-bottom: 10px;
+}
+
+#wrongMoveText {
+  line-height: 1.6;
+  color: #f1f3f7;
+}
+
+#explanation {
+  font-size: 14px;
+  font-weight: normal;
+  min-height: 65px;
+}
+
+.feedback-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  color: #b9c2ce;
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-color {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+}
+
 @media(max-width: 720px) {
   .layout {
     grid-template-columns: 1fr;
@@ -350,6 +399,49 @@ button:disabled {
       <p id="status" class="status">
         Loading puzzle database...
       </p>
+
+      <!-- WRONG MOVE FEEDBACK PANEL -->
+      <div id="feedbackPanel" class="card" style="display:none;">
+
+        <h3>🔍 Why Was This Move Wrong?</h3>
+
+        <p id="wrongMoveText"></p>
+
+        <div class="controls">
+          <button onclick="explainWrongMove()">
+            🧠 Explain My Mistake
+          </button>
+
+          <button onclick="showOpponentThreat()">
+            ⚠️ Show Opponent's Threat
+          </button>
+
+          <button onclick="showCorrectMove()">
+            💡 Show Correct Move
+          </button>
+
+          <button class="primary" onclick="tryAgain()">
+            ↻ Try Again
+          </button>
+        </div>
+
+        <div class="feedback-legend">
+          <div class="legend-item">
+            <span class="legend-color" style="background:#e6bd42;"></span>
+            Starting square
+          </div>
+
+          <div class="legend-item">
+            <span class="legend-color" style="background:#e28b42;"></span>
+            Destination square
+          </div>
+        </div>
+
+        <p id="explanation" class="status">
+          Choose an option to understand your mistake.
+        </p>
+
+      </div>
 
       <div class="themes" id="themes"></div>
 
@@ -442,14 +534,20 @@ let opponentThinking = false;
 let puzzleSolved = false;
 let wrongMovePending = false;
 
+let wrongMoveDetails = null;
+let feedbackFrom = null;
+let feedbackTo = null;
+
 let solvedIds = [];
 let noHintIds = [];
 let totalHints = 0;
 
-// Timer protection when changing puzzles.
 let navigationVersion = 0;
 let opponentTimer = null;
-let wrongMoveTimer = null;
+
+// -----------------------------
+// PROGRESS
+// -----------------------------
 
 function loadProgress() {
   try {
@@ -514,6 +612,10 @@ function setMessage(message, type = "") {
   status.className = "status " + type;
 }
 
+// -----------------------------
+// CHESS HELPERS
+// -----------------------------
+
 function applyUci(uci) {
   if (!uci || uci.length < 4) return null;
 
@@ -523,6 +625,20 @@ function applyUci(uci) {
     promotion: uci.length > 4 ? uci[4] : "q"
   });
 }
+
+function createExpectedMove(fen, uci) {
+  const testGame = new Chess(fen);
+
+  return testGame.move({
+    from: uci.substring(0, 2),
+    to: uci.substring(2, 4),
+    promotion: uci.length > 4 ? uci[4] : "q"
+  });
+}
+
+// -----------------------------
+// LOAD PUZZLES
+// -----------------------------
 
 async function loadPuzzles() {
   loadProgress();
@@ -559,17 +675,17 @@ async function loadPuzzles() {
   }
 }
 
+// -----------------------------
+// START PUZZLE
+// -----------------------------
+
 function startPuzzle(index) {
   if (!puzzles.length) return;
 
-  // Cancel timers belonging to the previous puzzle.
   navigationVersion++;
 
   clearTimeout(opponentTimer);
-  clearTimeout(wrongMoveTimer);
-
   opponentTimer = null;
-  wrongMoveTimer = null;
 
   currentIndex = Math.max(
     0,
@@ -582,12 +698,24 @@ function startPuzzle(index) {
   selected = null;
   legalTargets = [];
   lastMove = null;
+
   hintLevel = 0;
   hintCount = 0;
   hintSquare = null;
+
   opponentThinking = false;
   puzzleSolved = false;
   wrongMovePending = false;
+
+  wrongMoveDetails = null;
+  feedbackFrom = null;
+  feedbackTo = null;
+
+  document.getElementById("feedbackPanel").style.display =
+    "none";
+
+  document.getElementById("explanation").textContent =
+    "Choose an option to understand your mistake.";
 
   try {
     game.load(currentPuzzle.fen);
@@ -629,13 +757,19 @@ function startPuzzle(index) {
 
     renderBoard();
     saveProgress();
+    updateStats();
 
   } catch (error) {
     setMessage("Puzzle error: " + error.message, "wrong");
+
     document.getElementById("gameStatus").textContent =
       "Puzzle Error";
   }
 }
+
+// -----------------------------
+// BOARD RENDERING
+// -----------------------------
 
 function renderBoard() {
   boardElement.innerHTML = "";
@@ -673,6 +807,14 @@ function renderBoard() {
         square.classList.add("hint");
       }
 
+      if (feedbackFrom === squareName) {
+        square.classList.add("feedback-from");
+      }
+
+      if (feedbackTo === squareName) {
+        square.classList.add("feedback-to");
+      }
+
       if (legalTargets.includes(squareName)) {
         if (piece) {
           square.classList.add("capture");
@@ -703,6 +845,10 @@ function renderBoard() {
 
   updateInfo();
 }
+
+// -----------------------------
+// PLAYER MOVE
+// -----------------------------
 
 function handleClick(square) {
   if (
@@ -753,6 +899,7 @@ function handleClick(square) {
           finishPuzzle();
         } else {
           opponentThinking = true;
+
           setMessage("Correct move! Opponent is thinking...");
 
           const timerVersion = navigationVersion;
@@ -768,6 +915,9 @@ function handleClick(square) {
       }
     }
 
+    // Store the position BEFORE the wrong move.
+    const fenBefore = game.fen();
+
     const wrongMove = game.move({
       from: selected,
       to: square,
@@ -775,9 +925,20 @@ function handleClick(square) {
     });
 
     if (wrongMove) {
-      const previousLastMove = lastMove
-        ? { ...lastMove }
-        : null;
+      const fenAfter = game.fen();
+
+      const expectedMove = createExpectedMove(
+        fenBefore,
+        expected
+      );
+
+      wrongMoveDetails = {
+        move: wrongMove,
+        expected: expectedMove,
+        expectedUci: expected,
+        fenBefore: fenBefore,
+        fenAfter: fenAfter
+      };
 
       lastMove = {
         from: wrongMove.from,
@@ -787,31 +948,35 @@ function handleClick(square) {
       selected = null;
       legalTargets = [];
       hintSquare = null;
+
       wrongMovePending = true;
 
+      feedbackFrom = null;
+      feedbackTo = null;
+
+      document.getElementById("feedbackPanel").style.display =
+        "block";
+
+      document.getElementById("wrongMoveText").textContent =
+        "Your move: " + wrongMove.san +
+        ". The expected move is " +
+        (expectedMove ? expectedMove.san : expected) +
+        ". Your move is shown on the board. Explore the options below.";
+
+      document.getElementById("explanation").textContent =
+        "Choose an option to understand your mistake.";
+
       renderBoard();
-      setMessage("❌ WRONG MOVE! Try again.", "wrong");
 
-      const timerVersion = navigationVersion;
-
-      wrongMoveTimer = setTimeout(() => {
-        if (timerVersion !== navigationVersion) return;
-
-        game.undo();
-
-        lastMove = previousLastMove;
-        wrongMovePending = false;
-
-        selected = null;
-        legalTargets = [];
-
-        renderBoard();
-        setMessage("Try another move!");
-      }, 1000);
+      setMessage(
+        "❌ Incorrect move. Let's understand why.",
+        "wrong"
+      );
 
       return;
     }
 
+    // If the attempted move was illegal, allow selecting another piece.
     if (piece && piece.color === game.turn()) {
       selectPiece(square);
       return;
@@ -819,8 +984,14 @@ function handleClick(square) {
 
     selected = null;
     legalTargets = [];
+
     renderBoard();
-    setMessage("Illegal move. Choose a highlighted square.", "wrong");
+
+    setMessage(
+      "Illegal move. Choose a highlighted square.",
+      "wrong"
+    );
+
     return;
   }
 
@@ -828,6 +999,10 @@ function handleClick(square) {
     selectPiece(square);
   }
 }
+
+// -----------------------------
+// SELECT PIECE
+// -----------------------------
 
 function selectPiece(square) {
   selected = square;
@@ -840,6 +1015,10 @@ function selectPiece(square) {
   renderBoard();
 }
 
+// -----------------------------
+// OPPONENT MOVE
+// -----------------------------
+
 function playOpponentMove() {
   if (puzzleSolved || !currentPuzzle) return;
 
@@ -847,9 +1026,13 @@ function playOpponentMove() {
   const move = applyUci(uci);
 
   opponentThinking = false;
+  opponentTimer = null;
 
   if (!move) {
-    setMessage("Puzzle move error. Please restart.", "wrong");
+    setMessage(
+      "Puzzle move error. Please restart.",
+      "wrong"
+    );
     return;
   }
 
@@ -862,126 +1045,4 @@ function playOpponentMove() {
 
   renderBoard();
 
-  if (puzzleMoveIndex >= currentPuzzle.moves.length) {
-    finishPuzzle();
-  } else {
-    setMessage("Your turn. Find the next correct move!");
-  }
-}
-
-function finishPuzzle() {
-  puzzleSolved = true;
-  opponentThinking = false;
-  wrongMovePending = false;
-
-  const id = currentPuzzle.id;
-
-  if (!solvedIds.includes(id)) {
-    solvedIds.push(id);
-
-    if (hintCount === 0) {
-      noHintIds.push(id);
-    }
-
-    saveProgress();
-  }
-
-  document.getElementById("gameStatus").textContent =
-    "Puzzle Solved!";
-
-  setMessage(
-    hintCount === 0
-      ? "🍅 PUZZLE SOLVED! Excellent work — no hints used!"
-      : "🍅 PUZZLE SOLVED! Great job!",
-    "success"
-  );
-
-  updateStats();
-}
-
-function getHint() {
-  if (
-    puzzleSolved ||
-    opponentThinking ||
-    wrongMovePending ||
-    !currentPuzzle
-  ) return;
-
-  const expected = currentPuzzle.moves[puzzleMoveIndex];
-
-  if (!expected) return;
-
-  if (hintLevel < 2) {
-    hintLevel++;
-    hintCount++;
-    totalHints++;
-  }
-
-  const from = expected.substring(0, 2);
-  const to = expected.substring(2, 4);
-
-  if (hintLevel === 1) {
-    hintSquare = from;
-    setMessage("Hint 1: Look at the highlighted starting square.");
-  } else {
-    hintSquare = to;
-    setMessage("Hint 2: Move the piece to the highlighted square.");
-  }
-
-  saveProgress();
-  updateStats();
-  renderBoard();
-}
-
-// PREVIOUS PUZZLE
-function previousPuzzle() {
-  if (!puzzles.length) return;
-
-  const previousIndex =
-    (currentIndex - 1 + puzzles.length) % puzzles.length;
-
-  startPuzzle(previousIndex);
-}
-
-// NEXT PUZZLE
-function nextPuzzle() {
-  if (!puzzles.length) return;
-
-  const nextIndex =
-    (currentIndex + 1) % puzzles.length;
-
-  startPuzzle(nextIndex);
-}
-
-function restartPuzzle() {
-  if (!puzzles.length) return;
-
-  startPuzzle(currentIndex);
-}
-
-function flipBoard() {
-  flipped = !flipped;
-  renderBoard();
-}
-
-function updateInfo() {
-  document.getElementById("turn").textContent =
-    game.turn() === "w" ? "White" : "Black";
-
-  if (puzzleSolved) {
-    document.getElementById("gameStatus").textContent =
-      "Puzzle Solved!";
-  } else if (opponentThinking) {
-    document.getElementById("gameStatus").textContent =
-      "Opponent Moving";
-  } else {
-    document.getElementById("gameStatus").textContent =
-      game.in_check() ? "Check" : "In Progress";
-  }
-}
-
-loadPuzzles();
-</script>
-
-</body>
-</html>
+  if (puzzleMoveIndex
