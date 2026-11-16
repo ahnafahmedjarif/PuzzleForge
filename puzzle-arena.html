@@ -9,331 +9,328 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+• {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
 }
 
 body {
-  background: #10131a;
-  color: #f1f3f7;
-  font-family: Arial, sans-serif;
-  padding: 16px;
+background: #10131a;
+color: #f1f3f7;
+font-family: Arial, sans-serif;
+padding: 16px;
 }
 
 header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 28px;
-  gap: 10px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 28px;
+gap: 10px;
 }
 
 .logo {
-  font-size: 22px;
-  font-weight: bold;
+font-size: 22px;
+font-weight: bold;
 }
 
 header a {
-  color: #c4cad4;
-  text-decoration: none;
+color: #c4cad4;
+text-decoration: none;
 }
 
 .container {
-  max-width: 1100px;
-  margin: auto;
+max-width: 1050px;
+margin: auto;
 }
 
 h1 {
-  font-size: 30px;
-  margin-bottom: 8px;
+font-size: 30px;
+margin-bottom: 8px;
 }
 
 .subtitle {
-  color: #d2bd78;
-  font-size: 15px;
-  margin-bottom: 24px;
-  font-style: italic;
+color: #d2bd78;
+font-size: 15px;
+margin-bottom: 24px;
+font-style: italic;
 }
 
 .layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(240px, .8fr);
-  gap: 22px;
-  align-items: start;
+display: grid;
+grid-template-columns: minmax(0, 1.4fr) minmax(240px, .8fr);
+gap: 22px;
+align-items: start;
 }
 
 .card {
-  background: #1a1f29;
-  border: 1px solid #303846;
-  border-radius: 14px;
-  padding: 16px;
-  min-width: 0;
+background: #1a1f29;
+border: 1px solid #303846;
+border-radius: 14px;
+padding: 16px;
 }
 
 .top-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 15px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+gap: 10px;
+flex-wrap: wrap;
+margin-bottom: 15px;
 }
 
 .rating {
-  color: #d7bd70;
-  font-weight: bold;
+color: #d7bd70;
+font-weight: bold;
 }
 
 .board {
-  width: min(100%, 560px);
-  aspect-ratio: 1 / 1;
-  display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  grid-template-rows: repeat(8, minmax(0, 1fr));
-  margin: auto;
-  border: 3px solid #343c49;
-  border-radius: 6px;
-  overflow: hidden;
+width: min(100%, 560px);
+aspect-ratio: 1 / 1;
+display: grid;
+grid-template-columns: repeat(8, minmax(0, 1fr));
+grid-template-rows: repeat(8, minmax(0, 1fr));
+margin: auto;
+border: 3px solid #343c49;
+border-radius: 6px;
+overflow: hidden;
 }
 
 .square {
-  min-width: 0;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  cursor: pointer;
-  user-select: none;
+width: 100%;
+height: 100%;
+min-width: 0;
+min-height: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+position: relative;
+cursor: pointer;
+user-select: none;
 }
 
-.light { background: #e5e1d5; }
-.dark { background: #789477; }
+.light {
+background: #e5e1d5;
+}
 
-.square.selected { background: #e6d45b; }
-.square.last-move { background: #c9c45b; }
-.square.hint { background: #e6bd42; }
+.dark {
+background: #789477;
+}
+
+.square.selected {
+background: #e6d45b;
+}
+
+.square.last-move {
+background: #c9c45b;
+}
+
+.square.hint {
+background: #e6bd42;
+}
+
+
+
+/* Lichess-inspired Staunton-style pieces */
 
 .piece {
-  font-family: "DejaVu Sans", "Segoe UI Symbol",
-    "Noto Sans Symbols 2", sans-serif;
-  font-size: clamp(30px, 6vw, 58px);
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  user-select: none;
-  pointer-events: none;
-  position: relative;
-  z-index: 2;
+font-family: "DejaVu Sans", "Segoe UI Symbol",
+"Noto Sans Symbols 2", sans-serif;
+font-size: clamp(34px, 6vw, 58px);
+font-weight: 400;
+line-height: 1;
+display: flex;
+align-items: center;
+justify-content: center;
+user-select: none;
+pointer-events: none;
+position: relative;
+z-index: 2;
 }
 
+/* White pieces */
 .white-piece {
-  color: #fff;
-  text-shadow: 0 2px 2px rgba(0,0,0,.45);
+color: #ffffff;
+-webkit-text-stroke: 0.7px #333333;
+text-shadow: 0 2px 2px rgba(0,0,0,0.28);
+filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
 }
 
+/* Black pieces */
 .black-piece {
-  color: #171717;
-  text-shadow: 0 1px 1px rgba(255,255,255,.3);
+color: #222222;
+-webkit-text-stroke: 0.6px #eeeeee;
+text-shadow: 0 2px 2px rgba(0,0,0,0.25);
+filter: drop-shadow(0 1px 1px rgba(0,0,0,0.25));
 }
+
+
+/* Mobile */
+@media (max-width: 720px) {
+.piece {
+width: 92%;
+height: 92%;
+font-size: clamp(26px, 7vw, 44px);
+}
+}
+
+/* Subtle hover effect */
+.piece:hover {
+transform: scale(1.06);
+}
+
+/* Mobile adjustment */
+@media(max-width: 720px) {
+.piece {
+font-size: clamp(34px, 10vw, 58px);
+transform: scale(1.05);
+}
+}
+
+
 
 .square.possible::after {
-  content: "";
-  position: absolute;
-  width: 25%;
-  height: 25%;
-  border-radius: 50%;
-  background: #263b2e99;
-  pointer-events: none;
+content: "";
+position: absolute;
+width: 25%;
+height: 25%;
+border-radius: 50%;
+background: #263b2e99;
+pointer-events: none;
 }
 
 .square.capture::after {
-  content: "";
-  position: absolute;
-  inset: 3px;
-  border: 5px solid #263b2e88;
-  border-radius: 50%;
-  pointer-events: none;
+content: "";
+position: absolute;
+inset: 3px;
+border: 5px solid #263b2e88;
+border-radius: 50%;
+pointer-events: none;
 }
 
 .controls {
-  display: flex;
-  gap: 9px;
-  flex-wrap: wrap;
-  margin-top: 16px;
+display: flex;
+gap: 9px;
+flex-wrap: wrap;
+margin-top: 16px;
 }
 
 button {
-  padding: 11px 14px;
-  border: 1px solid #465166;
-  border-radius: 8px;
-  background: #303a4b;
-  color: white;
-  cursor: pointer;
-  font-size: 14px;
+padding: 12px 15px;
+border: 1px solid #465166;
+border-radius: 8px;
+background: #303a4b;
+color: white;
+cursor: pointer;
+font-size: 14px;
 }
 
-button:hover { background: #46546b; }
+button:hover {
+background: #46546b;
+}
 
 button:disabled {
-  opacity: .45;
-  cursor: not-allowed;
+opacity: .45;
+cursor: not-allowed;
 }
 
 .primary {
-  background: #b6a05a;
-  color: #111;
-  font-weight: bold;
-  border: none;
+background: #b6a05a;
+color: #111;
+font-weight: bold;
+border: none;
 }
 
 .status {
-  color: #fff;
-  font-size: 16px;
-  font-weight: bold;
-  margin-top: 18px;
-  line-height: 1.6;
-  min-height: 55px;
-  padding: 10px;
-  border-radius: 9px;
-  background: #222936;
+color: #fff;
+font-size: 16px;
+font-weight: bold;
+margin-top: 18px;
+line-height: 1.6;
+min-height: 55px;
+padding: 10px;
+border-radius: 9px;
+background: #222936;
 }
 
 .status.wrong {
-  color: #ff7777;
-  background: #3b2025;
-  border: 1px solid #74343b;
+color: #ff7777;
+background: #3b2025;
+border: 1px solid #74343b;
 }
 
 .status.success {
-  color: #75f0a4;
-  background: #173a2a;
-  border: 1px solid #28734a;
-  font-size: 19px;
-  text-align: center;
-  padding: 17px 10px;
+color: #75f0a4;
+background: #173a2a;
+border: 1px solid #28734a;
+font-size: 20px;
+text-align: center;
+padding: 17px 10px;
 }
 
 .stat {
-  background: #222936;
-  padding: 14px;
-  border-radius: 9px;
-  margin-top: 12px;
+background: #222936;
+padding: 14px;
+border-radius: 9px;
+margin-top: 12px;
 }
 
-.stat small { color: #9da7b6; }
+.stat small {
+color: #9da7b6;
+}
 
 .stat strong {
-  display: block;
-  font-size: 20px;
-  margin-top: 5px;
+display: block;
+font-size: 20px;
+margin-top: 5px;
 }
 
 .progress-track {
-  height: 9px;
-  background: #303846;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-top: 10px;
+height: 9px;
+background: #303846;
+border-radius: 10px;
+overflow: hidden;
+margin-top: 10px;
 }
 
 .progress-fill {
-  height: 100%;
-  width: 0%;
-  background: #b6a05a;
-  transition: width .3s;
+height: 100%;
+width: 0%;
+background: #b6a05a;
+transition: width .3s;
 }
 
 .themes {
-  color: #aab4c3;
-  font-size: 12px;
-  line-height: 1.6;
-  margin-top: 12px;
+color: #aab4c3;
+font-size: 12px;
+line-height: 1.6;
+margin-top: 12px;
 }
 
 .note {
-  color: #929baa;
-  font-size: 12px;
-  line-height: 1.5;
-  margin-top: 18px;
-}
-
-/* Stockfish analysis panel */
-
-.analysis-card {
-  margin-top: 18px;
-  background: #151b25;
-  border: 1px solid #354153;
-  border-radius: 12px;
-  padding: 15px;
-}
-
-.analysis-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.engine-status {
-  font-size: 12px;
-  color: #d7bd70;
-}
-
-.engine-status.ready { color: #75f0a4; }
-.engine-status.error { color: #ff7777; }
-
-.analysis-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.analysis-box {
-  background: #222936;
-  padding: 12px;
-  border-radius: 8px;
-  min-width: 0;
-}
-
-.analysis-box small {
-  color: #9da7b6;
-  display: block;
-  margin-bottom: 6px;
-}
-
-.analysis-box strong {
-  font-size: 19px;
-  overflow-wrap: anywhere;
-}
-
-.engine-message {
-  font-size: 12px;
-  color: #9da7b6;
-  margin-top: 12px;
-  line-height: 1.5;
-}
-
-.analysis-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
+color: #929baa;
+font-size: 12px;
+line-height: 1.5;
+margin-top: 18px;
 }
 
 @media(max-width: 720px) {
-  .layout { grid-template-columns: 1fr; }
-  body { padding: 12px; }
-  h1 { font-size: 26px; }
+.layout {
+grid-template-columns: 1fr;
+}
 
-  .piece {
-    font-size: clamp(27px, 10vw, 52px);
-  }
+body {
+padding: 12px;
+}
+
+h1 {
+font-size: 26px;
+}
+
+.piece {
+font-size: clamp(30px, 10vw, 58px);
+}
 }
 </style>
 </head>
@@ -341,8 +338,8 @@ button:disabled {
 <body>
 
 <header>
-  <div class="logo">♟ PuzzleForge</div>
-  <a href="index.html">← Dashboard</a>
+<div class="logo">♟ PuzzleForge</div>
+<a href="index.html">← Dashboard</a>
 </header>
 
 <div class="container">
@@ -357,114 +354,69 @@ Bobby Fischer: "Chess is life."
 
 <section class="card">
 
-  <div class="top-info">
-    <strong id="puzzleNumber">Loading puzzles...</strong>
-    <span class="rating" id="rating">Rating: --</span>
-  </div>
+<div class="top-info">
+<strong id="puzzleNumber">Loading puzzles...</strong>
+<span class="rating" id="rating">Rating: --</span>
+</div>
 
-  <div id="board" class="board"></div>
+<div id="board" class="board"></div>
 
-  <div class="controls">
-    <button onclick="flipBoard()">⇅ Flip Board</button>
-    <button onclick="restartPuzzle()">↻ Restart</button>
-    <button onclick="getHint()">💡 Hint</button>
-    <button class="primary" onclick="nextPuzzle()">Next Puzzle →</button>
-  </div>
+<div class="controls">
+<button onclick="flipBoard()">⇅ Flip Board</button>
+<button onclick="restartPuzzle()">↻ Restart</button>
+<button onclick="getHint()">💡 Hint</button>
+<button class="primary" onclick="nextPuzzle()">Next Puzzle →</button>
+</div>
 
-  <p id="status" class="status">Loading puzzle database...</p>
+<p id="status" class="status">
+Loading puzzle database...
+</p>
 
-  <div class="themes" id="themes"></div>
-
-  <!-- STOCKFISH ANALYSIS -->
-  <div class="analysis-card">
-
-    <div class="analysis-heading">
-      <h3>♟ Stockfish Analysis</h3>
-      <span id="engineStatus" class="engine-status">
-        Initializing...
-      </span>
-    </div>
-
-    <div class="analysis-grid">
-
-      <div class="analysis-box">
-        <small>Evaluation (White POV)</small>
-        <strong id="engineEval">--</strong>
-      </div>
-
-      <div class="analysis-box">
-        <small>Best Move</small>
-        <strong id="engineBestMove">--</strong>
-      </div>
-
-      <div class="analysis-box">
-        <small>Search Depth</small>
-        <strong id="engineDepth">--</strong>
-      </div>
-
-      <div class="analysis-box">
-        <small>Engine</small>
-        <strong>Stockfish 19</strong>
-      </div>
-
-    </div>
-
-    <div class="analysis-controls">
-      <button class="primary" id="analyzeButton" onclick="analyzePosition()">
-        Analyze Position
-      </button>
-      <button onclick="stopAnalysis()">Stop Analysis</button>
-    </div>
-
-    <p id="engineMessage" class="engine-message">
-      Preparing Stockfish engine...
-    </p>
-
-  </div>
+<div class="themes" id="themes"></div>
 
 </section>
 
 <aside class="card">
 
-  <h3>Your Progress</h3>
+<h3>Your Progress</h3>
 
-  <div class="stat">
-    <small>Puzzles Solved</small>
-    <strong id="solved">0 / 280</strong>
-  </div>
+<div class="stat">
+<small>Puzzles Solved</small>
+<strong id="solved">0 / 280</strong>
+</div>
 
-  <div class="stat">
-    <small>Solved Without Hint</small>
-    <strong id="noHint">0</strong>
-  </div>
+<div class="stat">
+<small>Solved Without Hint</small>
+<strong id="noHint">0</strong>
+</div>
 
-  <div class="stat">
-    <small>Hints Used</small>
-    <strong id="hintsUsed">0</strong>
-  </div>
+<div class="stat">
+<small>Hints Used</small>
+<strong id="hintsUsed">0</strong>
+</div>
 
-  <div class="stat">
-    <small>Completion</small>
-    <strong id="percentage">0%</strong>
-    <div class="progress-track">
-      <div class="progress-fill" id="progressFill"></div>
-    </div>
-  </div>
+<div class="stat">
+<small>Completion</small>
+<strong id="percentage">0%</strong>
+<div class="progress-track">
+<div class="progress-fill" id="progressFill"></div>
+</div>
+</div>
 
-  <div class="stat">
-    <small>Current Turn</small>
-    <strong id="turn">--</strong>
-  </div>
+<div class="stat">
+<small>Current Turn</small>
+<strong id="turn">--</strong>
+</div>
 
-  <div class="stat">
-    <small>Game Status</small>
-    <strong id="gameStatus">Loading</strong>
-  </div>
+<div class="stat">
+<small>Game Status</small>
+<strong id="gameStatus">Loading</strong>
+</div>
 
-  <p class="note">
-    Your progress is saved in this browser.
-    Puzzle data is loaded from puzzles.json.
-  </p>
+<p class="note">
+Your progress is saved in this browser.
+Puzzle data is loaded from puzzles.json.
+</p>
 
 </aside>
 
@@ -472,25 +424,30 @@ Bobby Fischer: "Chess is life."
 </div>
 
 <script>
-/* ---------------- CHESS SETUP ---------------- */
-
 const game = new Chess();
 const boardElement = document.getElementById("board");
 
-const symbols = {
-  wk: "♔",
-  wq: "♕",
-  wr: "♖",
-  wb: "♗",
-  wn: "♘",
-  wp: "♙",
+/*
+IMPORTANT:
+Both sides use the filled black chess glyph shapes.
+White pieces are colored white using CSS.
+Black pieces are colored black using CSS.
+*/
 
-  bk: "♚",
-  bq: "♛",
-  br: "♜",
-  bb: "♝",
-  bn: "♞",
-  bp: "♟"
+const symbols = {
+wk: "♚",
+wq: "♛",
+wr: "♜",
+wb: "♝",
+wn: "♞",
+wp: "♟",
+
+bk: "♚",
+bq: "♛",
+br: "♜",
+bb: "♝",
+bn: "♞",
+bp: "♟"
 };
 
 const STORAGE_KEY = "puzzleforge_progress_v1";
@@ -517,794 +474,496 @@ let solvedIds = [];
 let noHintIds = [];
 let totalHints = 0;
 
-
-/* ---------------- PROGRESS ---------------- */
-
 function loadProgress() {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem(STORAGE_KEY) || "{}"
-    );
+try {
+const saved = JSON.parse(
+localStorage.getItem(STORAGE_KEY) || "{}"
+);
 
-    solvedIds = Array.isArray(saved.solvedIds)
-      ? saved.solvedIds : [];
+solvedIds = Array.isArray(saved.solvedIds)
+? saved.solvedIds : [];
 
-    noHintIds = Array.isArray(saved.noHintIds)
-      ? saved.noHintIds : [];
+noHintIds = Array.isArray(saved.noHintIds)
+? saved.noHintIds : [];
 
-    totalHints = Number(saved.totalHints) || 0;
-    currentIndex = Number(saved.currentIndex) || 0;
+totalHints = Number(saved.totalHints) || 0;
+currentIndex = Number(saved.currentIndex) || 0;
 
-  } catch (error) {
-    solvedIds = [];
-    noHintIds = [];
-    totalHints = 0;
-    currentIndex = 0;
-  }
+} catch (error) {
+solvedIds = [];
+noHintIds = [];
+totalHints = 0;
+currentIndex = 0;
+}
 }
 
 function saveProgress() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    solvedIds,
-    noHintIds,
-    totalHints,
-    currentIndex
-  }));
+localStorage.setItem(STORAGE_KEY, JSON.stringify({
+solvedIds,
+noHintIds,
+totalHints,
+currentIndex
+}));
 }
 
 function updateStats() {
-  const total = puzzles.length || 280;
-  const solved = solvedIds.length;
-  const percent = Math.round((solved / total) * 100);
+const total = puzzles.length || 280;
+const solved = solvedIds.length;
+const percent = Math.round((solved / total) * 100);
 
-  document.getElementById("solved").textContent =
-    solved + " / " + total;
+document.getElementById("solved").textContent =
+solved + " / " + total;
 
-  document.getElementById("noHint").textContent =
-    noHintIds.length;
+document.getElementById("noHint").textContent =
+noHintIds.length;
 
-  document.getElementById("hintsUsed").textContent =
-    totalHints;
+document.getElementById("hintsUsed").textContent =
+totalHints;
 
-  document.getElementById("percentage").textContent =
-    percent + "%";
+document.getElementById("percentage").textContent =
+percent + "%";
 
-  document.getElementById("progressFill").style.width =
-    percent + "%";
+document.getElementById("progressFill").style.width =
+percent + "%";
 }
 
 function setMessage(message, type = "") {
-  const status = document.getElementById("status");
-  status.textContent = message;
-  status.className = "status " + type;
+const status = document.getElementById("status");
+status.textContent = message;
+status.className = "status " + type;
 }
 
-
-/* ---------------- PUZZLE DATABASE ---------------- */
-
 function applyUci(uci) {
-  if (!uci || uci.length < 4) return null;
+if (!uci || uci.length < 4) return null;
 
-  return game.move({
-    from: uci.substring(0, 2),
-    to: uci.substring(2, 4),
-    promotion: uci.length > 4 ? uci[4] : "q"
-  });
+return game.move({
+from: uci.substring(0, 2),
+to: uci.substring(2, 4),
+promotion: uci.length > 4 ? uci[4] : "q"
+});
 }
 
 async function loadPuzzles() {
-  loadProgress();
+loadProgress();
 
-  try {
-    const response = await fetch("puzzles.json");
-
-    if (!response.ok) {
-      throw new Error("Could not load puzzles.json");
-    }
-
-    puzzles = await response.json();
-
-    if (!Array.isArray(puzzles) || puzzles.length === 0) {
-      throw new Error("Puzzle database is empty.");
-    }
-
-    currentIndex = Math.min(
-      currentIndex,
-      puzzles.length - 1
-    );
-
-    updateStats();
-    startPuzzle(currentIndex);
-
-  } catch (error) {
-    setMessage(
-      "Could not load puzzles.json. Make sure it is in the same folder as puzzle-arena.html.",
-      "wrong"
-    );
-
-    document.getElementById("gameStatus").textContent =
-      "Database Error";
-  }
-}
-
-
-/* ---------------- START PUZZLE ---------------- */
-
-function startPuzzle(index) {
-  if (!puzzles.length) return;
-
-  currentIndex = index;
-  currentPuzzle = puzzles[currentIndex];
-
-  puzzleMoveIndex = 0;
-  selected = null;
-  legalTargets = [];
-  lastMove = null;
-
-  hintLevel = 0;
-  hintCount = 0;
-  hintSquare = null;
-
-  opponentThinking = false;
-  puzzleSolved = false;
-  wrongMovePending = false;
-
-  try {
-    if (!game.load(currentPuzzle.fen)) {
-      throw new Error("Invalid FEN position.");
-    }
-
-    const moves = currentPuzzle.moves;
-
-    if (!moves || moves.length < 2) {
-      throw new Error("Invalid puzzle moves.");
-    }
-
-    // First move is the opponent's setup move.
-    const setupMove = applyUci(moves[0]);
-
-    if (!setupMove) {
-      throw new Error("Could not apply setup move.");
-    }
-
-    lastMove = {
-      from: setupMove.from,
-      to: setupMove.to
-    };
-
-    puzzleMoveIndex = 1;
-
-    flipped = game.turn() === "b";
-
-    document.getElementById("puzzleNumber").textContent =
-      "Puzzle " + (currentIndex + 1) + " / " + puzzles.length;
-
-    document.getElementById("rating").textContent =
-      "Rating: " + (currentPuzzle.rating || "--");
-
-    document.getElementById("themes").textContent =
-      "Themes: " + (currentPuzzle.themes || []).join(", ");
-
-    document.getElementById("gameStatus").textContent =
-      "In Progress";
-
-    setMessage("Find the best move!");
-
-    renderBoard();
-
-    // Automatically analyze the puzzle position.
-    analyzePosition();
-
-  } catch (error) {
-    setMessage("Puzzle error: " + error.message, "wrong");
-
-    document.getElementById("gameStatus").textContent =
-      "Puzzle Error";
-  }
-}
-
-
-/* ---------------- BOARD RENDERING ---------------- */
-
-function renderBoard() {
-  boardElement.innerHTML = "";
-
-  const position = game.board();
-
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
-
-      const row = flipped ? 7 - r : r;
-      const col = flipped ? 7 - c : c;
-
-      const square = document.createElement("div");
-
-      square.className = "square " +
-        ((r + c) % 2 === 0 ? "light" : "dark");
-
-      const file = "abcdefgh"[col];
-      const rank = 8 - row;
-      const squareName = file + rank;
-
-      const piece = position[row][col];
-
-      if (selected === squareName) {
-        square.classList.add("selected");
-      }
-
-      if (
-        lastMove &&
-        (lastMove.from === squareName ||
-         lastMove.to === squareName)
-      ) {
-        square.classList.add("last-move");
-      }
-
-      if (hintSquare === squareName) {
-        square.classList.add("hint");
-      }
-
-      if (legalTargets.includes(squareName)) {
-        if (piece) {
-          square.classList.add("capture");
-        } else {
-          square.classList.add("possible");
-        }
-      }
-
-      if (piece) {
-        const pieceElement = document.createElement("span");
-
-        pieceElement.textContent =
-          symbols[piece.color + piece.type];
-
-        pieceElement.className = "piece " +
-          (piece.color === "w"
-            ? "white-piece"
-            : "black-piece");
-
-        square.appendChild(pieceElement);
-      }
-
-      square.addEventListener("click", () => {
-        handleClick(squareName);
-      });
-
-      boardElement.appendChild(square);
-    }
-  }
-
-  updateInfo();
-}
-
-
-/* ---------------- PLAYER MOVES ---------------- */
-
-function handleClick(square) {
-  if (
-    puzzleSolved ||
-    opponentThinking ||
-    wrongMovePending ||
-    !currentPuzzle
-  ) return;
-
-  const piece = game.get(square);
-
-  if (selected) {
-    const expected = currentPuzzle.moves[puzzleMoveIndex];
-
-    if (!expected) return;
-
-    const expectedFrom = expected.substring(0, 2);
-    const expectedTo = expected.substring(2, 4);
-
-    const isCorrect =
-      selected === expectedFrom &&
-      square === expectedTo;
-
-    if (isCorrect) {
-      const move = game.move({
-        from: selected,
-        to: square,
-        promotion: expected.length > 4
-          ? expected[4]
-          : "q"
-      });
-
-      if (move) {
-        lastMove = {
-          from: move.from,
-          to: move.to
-        };
-
-        selected = null;
-        legalTargets = [];
-        hintSquare = null;
-
-        puzzleMoveIndex++;
-
-        renderBoard();
-        analyzePosition();
-
-        if (puzzleMoveIndex >= currentPuzzle.moves.length) {
-          finishPuzzle();
-        } else {
-          opponentThinking = true;
-          setMessage("Correct move! Opponent is thinking...");
-          setTimeout(playOpponentMove, 600);
-        }
-
-        return;
-      }
-    }
-
-    // Temporarily show an incorrect legal move.
-    const wrongMove = game.move({
-      from: selected,
-      to: square,
-      promotion: "q"
-    });
-
-    if (wrongMove) {
-      const previousLastMove = lastMove
-        ? { ...lastMove }
-        : null;
-
-      lastMove = {
-        from: wrongMove.from,
-        to: wrongMove.to
-      };
-
-      selected = null;
-      legalTargets = [];
-      hintSquare = null;
-      wrongMovePending = true;
-
-      renderBoard();
-      setMessage("❌ WRONG MOVE! Try again.", "wrong");
-
-      setTimeout(() => {
-        game.undo();
-
-        lastMove = previousLastMove;
-        wrongMovePending = false;
-
-        selected = null;
-        legalTargets = [];
-
-        renderBoard();
-        setMessage("Try another move!");
-
-      }, 1000);
-
-      return;
-    }
-
-    if (piece && piece.color === game.turn()) {
-      selectPiece(square);
-      return;
-    }
-
-    selected = null;
-    legalTargets = [];
-    renderBoard();
-
-    setMessage("Illegal move. Choose a highlighted square.", "wrong");
-    return;
-  }
-
-  if (piece && piece.color === game.turn()) {
-    selectPiece(square);
-  }
-}
-
-function selectPiece(square) {
-  selected = square;
-
-  legalTargets = game.moves({
-    square: square,
-    verbose: true
-  }).map(move => move.to);
-
-  renderBoard();
-}
-
-
-/* ---------------- OPPONENT MOVES ---------------- */
-
-function playOpponentMove() {
-  if (puzzleSolved || !currentPuzzle) return;
-
-  const uci = currentPuzzle.moves[puzzleMoveIndex];
-  const move = applyUci(uci);
-
-  opponentThinking = false;
-
-  if (!move) {
-    setMessage("Puzzle move error. Please restart.", "wrong");
-    return;
-  }
-
-  lastMove = {
-    from: move.from,
-    to: move.to
-  };
-
-  puzzleMoveIndex++;
-
-  renderBoard();
-  analyzePosition();
-
-  if (puzzleMoveIndex >= currentPuzzle.moves.length) {
-    finishPuzzle();
-  } else {
-    setMessage("Your turn. Find the next correct move!");
-  }
-}
-
-
-/* ---------------- PUZZLE COMPLETION ---------------- */
-
-function finishPuzzle() {
-  puzzleSolved = true;
-  opponentThinking = false;
-  wrongMovePending = false;
-
-  const id = currentPuzzle.id;
-
-  if (!solvedIds.includes(id)) {
-    solvedIds.push(id);
-
-    if (hintCount === 0) {
-      noHintIds.push(id);
-    }
-
-    saveProgress();
-  }
-
-  document.getElementById("gameStatus").textContent =
-    "Puzzle Solved!";
-
-  setMessage(
-    hintCount === 0
-      ? "🎉 PUZZLE SOLVED! Excellent work — no hints used!"
-      : "🎉 PUZZLE SOLVED! Great job!",
-    "success"
-  );
-
-  updateStats();
-}
-
-
-/* ---------------- HINTS ---------------- */
-
-function getHint() {
-  if (
-    puzzleSolved ||
-    opponentThinking ||
-    wrongMovePending ||
-    !currentPuzzle
-  ) return;
-
-  const expected = currentPuzzle.moves[puzzleMoveIndex];
-
-  if (!expected) return;
-
-  if (hintLevel < 2) {
-    hintLevel++;
-    hintCount++;
-    totalHints++;
-  }
-
-  const from = expected.substring(0, 2);
-  const to = expected.substring(2, 4);
-
-  if (hintLevel === 1) {
-    hintSquare = from;
-    setMessage("Hint 1: Look at the highlighted starting square.");
-  } else {
-    hintSquare = to;
-    setMessage("Hint 2: Move the piece to the highlighted square.");
-  }
-
-  saveProgress();
-  updateStats();
-  renderBoard();
-}
-
-
-/* ---------------- NAVIGATION ---------------- */
-
-function nextPuzzle() {
-  if (!puzzles.length) return;
-
-  const nextIndex = (currentIndex + 1) % puzzles.length;
-
-  startPuzzle(nextIndex);
-  saveProgress();
-}
-
-function restartPuzzle() {
-  if (!puzzles.length) return;
-
-  startPuzzle(currentIndex);
-}
-
-function flipBoard() {
-  flipped = !flipped;
-  renderBoard();
-}
-
-function updateInfo() {
-  document.getElementById("turn").textContent =
-    game.turn() === "w" ? "White" : "Black";
-
-  if (puzzleSolved) {
-    document.getElementById("gameStatus").textContent =
-      "Puzzle Solved!";
-  } else if (opponentThinking) {
-    document.getElementById("gameStatus").textContent =
-      "Opponent Moving";
-  } else {
-    document.getElementById("gameStatus").textContent =
-      game.in_check() ? "Check" : "In Progress";
-  }
-}
-
-
-
-/* ==================================================
-STOCKFISH ENGINE
-================================================== */
-
-let stockfish = null;
-let engineReady = false;
-let engineFailed = false;
-let pendingAnalysis = false;
-let analysisRunning = false;
-let currentAnalysisFen = null;
-
-const engineStatusElement =
-document.getElementById("engineStatus");
-
-const engineMessageElement =
-document.getElementById("engineMessage");
-
-function setEngineStatus(message, type = "") {
-engineStatusElement.textContent = message;
-engineStatusElement.className = "engine-status " + type;
-}
-
-function setEngineMessage(message) {
-engineMessageElement.textContent = message;
-}
-
-
-/* INITIALIZE STOCKFISH */
-
-function initializeStockfish() {
 try {
-setEngineStatus("Loading engine...");
-setEngineMessage("Loading Stockfish 19...");
+const response = await fetch("puzzles.json");
 
-stockfish = new Worker(
-"engine/stockfish-19-lite-single.js"
+if (!response.ok) {
+throw new Error("Could not load puzzles.json");
+}
+
+puzzles = await response.json();
+
+if (!Array.isArray(puzzles) || puzzles.length === 0) {
+throw new Error("Puzzle database is empty.");
+}
+
+currentIndex = Math.min(
+currentIndex,
+puzzles.length - 1
 );
 
-stockfish.onmessage = function(event) {
-handleEngineMessage(event.data);
-};
-
-stockfish.onerror = function(error) {
-engineFailed = true;
-engineReady = false;
-
-setEngineStatus("Engine Error", "error");
-
-setEngineMessage(
-"Stockfish could not start. Check that both engine files are uploaded correctly."
-);
-
-console.error("Stockfish error:", error);
-};
-
-stockfish.postMessage("uci");
+updateStats();
+startPuzzle(currentIndex);
 
 } catch (error) {
-engineFailed = true;
-
-setEngineStatus("Unavailable", "error");
-
-setEngineMessage(
-"Could not initialize Stockfish: " + error.message
+setMessage(
+"Could not load puzzles.json. Check that it is in the same folder as puzzle-arena.html.",
+"wrong"
 );
+
+document.getElementById("gameStatus").textContent =
+"Database Error";
 }
 }
 
+function startPuzzle(index) {
+if (!puzzles.length) return;
 
-/* HANDLE ENGINE MESSAGES */
+currentIndex = index;
+currentPuzzle = puzzles[currentIndex];
 
-function handleEngineMessage(message) {
-if (typeof message !== "string") return;
-
-if (message === "uciok") {
-stockfish.postMessage("isready");
-return;
-}
-
-if (message === "readyok") {
-engineReady = true;
-engineFailed = false;
-
-setEngineStatus("Ready", "ready");
-setEngineMessage("Stockfish is ready for analysis.");
-
-if (pendingAnalysis) {
-pendingAnalysis = false;
-analyzePosition();
-}
-
-return;
-}
-
-if (message.startsWith("info ")) {
-parseEngineInfo(message);
-return;
-}
-
-if (message.startsWith("bestmove ")) {
-analysisRunning = false;
-
-const parts = message.trim().split(/\s+/);
-const bestMove = parts[1];
-
-if (bestMove && bestMove !== "(none)") {
-displayBestMove(bestMove);
-}
-
-setEngineStatus("Ready", "ready");
-setEngineMessage("Analysis complete.");
-}
-}
-
-
-/* PARSE EVALUATION AND DEPTH */
-
-function parseEngineInfo(message) {
-const depthMatch = message.match(/\bdepth (\d+)/);
-const cpMatch = message.match(/\bscore cp (-?\d+)/);
-const mateMatch = message.match(/\bscore mate (-?\d+)/);
-
-if (depthMatch) {
-document.getElementById("engineDepth").textContent =
-depthMatch[1];
-}
-
-if (cpMatch) {
-const cp = parseInt(cpMatch[1], 10);
-
-// Convert score to White's perspective.
-const whiteScore = game.turn() === "w" ? cp : -cp;
-
-const evaluation = whiteScore / 100;
-
-document.getElementById("engineEval").textContent =
-(evaluation > 0 ? "+" : "") +
-evaluation.toFixed(2);
-}
-
-if (mateMatch) {
-const mate = parseInt(mateMatch[1], 10);
-
-const whiteMate = game.turn() === "w"
-? mate
-: -mate;
-
-document.getElementById("engineEval").textContent =
-whiteMate > 0
-? "M" + whiteMate
-: "-M" + Math.abs(whiteMate);
-}
-}
-
-
-/* DISPLAY BEST MOVE */
-
-function displayBestMove(uci) {
-const from = uci.substring(0, 2);
-const to = uci.substring(2, 4);
-const promotion = uci.length > 4 ? uci[4] : undefined;
-
-let display = uci;
+puzzleMoveIndex = 0;
+selected = null;
+legalTargets = [];
+lastMove = null;
+hintLevel = 0;
+hintCount = 0;
+hintSquare = null;
+opponentThinking = false;
+puzzleSolved = false;
+wrongMovePending = false;
 
 try {
-const temporaryGame = new Chess(game.fen());
+game.load(currentPuzzle.fen);
 
-const move = temporaryGame.move({
-from: from,
-to: to,
-promotion: promotion || "q"
+const moves = currentPuzzle.moves;
+
+if (!moves || moves.length < 2) {
+throw new Error("Invalid puzzle moves.");
+}
+
+const setupMove = applyUci(moves[0]);
+
+if (!setupMove) {
+throw new Error("Could not apply setup move.");
+}
+
+lastMove = {
+from: setupMove.from,
+to: setupMove.to
+};
+
+puzzleMoveIndex = 1;
+
+flipped = game.turn() === "b";
+
+document.getElementById("puzzleNumber").textContent =
+"Puzzle " + (currentIndex + 1) + " / " + puzzles.length;
+
+document.getElementById("rating").textContent =
+"Rating: " + currentPuzzle.rating;
+
+document.getElementById("themes").textContent =
+"Themes: " + (currentPuzzle.themes || []).join(", ");
+
+document.getElementById("gameStatus").textContent =
+"In Progress";
+
+setMessage("Find the best move!");
+
+renderBoard();
+
+} catch (error) {
+setMessage("Puzzle error: " + error.message, "wrong");
+document.getElementById("gameStatus").textContent =
+"Puzzle Error";
+}
+}
+
+function renderBoard() {
+boardElement.innerHTML = "";
+
+const position = game.board();
+
+for (let r = 0; r < 8; r++) {
+for (let c = 0; c < 8; c++) {
+
+const row = flipped ? 7 - r : r;
+const col = flipped ? 7 - c : c;
+
+const square = document.createElement("div");
+
+square.className = "square " +
+((r + c) % 2 === 0 ? "light" : "dark");
+
+const file = "abcdefgh"[col];
+const rank = 8 - row;
+const squareName = file + rank;
+
+const piece = position[row][col];
+
+if (selected === squareName) {
+square.classList.add("selected");
+}
+
+if (lastMove &&
+(lastMove.from === squareName ||
+lastMove.to === squareName)) {
+square.classList.add("last-move");
+}
+
+if (hintSquare === squareName) {
+square.classList.add("hint");
+}
+
+if (legalTargets.includes(squareName)) {
+if (piece) {
+square.classList.add("capture");
+} else {
+square.classList.add("possible");
+}
+}
+
+if (piece) {
+const pieceElement = document.createElement("span");
+
+pieceElement.textContent =
+symbols[piece.color + piece.type];
+
+pieceElement.className = "piece " +
+(piece.color === "w" ? "white-piece" : "black-piece");
+
+square.appendChild(pieceElement);
+}
+
+square.addEventListener("click", () => {
+handleClick(squareName);
+});
+
+boardElement.appendChild(square);
+}
+}
+
+updateInfo();
+}
+
+function handleClick(square) {
+if (
+puzzleSolved ||
+opponentThinking ||
+wrongMovePending ||
+!currentPuzzle
+) return;
+
+const piece = game.get(square);
+
+if (selected) {
+const expected = currentPuzzle.moves[puzzleMoveIndex];
+
+if (!expected) return;
+
+const expectedFrom = expected.substring(0, 2);
+const expectedTo = expected.substring(2, 4);
+
+const isCorrect =
+selected === expectedFrom &&
+square === expectedTo;
+
+if (isCorrect) {
+const move = game.move({
+from: selected,
+to: square,
+promotion: expected.length > 4
+? expected[4]
+: "q"
 });
 
 if (move) {
-display = move.san + " (" + uci + ")";
+lastMove = {
+from: move.from,
+to: move.to
+};
+
+selected = null;
+legalTargets = [];
+hintSquare = null;
+
+puzzleMoveIndex++;
+
+renderBoard();
+
+if (puzzleMoveIndex >= currentPuzzle.moves.length) {
+finishPuzzle();
+} else {
+opponentThinking = true;
+setMessage("Correct move! Opponent is thinking...");
+setTimeout(playOpponentMove, 600);
 }
-
-} catch (error) {
-console.warn("Could not convert engine move to SAN:", error);
-}
-
-document.getElementById("engineBestMove").textContent =
-display;
-}
-
-
-/* ANALYZE CURRENT POSITION */
-
-function analyzePosition() {
-if (!currentPuzzle) return;
-
-if (engineFailed) {
-setEngineMessage(
-"Engine unavailable. Check the Stockfish files."
-);
-return;
-}
-
-if (!engineReady) {
-pendingAnalysis = true;
-
-setEngineMessage(
-"Waiting for Stockfish to finish loading..."
-);
 
 return;
 }
-
-if (analysisRunning) {
-stockfish.postMessage("stop");
 }
 
-currentAnalysisFen = game.fen();
+const wrongMove = game.move({
+from: selected,
+to: square,
+promotion: "q"
+});
 
-document.getElementById("engineEval").textContent = "--";
-document.getElementById("engineBestMove").textContent = "--";
-document.getElementById("engineDepth").textContent = "--";
+if (wrongMove) {
+const previousLastMove = lastMove
+? { ...lastMove }
+: null;
 
-setEngineMessage("Analyzing current position...");
-setEngineStatus("Analyzing");
+lastMove = {
+from: wrongMove.from,
+to: wrongMove.to
+};
 
-analysisRunning = true;
+selected = null;
+legalTargets = [];
+hintSquare = null;
+wrongMovePending = true;
 
-stockfish.postMessage("ucinewgame");
-stockfish.postMessage("position fen " + currentAnalysisFen);
-stockfish.postMessage("go depth 15");
+renderBoard();
+setMessage("❌ WRONG MOVE! Try again.", "wrong");
+
+setTimeout(() => {
+game.undo();
+
+lastMove = previousLastMove;
+wrongMovePending = false;
+
+selected = null;
+legalTargets = [];
+
+renderBoard();
+setMessage("Try another move!");
+}, 1000);
+
+return;
 }
 
-
-/* STOP ANALYSIS */
-
-function stopAnalysis() {
-pendingAnalysis = false;
-
-if (stockfish && analysisRunning) {
-stockfish.postMessage("stop");
+if (piece && piece.color === game.turn()) {
+selectPiece(square);
+return;
 }
 
-analysisRunning = false;
+selected = null;
+legalTargets = [];
+renderBoard();
+setMessage("Illegal move. Choose a highlighted square.", "wrong");
+return;
+}
 
-if (engineReady) {
-setEngineStatus("Ready", "ready");
-setEngineMessage("Analysis stopped.");
+if (piece && piece.color === game.turn()) {
+selectPiece(square);
 }
 }
 
+function selectPiece(square) {
+selected = square;
 
-/* START ENGINE */
+legalTargets = game.moves({
+square: square,
+verbose: true
+}).map(move => move.to);
 
-initializeStockfish();
+renderBoard();
+}
+
+function playOpponentMove() {
+if (puzzleSolved || !currentPuzzle) return;
+
+const uci = currentPuzzle.moves[puzzleMoveIndex];
+const move = applyUci(uci);
+
+opponentThinking = false;
+
+if (!move) {
+setMessage("Puzzle move error. Please restart.", "wrong");
+return;
+}
+
+lastMove = {
+from: move.from,
+to: move.to
+};
+
+puzzleMoveIndex++;
+
+renderBoard();
+
+if (puzzleMoveIndex >= currentPuzzle.moves.length) {
+finishPuzzle();
+} else {
+setMessage("Your turn. Find the next correct move!");
+}
+}
+
+function finishPuzzle() {
+puzzleSolved = true;
+opponentThinking = false;
+wrongMovePending = false;
+
+const id = currentPuzzle.id;
+
+if (!solvedIds.includes(id)) {
+solvedIds.push(id);
+
+if (hintCount === 0) {
+noHintIds.push(id);
+}
+
+saveProgress();
+}
+
+document.getElementById("gameStatus").textContent =
+"Puzzle Solved!";
+
+setMessage(
+hintCount === 0
+? "🍅 PUZZLE SOLVED! Excellent work — no hints used!"
+: "🍅 PUZZLE SOLVED! Great job!",
+"success"
+);
+
+updateStats();
+}
+
+function getHint() {
+if (
+puzzleSolved ||
+opponentThinking ||
+wrongMovePending ||
+!currentPuzzle
+) return;
+
+const expected = currentPuzzle.moves[puzzleMoveIndex];
+
+if (!expected) return;
+
+if (hintLevel < 2) {
+hintLevel++;
+hintCount++;
+totalHints++;
+}
+
+const from = expected.substring(0, 2);
+const to = expected.substring(2, 4);
+
+if (hintLevel === 1) {
+hintSquare = from;
+setMessage("Hint 1: Look at the highlighted starting square.");
+} else {
+hintSquare = to;
+setMessage("Hint 2: Move the piece to the highlighted square.");
+}
+
+saveProgress();
+updateStats();
+renderBoard();
+}
+
+function nextPuzzle() {
+if (!puzzles.length) return;
+
+const nextIndex = (currentIndex + 1) % puzzles.length;
+
+startPuzzle(nextIndex);
+saveProgress();
+}
+
+function restartPuzzle() {
+if (!puzzles.length) return;
+
+startPuzzle(currentIndex);
+}
+
+function flipBoard() {
+flipped = !flipped;
+renderBoard();
+}
+
+function updateInfo() {
+document.getElementById("turn").textContent =
+game.turn() === "w" ? "White" : "Black";
+
+if (puzzleSolved) {
+document.getElementById("gameStatus").textContent =
+"Puzzle Solved!";
+} else if (opponentThinking) {
+document.getElementById("gameStatus").textContent =
+"Opponent Moving";
+} else {
+document.getElementById("gameStatus").textContent =
+game.in_check() ? "Check" : "In Progress";
+}
+}
+
 loadPuzzles();
-
 </script>
 
 </body>
