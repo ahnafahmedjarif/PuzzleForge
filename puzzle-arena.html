@@ -118,29 +118,19 @@ h1 {
 .square.hint { background: #e6bd42; }
 
 .piece {
-  font-family: "DejaVu Sans", "Segoe UI Symbol", serif;
-  font-size: clamp(32px, 9vw, 66px);
-  line-height: 1;
+  width: 88%;
+  height: 88%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
   z-index: 1;
 }
 
-/* White pieces: filled white with visible details */
-.white-piece {
-  color: #ffffff;
-  -webkit-text-stroke: 1.2px #303030;
-  text-shadow:
-    0 1px 2px #111,
-    0 0 2px #555;
-  filter: none;
-}
-
-/* Black pieces */
-.black-piece {
-  color: #171717;
-  -webkit-text-stroke: .5px #111;
-  text-shadow: 0 1px 1px #777;
-  filter: none;
+.piece svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 .square.possible::after {
@@ -282,7 +272,8 @@ button:disabled {
   }
 
   .piece {
-    font-size: clamp(30px, 10vw, 58px);
+    width: 92%;
+    height: 92%;
   }
 }
 </style>
@@ -380,24 +371,95 @@ button:disabled {
 const game = new Chess();
 const boardElement = document.getElementById("board");
 
-/* Correct white and black chess piece glyphs */
-const symbols = {
-  wk: "♔",
-  wq: "♕",
-  wr: "♖",
-  wb: "♗",
-  wn: "♘",
-  wp: "♙",
-
-  bk: "♚",
-  bq: "♛",
-  br: "♜",
-  bb: "♝",
-  bn: "♞",
-  bp: "♟"
-};
-
 const STORAGE_KEY = "puzzleforge_progress_v1";
+
+/* Classic Staunton-style SVG chess pieces */
+function pieceSVG(type, color) {
+
+  const white = color === "w";
+  const fill = white ? "#ffffff" : "#111111";
+  const stroke = white ? "#171717" : "#050505";
+  const detail = white ? "#171717" : "#ffffff";
+
+  const common = `
+    fill="${fill}"
+    stroke="${stroke}"
+    stroke-width="2.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  `;
+
+  let shape = "";
+
+  if (type === "k") {
+    shape = `
+      <path ${common} d="M50 7 V25 M41 16 H59"/>
+      <path ${common} d="M37 30 Q50 22 63 30 L66 43 Q72 51 76 62 L82 82 Q50 90 18 82 L24 62 Q28 51 34 43 Z"/>
+      <path ${common} d="M31 54 Q50 61 69 54 L74 74 Q50 81 26 74 Z"/>
+      <path fill="none" stroke="${detail}" stroke-width="2.5" d="M33 65 Q50 72 67 65"/>
+      <path ${common} d="M17 82 Q50 91 83 82 L88 92 H12 Z"/>
+    `;
+  }
+
+  if (type === "q") {
+    shape = `
+      <path ${common} d="M18 36 L28 61 L72 61 L82 36 L70 48 L64 24 L50 43 L36 24 L30 48 Z"/>
+      <circle cx="18" cy="31" r="6" fill="${fill}" stroke="${stroke}" stroke-width="2.8"/>
+      <circle cx="36" cy="19" r="6" fill="${fill}" stroke="${stroke}" stroke-width="2.8"/>
+      <circle cx="50" cy="36" r="6" fill="${fill}" stroke="${stroke}" stroke-width="2.8"/>
+      <circle cx="64" cy="19" r="6" fill="${fill}" stroke="${stroke}" stroke-width="2.8"/>
+      <circle cx="82" cy="31" r="6" fill="${fill}" stroke="${stroke}" stroke-width="2.8"/>
+      <path ${common} d="M28 61 L22 79 Q50 87 78 79 L72 61 Z"/>
+      <path fill="none" stroke="${detail}" stroke-width="3" d="M31 68 Q50 75 69 68"/>
+      <path ${common} d="M17 81 H83 L88 92 H12 Z"/>
+    `;
+  }
+
+  if (type === "r") {
+    shape = `
+      <path ${common} d="M17 12 H30 V22 H40 V12 H60 V22 H70 V12 H83 V39 H76 L72 77 H28 L24 39 H17 Z"/>
+      <path ${common} d="M28 40 H72 L68 77 H32 Z"/>
+      <path fill="none" stroke="${detail}" stroke-width="3" d="M34 47 H66 M35 67 H65"/>
+      <path ${common} d="M22 78 H78 L84 91 H16 Z"/>
+    `;
+  }
+
+  if (type === "b") {
+    shape = `
+      <path ${common} d="M50 9 C62 9 70 21 65 34 C62 43 56 48 56 56 L70 73 H30 L44 56 C44 48 38 43 35 34 C30 21 38 9 50 9 Z"/>
+      <path fill="none" stroke="${detail}" stroke-width="3" d="M42 23 L57 39"/>
+      <path ${common} d="M35 73 H65 L76 84 H24 Z"/>
+      <path ${common} d="M19 84 H81 L88 93 H12 Z"/>
+    `;
+  }
+
+  if (type === "n") {
+    shape = `
+      <path ${common} d="M20 83 Q23 68 30 58 Q21 52 24 42 Q28 31 43 26 L57 13 L73 24 L69 35 Q82 43 79 58 L76 76 L84 84 Z"/>
+      <path fill="none" stroke="${detail}" stroke-width="3" d="M45 31 Q57 35 64 45"/>
+      <circle cx="58" cy="30" r="3.5" fill="${detail}"/>
+      <path fill="none" stroke="${detail}" stroke-width="2.5" d="M31 53 L40 49"/>
+      <path ${common} d="M17 83 H83 L88 93 H12 Z"/>
+    `;
+  }
+
+  if (type === "p") {
+    shape = `
+      <circle cx="50" cy="25" r="13" ${common}/>
+      <path ${common} d="M43 39 Q38 49 34 59 L24 77 Q50 84 76 77 L66 59 Q62 49 57 39 Z"/>
+      <path fill="none" stroke="${detail}" stroke-width="2.8" d="M35 61 Q50 68 65 61"/>
+      <path ${common} d="M23 78 Q50 85 77 78 L86 92 H14 Z"/>
+    `;
+  }
+
+  return `
+    <svg viewBox="0 0 100 100"
+         xmlns="http://www.w3.org/2000/svg"
+         aria-hidden="true">
+      ${shape}
+    </svg>
+  `;
+}
 
 let puzzles = [];
 let currentIndex = 0;
@@ -416,6 +478,9 @@ let hintSquare = null;
 let opponentThinking = false;
 let puzzleSolved = false;
 let wrongMovePending = false;
+
+/* Prevent delayed moves from affecting a newly loaded puzzle */
+let puzzleSession = 0;
 
 let solvedIds = [];
 let noHintIds = [];
@@ -528,6 +593,11 @@ async function loadPuzzles() {
 function startPuzzle(index) {
   if (!puzzles.length) return;
 
+  /* Invalidate any pending timer from the previous puzzle */
+  puzzleSession++;
+
+  const thisSession = puzzleSession;
+
   currentIndex = index;
   currentPuzzle = puzzles[currentIndex];
 
@@ -636,11 +706,11 @@ function renderBoard() {
       if (piece) {
         const pieceElement = document.createElement("span");
 
-        pieceElement.textContent =
-          symbols[piece.color + piece.type];
-
-        pieceElement.className = "piece " +
-          (piece.color === "w" ? "white-piece" : "black-piece");
+        pieceElement.className = "piece";
+        pieceElement.innerHTML = pieceSVG(
+          piece.type,
+          piece.color
+        );
 
         square.appendChild(pieceElement);
       }
@@ -706,7 +776,14 @@ function handleClick(square) {
         } else {
           opponentThinking = true;
           setMessage("Correct move! Opponent is thinking...");
-          setTimeout(playOpponentMove, 600);
+
+          const session = puzzleSession;
+
+          setTimeout(() => {
+            if (session === puzzleSession) {
+              playOpponentMove();
+            }
+          }, 600);
         }
 
         return;
@@ -737,7 +814,11 @@ function handleClick(square) {
       renderBoard();
       setMessage("❌ WRONG MOVE! Try again.", "wrong");
 
+      const session = puzzleSession;
+
       setTimeout(() => {
+        if (session !== puzzleSession) return;
+
         game.undo();
 
         lastMove = previousLastMove;
@@ -894,24 +975,4 @@ function flipBoard() {
   renderBoard();
 }
 
-function updateInfo() {
-  document.getElementById("turn").textContent =
-    game.turn() === "w" ? "White" : "Black";
-
-  if (puzzleSolved) {
-    document.getElementById("gameStatus").textContent =
-      "Puzzle Solved!";
-  } else if (opponentThinking) {
-    document.getElementById("gameStatus").textContent =
-      "Opponent Moving";
-  } else {
-    document.getElementById("gameStatus").textContent =
-      game.in_check() ? "Check" : "In Progress";
-  }
-}
-
-loadPuzzles();
-</script>
-
-</body>
-</html>
+functio
