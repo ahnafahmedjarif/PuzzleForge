@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PuzzleForge - Chess Arena</title>
+<title>PuzzleForge - Puzzle Arena</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
@@ -68,6 +68,19 @@ h1 {
   padding: 16px;
 }
 
+.top-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.rating {
+  color: #d7bd70;
+  font-weight: bold;
+}
+
 .board {
   width: min(100%, 560px);
   aspect-ratio: 1 / 1;
@@ -83,8 +96,6 @@ h1 {
 .square {
   width: 100%;
   height: 100%;
-  min-width: 0;
-  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -93,37 +104,27 @@ h1 {
   user-select: none;
 }
 
-.light {
-  background: #e5e1d5;
-}
+.light { background: #e5e1d5; }
+.dark { background: #789477; }
 
-.dark {
-  background: #789477;
-}
-
-.square.selected {
-  background: #e6d45b;
-}
-
-.square.last-move {
-  background: #c9c45b;
-}
+.square.selected { background: #e6d45b; }
+.square.last-move { background: #c9c45b; }
+.square.hint { background: #d7b84c; }
 
 .piece {
   font-family: "DejaVu Sans", "Segoe UI Symbol", serif;
   font-size: clamp(32px, 9vw, 66px);
   line-height: 1;
   pointer-events: none;
+  z-index: 1;
 }
 
-/* Solid white pieces */
 .white-piece {
   color: white;
   filter: brightness(0) invert(1)
           drop-shadow(0 1px 1px #222);
 }
 
-/* Solid black pieces */
 .black-piece {
   color: #171717;
   filter: drop-shadow(0 1px 1px #777);
@@ -136,7 +137,6 @@ h1 {
   height: 25%;
   border-radius: 50%;
   background: #263b2e99;
-  pointer-events: none;
 }
 
 .square.capture::after {
@@ -145,7 +145,6 @@ h1 {
   inset: 3px;
   border: 5px solid #263b2e88;
   border-radius: 50%;
-  pointer-events: none;
 }
 
 .controls {
@@ -169,6 +168,11 @@ button:hover {
   background: #46546b;
 }
 
+button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
 .primary {
   background: #b6a05a;
   color: #111;
@@ -179,7 +183,8 @@ button:hover {
 .status {
   color: #d1d6df;
   margin-top: 16px;
-  line-height: 1.5;
+  line-height: 1.6;
+  min-height: 45px;
 }
 
 .stat {
@@ -199,6 +204,21 @@ button:hover {
   margin-top: 5px;
 }
 
+.progress-track {
+  height: 9px;
+  background: #303846;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #b6a05a;
+  transition: width .3s;
+}
+
 .note {
   color: #929baa;
   font-size: 12px;
@@ -206,18 +226,17 @@ button:hover {
   margin-top: 18px;
 }
 
+.themes {
+  color: #aab4c3;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
 @media(max-width: 720px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  body {
-    padding: 12px;
-  }
-
-  h1 {
-    font-size: 26px;
-  }
+  .layout { grid-template-columns: 1fr; }
+  body { padding: 12px; }
+  h1 { font-size: 26px; }
 }
 </style>
 </head>
@@ -233,55 +252,75 @@ button:hover {
 
   <h1>Puzzle Arena</h1>
   <p class="subtitle">
-    Train your chess skills, one move at a time.
+    Solve real chess puzzles and improve your rating.
   </p>
 
   <div class="layout">
 
     <section class="card">
 
-      <div style="margin-bottom:15px">
-        <strong>Chess Arena</strong>
+      <div class="top-info">
+        <strong id="puzzleNumber">Loading puzzles...</strong>
+        <span class="rating" id="rating">Rating: --</span>
       </div>
 
       <div id="board" class="board"></div>
 
       <div class="controls">
         <button onclick="flipBoard()">⇅ Flip Board</button>
-        <button onclick="undoMove()">↶ Undo</button>
-        <button onclick="resetGame()">↻ Reset</button>
-        <button class="primary" onclick="newGame()">New Game</button>
+        <button onclick="restartPuzzle()">↻ Restart</button>
+        <button onclick="getHint()">💡 Hint</button>
+        <button class="primary" onclick="nextPuzzle()">Next Puzzle →</button>
       </div>
 
       <p id="status" class="status">
-        White to move. Select a piece.
+        Loading puzzle database...
       </p>
+
+      <div class="themes" id="themes"></div>
 
     </section>
 
     <aside class="card">
 
-      <h3>Game Information</h3>
+      <h3>Your Progress</h3>
 
       <div class="stat">
-        <small>Current Turn</small>
-        <strong id="turn">White</strong>
+        <small>Puzzles Solved</small>
+        <strong id="solved">0 / 280</strong>
       </div>
 
       <div class="stat">
-        <small>Total Moves</small>
-        <strong id="moves">0</strong>
+        <small>Solved Without Hint</small>
+        <strong id="noHint">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>Hints Used</small>
+        <strong id="hintsUsed">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>Completion</small>
+        <strong id="percentage">0%</strong>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <div class="stat">
+        <small>Current Turn</small>
+        <strong id="turn">--</strong>
       </div>
 
       <div class="stat">
         <small>Game Status</small>
-        <strong id="gameStatus">In Progress</strong>
+        <strong id="gameStatus">Loading</strong>
       </div>
 
       <p class="note">
-        Legal chess moves are enabled.
-        Check, checkmate, captures and castling
-        are handled by the chess engine.
+        Your progress is saved in this browser.
+        Puzzle data is loaded from puzzles.json.
       </p>
 
     </aside>
@@ -295,16 +334,199 @@ const game = new Chess();
 const boardElement = document.getElementById("board");
 
 const symbols = {
-  wk: "♚", wq: "♛", wr: "♜",
-  wb: "♝", wn: "♞", wp: "♟",
+  wk: "♔", wq: "♕", wr: "♖",
+  wb: "♗", wn: "♘", wp: "♙",
   bk: "♚", bq: "♛", br: "♜",
   bb: "♝", bn: "♞", bp: "♟"
 };
 
+const STORAGE_KEY = "puzzleforge_progress_v1";
+
+let puzzles = [];
+let currentIndex = 0;
+let currentPuzzle = null;
+
+let puzzleMoveIndex = 0;
 let selected = null;
-let flipped = false;
 let legalTargets = [];
+let flipped = false;
 let lastMove = null;
+
+let hintLevel = 0;
+let opponentThinking = false;
+let puzzleSolved = false;
+let hintCount = 0;
+let hintSquare = null;
+
+let solvedIds = [];
+let noHintIds = [];
+let totalHints = 0;
+
+function loadProgress() {
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem(STORAGE_KEY) || "{}"
+    );
+
+    solvedIds = saved.solvedIds || [];
+    noHintIds = saved.noHintIds || [];
+    totalHints = saved.totalHints || 0;
+    currentIndex = saved.currentIndex || 0;
+
+  } catch (error) {
+    solvedIds = [];
+    noHintIds = [];
+    totalHints = 0;
+    currentIndex = 0;
+  }
+}
+
+function saveProgress() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    solvedIds,
+    noHintIds,
+    totalHints,
+    currentIndex
+  }));
+}
+
+function updateStats() {
+  const total = puzzles.length || 280;
+  const solved = solvedIds.length;
+  const percent = Math.round((solved / total) * 100);
+
+  document.getElementById("solved").textContent =
+    solved + " / " + total;
+
+  document.getElementById("noHint").textContent =
+    noHintIds.length;
+
+  document.getElementById("hintsUsed").textContent =
+    totalHints;
+
+  document.getElementById("percentage").textContent =
+    percent + "%";
+
+  document.getElementById("progressFill").style.width =
+    percent + "%";
+}
+
+function setMessage(message) {
+  document.getElementById("status").textContent = message;
+}
+
+function moveUci(move) {
+  return move.from + move.to + (move.promotion || "");
+}
+
+function applyUci(uci) {
+  if (!uci || uci.length < 4) return null;
+
+  return game.move({
+    from: uci.substring(0, 2),
+    to: uci.substring(2, 4),
+    promotion: uci.length > 4 ? uci[4] : "q"
+  });
+}
+
+async function loadPuzzles() {
+  loadProgress();
+
+  try {
+    const response = await fetch("puzzles.json");
+
+    if (!response.ok) {
+      throw new Error("Could not load puzzles.json");
+    }
+
+    puzzles = await response.json();
+
+    if (!Array.isArray(puzzles) || puzzles.length === 0) {
+      throw new Error("Puzzle database is empty.");
+    }
+
+    currentIndex = Math.min(
+      currentIndex,
+      puzzles.length - 1
+    );
+
+    updateStats();
+    startPuzzle(currentIndex);
+
+  } catch (error) {
+    setMessage(
+      "Puzzle loading failed. Make sure puzzles.json is in the same folder as puzzle-arena.html."
+    );
+
+    document.getElementById("gameStatus").textContent =
+      "Database Error";
+  }
+}
+
+function startPuzzle(index) {
+  if (!puzzles.length) return;
+
+  currentIndex = index;
+  currentPuzzle = puzzles[currentIndex];
+
+  puzzleMoveIndex = 0;
+  selected = null;
+  legalTargets = [];
+  lastMove = null;
+  hintLevel = 0;
+  hintCount = 0;
+  hintSquare = null;
+  opponentThinking = false;
+  puzzleSolved = false;
+
+  try {
+    game.load(currentPuzzle.fen);
+
+    const moves = currentPuzzle.moves;
+
+    if (!moves || moves.length < 2) {
+      throw new Error("Invalid puzzle moves.");
+    }
+
+    // First move is the opponent's setup move.
+    const setupMove = applyUci(moves[0]);
+
+    if (!setupMove) {
+      throw new Error("Could not apply setup move.");
+    }
+
+    lastMove = {
+      from: setupMove.from,
+      to: setupMove.to
+    };
+
+    puzzleMoveIndex = 1;
+
+    // Put the solving side at the bottom.
+    flipped = game.turn() === "b";
+
+    document.getElementById("puzzleNumber").textContent =
+      "Puzzle " + (currentIndex + 1) + " / " + puzzles.length;
+
+    document.getElementById("rating").textContent =
+      "Rating: " + currentPuzzle.rating;
+
+    document.getElementById("themes").textContent =
+      "Themes: " + (currentPuzzle.themes || []).join(", ");
+
+    document.getElementById("gameStatus").textContent =
+      "In Progress";
+
+    setMessage("Find the best move!");
+
+    renderBoard();
+
+  } catch (error) {
+    setMessage("Puzzle error: " + error.message);
+    document.getElementById("gameStatus").textContent =
+      "Puzzle Error";
+  }
+}
 
 function renderBoard() {
   boardElement.innerHTML = "";
@@ -336,6 +558,10 @@ function renderBoard() {
           (lastMove.from === squareName ||
            lastMove.to === squareName)) {
         square.classList.add("last-move");
+      }
+
+      if (hintSquare === squareName) {
+        square.classList.add("hint");
       }
 
       if (legalTargets.includes(squareName)) {
@@ -370,34 +596,69 @@ function renderBoard() {
 }
 
 function handleClick(square) {
-
-  if (game.game_over()) return;
+  if (
+    puzzleSolved ||
+    opponentThinking ||
+    !currentPuzzle
+  ) return;
 
   const piece = game.get(square);
 
   if (selected) {
+    const expected = currentPuzzle.moves[puzzleMoveIndex];
 
-    const move = game.move({
-      from: selected,
-      to: square,
-      promotion: "q"
-    });
+    if (!expected) return;
 
-    if (move) {
-      lastMove = {
-        from: move.from,
-        to: move.to
-      };
+    const expectedFrom = expected.substring(0, 2);
+    const expectedTo = expected.substring(2, 4);
 
-      selected = null;
-      legalTargets = [];
+    // Check if the selected move matches the puzzle solution.
+    if (
+      selected === expectedFrom &&
+      square === expectedTo
+    ) {
+      const move = game.move({
+        from: selected,
+        to: square,
+        promotion: expected.length > 4
+          ? expected[4]
+          : "q"
+      });
 
-      renderBoard();
-      return;
+      if (move) {
+        lastMove = {
+          from: move.from,
+          to: move.to
+        };
+
+        selected = null;
+        legalTargets = [];
+        hintSquare = null;
+
+        puzzleMoveIndex++;
+
+        renderBoard();
+
+        if (puzzleMoveIndex >= currentPuzzle.moves.length) {
+          finishPuzzle();
+        } else {
+          setMessage("Correct! Opponent is thinking...");
+          opponentThinking = true;
+
+          setTimeout(playOpponentMove, 550);
+        }
+
+        return;
+      }
     }
 
-    if (piece && piece.color === game.turn()) {
+    // Wrong move.
+    if (
+      piece &&
+      piece.color === game.turn()
+    ) {
       selectPiece(square);
+      setMessage("That is not the solution. Try another move.");
       return;
     }
 
@@ -405,6 +666,7 @@ function handleClick(square) {
     legalTargets = [];
 
     renderBoard();
+    setMessage("Incorrect move. Try again!");
     return;
   }
 
@@ -417,46 +679,116 @@ function selectPiece(square) {
   selected = square;
 
   legalTargets = game.moves({
-    square: square,
+    square,
     verbose: true
   }).map(move => move.to);
 
   renderBoard();
 }
 
-function updateInfo() {
+function playOpponentMove() {
+  if (puzzleSolved || !currentPuzzle) return;
 
-  document.getElementById("turn").textContent =
-    game.turn() === "w" ? "White" : "Black";
+  const uci = currentPuzzle.moves[puzzleMoveIndex];
+  const move = applyUci(uci);
 
-  document.getElementById("moves").textContent =
-    game.history().length;
+  opponentThinking = false;
 
-  let status = "In Progress";
-  let message = game.turn() === "w"
-    ? "White to move."
-    : "Black to move.";
-
-  if (game.in_checkmate()) {
-    status = "Checkmate";
-    message = "Checkmate! " +
-      (game.turn() === "w" ? "Black" : "White") + " wins.";
-
-  } else if (game.in_stalemate()) {
-    status = "Stalemate";
-    message = "Draw by stalemate.";
-
-  } else if (game.in_draw()) {
-    status = "Draw";
-    message = "The game is drawn.";
-
-  } else if (game.in_check()) {
-    status = "Check";
-    message += " Check!";
+  if (!move) {
+    setMessage("Puzzle move error. Please restart.");
+    return;
   }
 
-  document.getElementById("gameStatus").textContent = status;
-  document.getElementById("status").textContent = message;
+  lastMove = {
+    from: move.from,
+    to: move.to
+  };
+
+  puzzleMoveIndex++;
+
+  renderBoard();
+
+  if (puzzleMoveIndex >= currentPuzzle.moves.length) {
+    finishPuzzle();
+  } else {
+    setMessage("Your turn. Find the next correct move!");
+  }
+}
+
+function finishPuzzle() {
+  puzzleSolved = true;
+  opponentThinking = false;
+
+  const id = currentPuzzle.id;
+
+  if (!solvedIds.includes(id)) {
+    solvedIds.push(id);
+
+    if (hintCount === 0) {
+      noHintIds.push(id);
+    }
+
+    saveProgress();
+  }
+
+  document.getElementById("gameStatus").textContent =
+    "Solved!";
+
+  setMessage(
+    hintCount === 0
+      ? "Excellent! Puzzle solved without hints! 🎉"
+      : "Puzzle solved! Great work! 🎉"
+  );
+
+  updateStats();
+}
+
+function getHint() {
+  if (
+    puzzleSolved ||
+    opponentThinking ||
+    !currentPuzzle
+  ) return;
+
+  const expected = currentPuzzle.moves[puzzleMoveIndex];
+
+  if (!expected) return;
+
+  hintLevel = Math.min(hintLevel + 1, 2);
+  hintCount++;
+  totalHints++;
+
+  saveProgress();
+
+  const from = expected.substring(0, 2);
+  const to = expected.substring(2, 4);
+
+  if (hintLevel === 1) {
+    hintSquare = from;
+    setMessage("Hint 1: Look at the highlighted starting square.");
+  } else {
+    hintSquare = to;
+    setMessage("Hint 2: Move the piece to the highlighted square.");
+  }
+
+  updateStats();
+  renderBoard();
+}
+
+function nextPuzzle() {
+  if (!puzzles.length) return;
+
+  const nextIndex = (currentIndex + 1) % puzzles.length;
+
+  startPuzzle(nextIndex);
+
+  saveProgress();
+}
+
+function restartPuzzle() {
+  if (!puzzles.length) return;
+
+  startPuzzle(currentIndex);
 }
 
 function flipBoard() {
@@ -464,39 +796,23 @@ function flipBoard() {
   renderBoard();
 }
 
-function undoMove() {
-  const move = game.undo();
+function updateInfo() {
+  document.getElementById("turn").textContent =
+    game.turn() === "w" ? "White" : "Black";
 
-  if (move) {
-    selected = null;
-    legalTargets = [];
-
-    const history = game.history({ verbose: true });
-    const previous = history[history.length - 1];
-
-    lastMove = previous
-      ? { from: previous.from, to: previous.to }
-      : null;
-
-    renderBoard();
+  if (puzzleSolved) {
+    document.getElementById("gameStatus").textContent =
+      "Solved!";
+  } else if (opponentThinking) {
+    document.getElementById("gameStatus").textContent =
+      "Opponent Moving";
+  } else {
+    document.getElementById("gameStatus").textContent =
+      game.in_check() ? "Check" : "In Progress";
   }
 }
 
-function resetGame() {
-  game.reset();
-
-  selected = null;
-  legalTargets = [];
-  lastMove = null;
-
-  renderBoard();
-}
-
-function newGame() {
-  resetGame();
-}
-
-renderBoard();
+loadPuzzles();
 </script>
 
 </body>
