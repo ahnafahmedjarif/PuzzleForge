@@ -1,0 +1,76 @@
+
+name: Build PuzzleForge Database
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-puzzles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zstd
+
+      - name: Download Lichess puzzle database
+        run: |
+          curl -L --fail --retry 3 \
+            https://database.lichess.org/lichess_db_puzzle.csv.zst \
+            -o puzzles.csv.zst
+
+      - name: Extract 280 puzzles rated 1950-2050
+        run: |
+          zstd -dc puzzles.csv.zst | python3 -c '
+          import csv, json, sys
+
+          reader = csv.DictReader(sys.stdin)
+          puzzles = []
+
+          for row in reader:
+              try:
+                  rating = int(row["Rating"])
+              except (ValueError, KeyError):
+                  continue
+
+              if 1950 <= rating <= 2050:
+                  puzzles.append({
+                      "id": row["PuzzleId"],
+                      "fen": row["FEN"],
+                      "moves": row["Moves"].split(),
+                      "rating": rating,
+                      "themes": row["Themes"].split(),
+                      "gameUrl": row["GameUrl"]
+                  })
+
+                  if len(puzzles) == 280:
+                      break
+
+          if len(puzzles) < 280:
+              raise SystemExit(
+                  f"Only found {len(puzzles)} puzzles; expected 280."
+              )
+
+          with open("puzzles.json", "w") as f:
+              json.dump(puzzles, f, indent=2)
+
+          print(f"Created {len(puzzles)} puzzles.")
+          '
+
+      - name: Remove downloaded database
+        run: rm -f puzzles.csv.zst
+
+      - name: Commit puzzle database
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Add 280 chess puzzles"
+          file_pattern: puzzles.json
+          
