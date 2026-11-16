@@ -130,37 +130,57 @@ h1 {
   background: #e6bd42;
 }
 
-/* CHESS PIECES */
+
+/* PREMIUM STAUNTON-INSPIRED CHESS PIECES */
 
 .piece {
   font-family: "DejaVu Sans", "Segoe UI Symbol", serif;
-  font-size: clamp(32px, 9vw, 66px);
+  font-size: clamp(36px, 9vw, 66px);
   line-height: 1;
-  pointer-events: none;
-  z-index: 1;
   display: block;
+  pointer-events: none;
+  z-index: 2;
+
+  transform: scale(1.08);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* FULL WHITE PIECES */
+/* WHITE IVORY CHESS PIECES */
 
 .white-piece {
-  color: #ffffff;
-  -webkit-text-stroke: 1.4px #202020;
+  color: #fffdf4;
+
+  -webkit-text-stroke: 1.3px #45433d;
+
   text-shadow:
-    0 1px 2px #111,
-    0 0 2px #111;
-  filter: none;
+    0 -1px 0 #ffffff,
+    1px 1px 0 #d9d7cd,
+    -1px 1px 0 #e9e6dc,
+    0 2px 2px #77746c,
+    0 4px 4px #292929,
+    0 5px 6px #111111;
+
+  filter: drop-shadow(0 1px 1px #222);
 }
 
-/* FULL BLACK PIECES */
+/* BLACK EBONY CHESS PIECES */
 
 .black-piece {
-  color: #080808;
+  color: #171717;
+
   -webkit-text-stroke: 1px #050505;
+
   text-shadow:
-    0 1px 2px #777;
-  filter: none;
+    0 -1px 0 #777,
+    1px 1px 0 #333,
+    -1px 1px 0 #111,
+    0 2px 2px #050505,
+    0 4px 4px #000,
+    0 5px 6px #000;
+
+  filter: drop-shadow(0 1px 1px #000);
 }
+  
 
 .square.possible::after {
   content: "";
