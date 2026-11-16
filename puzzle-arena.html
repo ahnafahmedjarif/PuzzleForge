@@ -1,70 +1,180 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#090b10">
-<title>Puzzle Arena — PuzzleForge</title>
-<link rel="stylesheet" href="https://unpkg.com/chessboard-element@1.4.0/dist/chessboard-element.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PuzzleForge - Puzzle Arena</title>
+
 <style>
-:root{color-scheme:dark;--bg:#090b10;--panel:#171b24;--line:#292f3b;--text:#f4f5f7;--muted:#9299a8}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-header{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,48px)}
-.brand{font-weight:750;font-size:19px;letter-spacing:-.5px}.brand span{color:#9ca3af}.back{color:#d7dbe2;text-decoration:none;border:1px solid #343b48;border-radius:9px;padding:8px 12px;font-size:13px}
-main{max-width:1120px;margin:0 auto;padding:32px 18px 60px}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:22px}
-.eyebrow{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:700}
-h1{font-size:30px;letter-spacing:-.8px;margin:4px 0}.muted{color:var(--muted);font-size:13px}
-.tag{border:1px solid #343b48;background:#141821;border-radius:99px;padding:7px 11px;font-size:12px;white-space:nowrap}
-.layout{display:grid;grid-template-columns:minmax(280px, min(62vw,620px)) minmax(250px,1fr);gap:22px;align-items:start}
-.board-wrap{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px}
-chess-board{display:block;width:100%;max-width:590px;margin:auto;--light-color:#e6e2d8;--dark-color:#78818d;--highlight-color:rgba(255,255,255,.35);--marker-color:rgba(20,20,20,.25)}
-.board-note{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;padding:12px 2px 0}
-.panel{display:grid;gap:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
-.card h2{font-size:15px;margin:0 0 8px}.rating{font-size:28px;font-weight:750}.progress{height:5px;background:#2b313c;border-radius:9px;overflow:hidden;margin-top:12px}.progress span{display:block;height:100%;width:.36%;background:#d9dde4}
-.status{min-height:46px;border:1px solid var(--line);background:#11151d;border-radius:10px;padding:11px 12px;color:#dce0e7;font-size:13px}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.btn{border:1px solid #424957;background:#242a35;color:#fff;padding:11px 12px;border-radius:9px;font-weight:650;cursor:pointer}.btn.primary{background:#f0f1f3;color:#111318;border-color:#f0f1f3}.btn:disabled{opacity:.45;cursor:not-allowed}
-.hint{color:#d5d9e1;font-size:13px;min-height:38px}.foot{color:#7f8795;font-size:11px;line-height:1.5}
-@media(max-width:760px){.layout{grid-template-columns:1fr}.board-wrap{max-width:590px;width:100%;margin:auto}.panel{grid-template-columns:1fr 1fr}.panel .wide{grid-column:1/-1}main{padding-top:23px}}
-@media(max-width:420px){.panel{grid-template-columns:1fr}.panel .wide{grid-column:auto}.top{align-items:center}h1{font-size:25px}}
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: #101820;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+h1 {
+  color: #55d6a7;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #aab7c4;
+  margin-bottom: 25px;
+}
+
+.board {
+  width: min(90vw, 480px);
+  aspect-ratio: 1 / 1;
+  margin: 20px auto;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  border: 4px solid #293744;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.square {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(22px, 8vw, 48px);
+}
+
+.light {
+  background: #e8e3d5;
+}
+
+.dark {
+  background: #628b78;
+}
+
+.white-piece {
+  color: #ffffff;
+  text-shadow: 1px 2px 3px #222;
+}
+
+.black-piece {
+  color: #172027;
+  text-shadow: 1px 1px 2px #aaa;
+}
+
+.info {
+  color: #c4ced8;
+  margin-top: 20px;
+}
+
+button {
+  background: #55d6a7;
+  color: #102019;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 15px;
+}
 </style>
 </head>
+
 <body>
-<header><div class="brand">♟ <span>Puzzle</span>Forge</div><a class="back" href="./index.html">← Dashboard</a></header>
-<main>
-  <div class="top">
-    <div><div class="eyebrow">Tactical training</div><h1>Puzzle Arena</h1><div class="muted">Find the best move. Think before you play.</div></div>
-    <div class="tag">Puzzle 001 / 280</div>
-  </div>
-  <div class="layout">
-    <section class="board-wrap">
-      <chess-board id="board" position="start" draggable-pieces></chess-board>
-      <div class="board-note"><span id="turn">White to move</span><span>Demo puzzle</span></div>
-    </section>
-    <aside class="panel">
-      <section class="card"><div class="eyebrow">Puzzle rating</div><div class="rating">2000</div><div class="muted">Target range: 1950–2050</div><div class="progress"><span></span></div></section>
-      <section class="card"><h2>Your task</h2><div class="muted">Find the strongest move for White. This is a demonstration board; the verified 280-puzzle set will be connected in the next stage.</div></section>
-      <section class="card wide"><h2>Move feedback</h2><div class="status" id="status" aria-live="polite">Make a move on the board to test the interface.</div></section>
-      <section class="card wide"><h2>Progressive hint</h2><div class="hint" id="hint">No hint used.</div><div class="actions"><button class="btn" id="hintBtn">Show hint</button><button class="btn" id="resetBtn">Reset board</button></div></section>
-      <section class="card wide"><div class="actions"><button class="btn" id="flipBtn">Flip board</button><button class="btn primary" id="nextBtn" disabled>Next puzzle</button></div></section>
-      <div class="foot wide">This is the first interface prototype. Puzzle scoring, real solution validation, hint tracking and persistent statistics will be connected after the verified puzzle database is added.</div>
-    </aside>
-  </div>
-</main>
-<script type="module">
-import 'https://unpkg.com/chessboard-element@1.4.0/dist/chessboard-element.js';
-const board=document.querySelector('#board');
-const status=document.querySelector('#status');
-const hint=document.querySelector('#hint');
-let hintLevel=0;
-document.querySelector('#hintBtn').addEventListener('click',()=>{
- hintLevel=Math.min(3,hintLevel+1);
- const hints=['Look for forcing moves: checks, captures and threats.','Examine the opponent king’s safety and loose pieces.','This demonstration puzzle has no verified answer loaded yet.'];
- hint.textContent=hints[hintLevel-1];
-});
-document.querySelector('#resetBtn').addEventListener('click',()=>{board.position='start';status.textContent='Board reset. Try another move.';});
-document.querySelector('#flipBtn').addEventListener('click',()=>board.flip());
-board.addEventListener('drop',()=>{status.textContent='Move played on the demonstration board. Full legal-move and solution checking will be enabled with the puzzle engine.';});
-document.querySelector('#nextBtn').addEventListener('click',()=>{status.textContent='The verified puzzle collection has not been connected yet.';});
-</script>
+
+<h1>♟ PuzzleForge</h1>
+<p class="subtitle">Chess Puzzle Arena</p>
+
+<div class="board">
+
+<!-- Rank 8 -->
+<div class="square light black-piece">♜</div>
+<div class="square dark black-piece">♞</div>
+<div class="square light black-piece">♝</div>
+<div class="square dark black-piece">♛</div>
+<div class="square light black-piece">♚</div>
+<div class="square dark black-piece">♝</div>
+<div class="square light black-piece">♞</div>
+<div class="square dark black-piece">♜</div>
+
+<!-- Rank 7 -->
+<div class="square dark black-piece">♟</div>
+<div class="square light black-piece">♟</div>
+<div class="square dark black-piece">♟</div>
+<div class="square light black-piece">♟</div>
+<div class="square dark black-piece">♟</div>
+<div class="square light black-piece">♟</div>
+<div class="square dark black-piece">♟</div>
+<div class="square light black-piece">♟</div>
+
+<!-- Rank 6 -->
+<div class="square light"></div>
+<div class="square dark"></div>
+<div class="square light"></div>
+<div class="square dark"></div>
+<div class="square light"></div>
+<div class="square dark"></div>
+<div class="square light"></div>
+<div class="square dark"></div>
+
+<!-- Rank 5 -->
+<div class="square dark"></div>
+<div class="square light"></div>
+<div class="square dark"></div>
+<div class="square light"></div>
+<div class="square dark"></div>
+<div class="square light"></div>
+<div class="square dark"></div>
+<div class="square light"></div>
+
+<!-- Rank 4 -->
+<div class="square light"></div>
+<div class="square dark"></div>
+<div class="square light"></div>
+<div class="square dark"></div>
+<div class="square light"></div>
+<div class="square dark"></div>
+<div class="square light"></div>
+<div class="square dark"></div>
+
+<!-- Rank 3 -->
+<div class="square dark"></div>
+<div class="square light"></div>
+<div class="square dark"></div>
+<div class="square light"></div>
+<div class="square dark"></div>
+<div class="square light"></div>
+<div class="square dark"></div>
+<div class="square light"></div>
+
+<!-- Rank 2 -->
+<div class="square light white-piece">♙</div>
+<div class="square dark white-piece">♙</div>
+<div class="square light white-piece">♙</div>
+<div class="square dark white-piece">♙</div>
+<div class="square light white-piece">♙</div>
+<div class="square dark white-piece">♙</div>
+<div class="square light white-piece">♙</div>
+<div class="square dark white-piece">♙</div>
+
+<!-- Rank 1 -->
+<div class="square dark white-piece">♖</div>
+<div class="square light white-piece">♘</div>
+<div class="square dark white-piece">♗</div>
+<div class="square light white-piece">♕</div>
+<div class="square dark white-piece">♔</div>
+<div class="square light white-piece">♗</div>
+<div class="square dark white-piece">♘</div>
+<div class="square light white-piece">♖</div>
+
+</div>
+
+<p class="info">Welcome to PuzzleForge Chess Arena.</p>
+<p class="info">Your chess puzzle board is ready!</p>
+
 </body>
 </html>
