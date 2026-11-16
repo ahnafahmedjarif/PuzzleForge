@@ -132,49 +132,49 @@ h1 {
 
 
 
-/* Clear and bold chess pieces */
-
+/* Common Chess Piece Style */
 .piece {
-  font-family: "DejaVu Sans", "Segoe UI Symbol", "Arial Unicode MS", serif;
-  font-size: clamp(36px, 9vw, 66px);
-  line-height: 1;
-  font-weight: 900;
-  display: inline-block;
-  pointer-events: none;
-  z-index: 2;
-  transform: scale(1.08);
+    width: 88%;
+    height: 88%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(30px, 5.5vw, 54px);
+    line-height: 1;
+    font-family: "DejaVu Sans", "Arial Unicode MS", sans-serif;
+    font-weight: 900;
+    user-select: none;
+    pointer-events: none;
+    position: relative;
+    z-index: 2;
+    transition: transform 0.18s ease, filter 0.18s ease;
 }
 
-/* WHITE PIECES */
+/* WHITE PIECES — Pure White + Soft Black Outline */
 .white-piece {
-  color: #ffffff;
-  -webkit-text-fill-color: #ffffff;
-  -webkit-text-stroke: 1.5px #171717;
-
-  text-shadow:
-    1px 1px 0 #171717,
-    -1px 1px 0 #171717,
-    1px -1px 0 #171717,
-    -1px -1px 0 #171717,
-    0 2px 3px rgba(0,0,0,0.65);
-
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.45));
+    color: #ffffff;
+    -webkit-text-stroke: 1px #292929;
+    text-shadow:
+        0 1px 1px rgba(0, 0, 0, 0.65),
+        1px 2px 2px rgba(0, 0, 0, 0.30),
+        0 0 2px rgba(0, 0, 0, 0.35);
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
 }
 
-/* BLACK PIECES */
+/* BLACK PIECES — Black Grey + Soft White Outline */
 .black-piece {
-  color: #171717;
-  -webkit-text-fill-color: #171717;
-  -webkit-text-stroke: 1px #050505;
+    color: #292d32;
+    -webkit-text-stroke: 1px #e8e8e8;
+    text-shadow:
+        0 1px 1px rgba(255, 255, 255, 0.35),
+        1px 2px 2px rgba(0, 0, 0, 0.65),
+        0 0 2px rgba(255, 255, 255, 0.25);
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.45));
+}
 
-  text-shadow:
-    1px 1px 0 #ffffff,
-    -1px 1px 0 #ffffff,
-    1px -1px 0 #ffffff,
-    -1px -1px 0 #ffffff,
-    0 2px 2px rgba(0,0,0,0.4);
-
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.35));
+/* Subtle hover effect */
+.piece:hover {
+    transform: scale(1.06);
 }
 
 /* Mobile adjustment */
