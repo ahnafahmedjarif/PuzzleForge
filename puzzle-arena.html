@@ -125,25 +125,36 @@ h1 {
   z-index: 1;
 }
 
-/* Improved white pieces */
+
+/* Clear and detailed white chess pieces */
 .white-piece {
-  color: #fffdf4;
-  -webkit-text-stroke: 1.3px #292929;
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  -webkit-text-stroke: 1.7px #252525;
+  paint-order: stroke fill;
+  font-weight: 900;
+
   text-shadow:
-    0 1px 1px #111,
-    0 0 1px #555,
-    0 0 3px #fff,
-    0 0 5px rgba(255, 253, 244, 0.65);
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
+    0 0 1px #111111,
+    0 1px 1px #111111,
+    1px 2px 2px #333333,
+    0 0 3px #555555;
+
+  filter: drop-shadow(0 1px 1px #111);
 }
 
-/* Black pieces unchanged */
+/* Sharp black chess pieces */
 .black-piece {
   color: #171717;
-  -webkit-text-stroke: .5px #111;
-  text-shadow: 0 1px 1px #777;
-  filter: none;
+  -webkit-text-fill-color: #171717;
+  -webkit-text-stroke: 0.8px #000000;
+  paint-order: stroke fill;
+
+  text-shadow:
+    0 1px 1px #ffffff,
+    0 0 2px #555555;
 }
+  
 
 .square.possible::after {
   content: "";
