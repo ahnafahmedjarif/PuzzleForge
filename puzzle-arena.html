@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PuzzleForge - Puzzle Contriving</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chess.js@0.10.3/chess.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <style>
 * {
@@ -117,9 +117,10 @@ h1 {
 .square.last-move { background: #c9c45b; }
 .square.hint { background: #e6bd42; }
 
+/* SVG chess pieces */
 .piece {
-  width: 88%;
-  height: 88%;
+  width: 90%;
+  height: 90%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -373,82 +374,128 @@ const boardElement = document.getElementById("board");
 
 const STORAGE_KEY = "puzzleforge_progress_v1";
 
-/* Classic Staunton-style SVG chess pieces */
+/* ==================================
+   CLASSIC STAUNTON STYLE SVG PIECES
+================================== */
+
 function pieceSVG(type, color) {
 
   const white = color === "w";
+
   const fill = white ? "#ffffff" : "#111111";
   const stroke = white ? "#171717" : "#050505";
   const detail = white ? "#171717" : "#ffffff";
 
-  const common = `
+  const base = `
     fill="${fill}"
     stroke="${stroke}"
-    stroke-width="2.8"
+    stroke-width="3"
     stroke-linecap="round"
     stroke-linejoin="round"
   `;
 
   let shape = "";
 
+  /* KING */
   if (type === "k") {
     shape = `
-      <path ${common} d="M50 7 V25 M41 16 H59"/>
-      <path ${common} d="M37 30 Q50 22 63 30 L66 43 Q72 51 76 62 L82 82 Q50 90 18 82 L24 62 Q28 51 34 43 Z"/>
-      <path ${common} d="M31 54 Q50 61 69 54 L74 74 Q50 81 26 74 Z"/>
-      <path fill="none" stroke="${detail}" stroke-width="2.5" d="M33 65 Q50 72 67 65"/>
-      <path ${common} d="M17 82 Q50 91 83 82 L88 92 H12 Z"/>
+      <path ${base} d="M50 7 V25 M41 16 H59"/>
+      <path ${base} d="M36 30 Q50 22 64 30 L68 48 Q78 59 80 83 H20 Q22 59 32 48 Z"/>
+      <path fill="none" stroke="${detail}" stroke-width="3"
+        d="M30 67 Q50 76 70 67"/>
+      <path ${base} d="M14 83 H86 L90 94 H10 Z"/>
     `;
   }
 
+  /* QUEEN */
   if (type === "q") {
     shape = `
-      <path ${common} d="M18 36 L28 61 L72 61 L82 36 L70 48 L64 24 L50 43 L36 24 L30 48 Z"/>
-      <circle cx="18" cy="31" r="6" fill="${fill}" stroke="${stroke}" stroke-width="2.8"/>
-      <circle cx="36" cy="19" r="6" fill="${fill}" stroke="${stroke}" stroke-width="2.8"/>
-      <circle cx="50" cy="36" r="6" fill="${fill}" stroke="${stroke}" stroke-width="2.8"/>
-      <circle cx="64" cy="19" r="6" fill="${fill}" stroke="${stroke}" stroke-width="2.8"/>
-      <circle cx="82" cy="31" r="6" fill="${fill}" stroke="${stroke}" stroke-width="2.8"/>
-      <path ${common} d="M28 61 L22 79 Q50 87 78 79 L72 61 Z"/>
-      <path fill="none" stroke="${detail}" stroke-width="3" d="M31 68 Q50 75 69 68"/>
-      <path ${common} d="M17 81 H83 L88 92 H12 Z"/>
+      <path ${base}
+        d="M18 34 L29 59 H71 L82 34 L69 46 L63 20 L50 41 L37 20 L31 46 Z"/>
+
+      <circle cx="18" cy="29" r="6"
+        fill="${fill}" stroke="${stroke}" stroke-width="3"/>
+
+      <circle cx="37" cy="15" r="6"
+        fill="${fill}" stroke="${stroke}" stroke-width="3"/>
+
+      <circle cx="50" cy="35" r="6"
+        fill="${fill}" stroke="${stroke}" stroke-width="3"/>
+
+      <circle cx="63" cy="15" r="6"
+        fill="${fill}" stroke="${stroke}" stroke-width="3"/>
+
+      <circle cx="82" cy="29" r="6"
+        fill="${fill}" stroke="${stroke}" stroke-width="3"/>
+
+      <path ${base} d="M29 60 L22 81 H78 L71 60 Z"/>
+
+      <path fill="none" stroke="${detail}" stroke-width="3"
+        d="M32 69 Q50 76 68 69"/>
+
+      <path ${base} d="M13 82 H87 L91 94 H9 Z"/>
     `;
   }
 
+  /* ROOK */
   if (type === "r") {
     shape = `
-      <path ${common} d="M17 12 H30 V22 H40 V12 H60 V22 H70 V12 H83 V39 H76 L72 77 H28 L24 39 H17 Z"/>
-      <path ${common} d="M28 40 H72 L68 77 H32 Z"/>
-      <path fill="none" stroke="${detail}" stroke-width="3" d="M34 47 H66 M35 67 H65"/>
-      <path ${common} d="M22 78 H78 L84 91 H16 Z"/>
+      <path ${base}
+        d="M16 12 H30 V23 H40 V12 H60 V23 H70 V12 H84 V39 H76 L72 79 H28 L24 39 H16 Z"/>
+
+      <path fill="none" stroke="${detail}" stroke-width="3"
+        d="M34 48 H66 M34 68 H66"/>
+
+      <path ${base} d="M18 80 H82 L90 94 H10 Z"/>
     `;
   }
 
+  /* BISHOP */
   if (type === "b") {
     shape = `
-      <path ${common} d="M50 9 C62 9 70 21 65 34 C62 43 56 48 56 56 L70 73 H30 L44 56 C44 48 38 43 35 34 C30 21 38 9 50 9 Z"/>
-      <path fill="none" stroke="${detail}" stroke-width="3" d="M42 23 L57 39"/>
-      <path ${common} d="M35 73 H65 L76 84 H24 Z"/>
-      <path ${common} d="M19 84 H81 L88 93 H12 Z"/>
+      <path ${base}
+        d="M50 9 C64 9 70 23 63 37 C59 45 56 50 57 57 L73 76 H27 L43 57 C44 50 41 45 37 37 C30 23 36 9 50 9 Z"/>
+
+      <path fill="none" stroke="${detail}" stroke-width="3"
+        d="M42 23 L58 40"/>
+
+      <path ${base} d="M26 76 H74 L84 85 H16 Z"/>
+
+      <path ${base} d="M12 85 H88 L92 95 H8 Z"/>
     `;
   }
 
+  /* KNIGHT */
   if (type === "n") {
     shape = `
-      <path ${common} d="M20 83 Q23 68 30 58 Q21 52 24 42 Q28 31 43 26 L57 13 L73 24 L69 35 Q82 43 79 58 L76 76 L84 84 Z"/>
-      <path fill="none" stroke="${detail}" stroke-width="3" d="M45 31 Q57 35 64 45"/>
-      <circle cx="58" cy="30" r="3.5" fill="${detail}"/>
-      <path fill="none" stroke="${detail}" stroke-width="2.5" d="M31 53 L40 49"/>
-      <path ${common} d="M17 83 H83 L88 93 H12 Z"/>
+      <path ${base}
+        d="M18 83 Q23 68 31 58 Q20 51 25 40 Q29 29 44 25 L58 12 L74 24 L69 36 Q83 44 78 60 L76 79 Z"/>
+
+      <path fill="none" stroke="${detail}" stroke-width="3"
+        d="M44 31 Q57 35 65 46"/>
+
+      <circle cx="59" cy="30" r="3.5" fill="${detail}"/>
+
+      <path fill="none" stroke="${detail}" stroke-width="2.5"
+        d="M30 52 L41 49"/>
+
+      <path ${base} d="M13 83 H87 L92 95 H8 Z"/>
     `;
   }
 
+  /* PAWN */
   if (type === "p") {
     shape = `
-      <circle cx="50" cy="25" r="13" ${common}/>
-      <path ${common} d="M43 39 Q38 49 34 59 L24 77 Q50 84 76 77 L66 59 Q62 49 57 39 Z"/>
-      <path fill="none" stroke="${detail}" stroke-width="2.8" d="M35 61 Q50 68 65 61"/>
-      <path ${common} d="M23 78 Q50 85 77 78 L86 92 H14 Z"/>
+      <circle cx="50" cy="25" r="13" ${base}/>
+
+      <path ${base}
+        d="M43 39 Q38 50 34 60 L23 79 Q50 86 77 79 L66 60 Q62 50 57 39 Z"/>
+
+      <path fill="none" stroke="${detail}" stroke-width="3"
+        d="M34 62 Q50 70 66 62"/>
+
+      <path ${base}
+        d="M15 80 Q50 88 85 80 L91 95 H9 Z"/>
     `;
   }
 
@@ -460,6 +507,10 @@ function pieceSVG(type, color) {
     </svg>
   `;
 }
+
+/* ==================================
+   PUZZLE DATA AND PROGRESS
+================================== */
 
 let puzzles = [];
 let currentIndex = 0;
@@ -479,7 +530,7 @@ let opponentThinking = false;
 let puzzleSolved = false;
 let wrongMovePending = false;
 
-/* Prevent delayed moves from affecting a newly loaded puzzle */
+/* Prevent old timers affecting new puzzles */
 let puzzleSession = 0;
 
 let solvedIds = [];
@@ -541,6 +592,7 @@ function updateStats() {
 
 function setMessage(message, type = "") {
   const status = document.getElementById("status");
+
   status.textContent = message;
   status.className = "status " + type;
 }
@@ -554,6 +606,10 @@ function applyUci(uci) {
     promotion: uci.length > 4 ? uci[4] : "q"
   });
 }
+
+/* ==================================
+   LOAD PUZZLES
+================================== */
 
 async function loadPuzzles() {
   loadProgress();
@@ -580,6 +636,8 @@ async function loadPuzzles() {
     startPuzzle(currentIndex);
 
   } catch (error) {
+    console.error(error);
+
     setMessage(
       "Could not load puzzles.json. Check that it is in the same folder as puzzle-arena.html.",
       "wrong"
@@ -590,13 +648,14 @@ async function loadPuzzles() {
   }
 }
 
+/* ==================================
+   START PUZZLE
+================================== */
+
 function startPuzzle(index) {
   if (!puzzles.length) return;
 
-  /* Invalidate any pending timer from the previous puzzle */
   puzzleSession++;
-
-  const thisSession = puzzleSession;
 
   currentIndex = index;
   currentPuzzle = puzzles[currentIndex];
@@ -605,9 +664,11 @@ function startPuzzle(index) {
   selected = null;
   legalTargets = [];
   lastMove = null;
+
   hintLevel = 0;
   hintCount = 0;
   hintSquare = null;
+
   opponentThinking = false;
   puzzleSolved = false;
   wrongMovePending = false;
@@ -653,11 +714,18 @@ function startPuzzle(index) {
     renderBoard();
 
   } catch (error) {
+    console.error(error);
+
     setMessage("Puzzle error: " + error.message, "wrong");
+
     document.getElementById("gameStatus").textContent =
       "Puzzle Error";
   }
 }
+
+/* ==================================
+   DRAW BOARD
+================================== */
 
 function renderBoard() {
   boardElement.innerHTML = "";
@@ -685,9 +753,11 @@ function renderBoard() {
         square.classList.add("selected");
       }
 
-      if (lastMove &&
-          (lastMove.from === squareName ||
-           lastMove.to === squareName)) {
+      if (
+        lastMove &&
+        (lastMove.from === squareName ||
+         lastMove.to === squareName)
+      ) {
         square.classList.add("last-move");
       }
 
@@ -703,10 +773,12 @@ function renderBoard() {
         }
       }
 
+      /* Render custom SVG chess piece */
       if (piece) {
         const pieceElement = document.createElement("span");
 
         pieceElement.className = "piece";
+
         pieceElement.innerHTML = pieceSVG(
           piece.type,
           piece.color
@@ -726,6 +798,10 @@ function renderBoard() {
   updateInfo();
 }
 
+/* ==================================
+   HANDLE USER MOVES
+================================== */
+
 function handleClick(square) {
   if (
     puzzleSolved ||
@@ -737,6 +813,7 @@ function handleClick(square) {
   const piece = game.get(square);
 
   if (selected) {
+
     const expected = currentPuzzle.moves[puzzleMoveIndex];
 
     if (!expected) return;
@@ -748,7 +825,9 @@ function handleClick(square) {
       selected === expectedFrom &&
       square === expectedTo;
 
+    /* Correct move */
     if (isCorrect) {
+
       const move = game.move({
         from: selected,
         to: square,
@@ -758,6 +837,7 @@ function handleClick(square) {
       });
 
       if (move) {
+
         lastMove = {
           from: move.from,
           to: move.to
@@ -774,7 +854,9 @@ function handleClick(square) {
         if (puzzleMoveIndex >= currentPuzzle.moves.length) {
           finishPuzzle();
         } else {
+
           opponentThinking = true;
+
           setMessage("Correct move! Opponent is thinking...");
 
           const session = puzzleSession;
@@ -790,6 +872,7 @@ function handleClick(square) {
       }
     }
 
+    /* Wrong but legal move */
     const wrongMove = game.move({
       from: selected,
       to: square,
@@ -797,6 +880,7 @@ function handleClick(square) {
     });
 
     if (wrongMove) {
+
       const previousLastMove = lastMove
         ? { ...lastMove }
         : null;
@@ -809,14 +893,17 @@ function handleClick(square) {
       selected = null;
       legalTargets = [];
       hintSquare = null;
+
       wrongMovePending = true;
 
       renderBoard();
+
       setMessage("❌ WRONG MOVE! Try again.", "wrong");
 
       const session = puzzleSession;
 
       setTimeout(() => {
+
         if (session !== puzzleSession) return;
 
         game.undo();
@@ -828,12 +915,15 @@ function handleClick(square) {
         legalTargets = [];
 
         renderBoard();
+
         setMessage("Try another move!");
+
       }, 1000);
 
       return;
     }
 
+    /* Allow selecting another own piece */
     if (piece && piece.color === game.turn()) {
       selectPiece(square);
       return;
@@ -841,8 +931,14 @@ function handleClick(square) {
 
     selected = null;
     legalTargets = [];
+
     renderBoard();
-    setMessage("Illegal move. Choose a highlighted square.", "wrong");
+
+    setMessage(
+      "Illegal move. Choose a highlighted square.",
+      "wrong"
+    );
+
     return;
   }
 
@@ -850,6 +946,10 @@ function handleClick(square) {
     selectPiece(square);
   }
 }
+
+/* ==================================
+   SELECT PIECE
+================================== */
 
 function selectPiece(square) {
   selected = square;
@@ -862,16 +962,25 @@ function selectPiece(square) {
   renderBoard();
 }
 
+/* ==================================
+   OPPONENT MOVE
+================================== */
+
 function playOpponentMove() {
   if (puzzleSolved || !currentPuzzle) return;
 
   const uci = currentPuzzle.moves[puzzleMoveIndex];
+
   const move = applyUci(uci);
 
   opponentThinking = false;
 
   if (!move) {
-    setMessage("Puzzle move error. Please restart.", "wrong");
+    setMessage(
+      "Puzzle move error. Please restart.",
+      "wrong"
+    );
+
     return;
   }
 
@@ -891,6 +1000,10 @@ function playOpponentMove() {
   }
 }
 
+/* ==================================
+   PUZZLE COMPLETED
+================================== */
+
 function finishPuzzle() {
   puzzleSolved = true;
   opponentThinking = false;
@@ -899,6 +1012,7 @@ function finishPuzzle() {
   const id = currentPuzzle.id;
 
   if (!solvedIds.includes(id)) {
+
     solvedIds.push(id);
 
     if (hintCount === 0) {
@@ -914,65 +1028,4 @@ function finishPuzzle() {
   setMessage(
     hintCount === 0
       ? "🎉 PUZZLE SOLVED! Excellent work — no hints used!"
-      : "🎉 PUZZLE SOLVED! Great job!",
-    "success"
-  );
-
-  updateStats();
-}
-
-function getHint() {
-  if (
-    puzzleSolved ||
-    opponentThinking ||
-    wrongMovePending ||
-    !currentPuzzle
-  ) return;
-
-  const expected = currentPuzzle.moves[puzzleMoveIndex];
-
-  if (!expected) return;
-
-  if (hintLevel < 2) {
-    hintLevel++;
-    hintCount++;
-    totalHints++;
-  }
-
-  const from = expected.substring(0, 2);
-  const to = expected.substring(2, 4);
-
-  if (hintLevel === 1) {
-    hintSquare = from;
-    setMessage("Hint 1: Look at the highlighted starting square.");
-  } else {
-    hintSquare = to;
-    setMessage("Hint 2: Move the piece to the highlighted square.");
-  }
-
-  saveProgress();
-  updateStats();
-  renderBoard();
-}
-
-function nextPuzzle() {
-  if (!puzzles.length) return;
-
-  const nextIndex = (currentIndex + 1) % puzzles.length;
-
-  startPuzzle(nextIndex);
-  saveProgress();
-}
-
-function restartPuzzle() {
-  if (!puzzles.length) return;
-
-  startPuzzle(currentIndex);
-}
-
-function flipBoard() {
-  flipped = !flipped;
-  renderBoard();
-}
-
-functio
+      : "🎉 PUZZLE SOLVED! Great
