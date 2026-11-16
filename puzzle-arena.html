@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PuzzleForge - Puzzle Arena</title>
+<title>PuzzleForge - Puzzle Contriving</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
@@ -27,6 +27,7 @@ header {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 28px;
+  gap: 10px;
 }
 
 .logo {
@@ -50,8 +51,10 @@ h1 {
 }
 
 .subtitle {
-  color: #929baa;
+  color: #d2bd78;
+  font-size: 15px;
   margin-bottom: 24px;
+  font-style: italic;
 }
 
 .layout {
@@ -71,9 +74,10 @@ h1 {
 .top-info {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 10px;
-  margin-bottom: 15px;
   flex-wrap: wrap;
+  margin-bottom: 15px;
 }
 
 .rating {
@@ -96,6 +100,8 @@ h1 {
 .square {
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -109,7 +115,7 @@ h1 {
 
 .square.selected { background: #e6d45b; }
 .square.last-move { background: #c9c45b; }
-.square.hint { background: #d7b84c; }
+.square.hint { background: #e6bd42; }
 
 .piece {
   font-family: "DejaVu Sans", "Segoe UI Symbol", serif;
@@ -119,15 +125,20 @@ h1 {
   z-index: 1;
 }
 
+/* Solid white pieces */
 .white-piece {
-  color: white;
+  color: #fff;
   filter: brightness(0) invert(1)
-          drop-shadow(0 1px 1px #222);
+          drop-shadow(0 2px 2px #111);
+  -webkit-text-stroke: 1px #fff;
+  text-shadow: 0 1px 3px #111;
 }
 
+/* Solid black pieces */
 .black-piece {
-  color: #171717;
-  filter: drop-shadow(0 1px 1px #777);
+  color: #111;
+  filter: brightness(0)
+          drop-shadow(0 1px 1px #777);
 }
 
 .square.possible::after {
@@ -137,6 +148,7 @@ h1 {
   height: 25%;
   border-radius: 50%;
   background: #263b2e99;
+  pointer-events: none;
 }
 
 .square.capture::after {
@@ -145,6 +157,7 @@ h1 {
   inset: 3px;
   border: 5px solid #263b2e88;
   border-radius: 50%;
+  pointer-events: none;
 }
 
 .controls {
@@ -181,10 +194,30 @@ button:disabled {
 }
 
 .status {
-  color: #d1d6df;
-  margin-top: 16px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 18px;
   line-height: 1.6;
-  min-height: 45px;
+  min-height: 55px;
+  padding: 10px;
+  border-radius: 9px;
+  background: #222936;
+}
+
+.status.wrong {
+  color: #ff7777;
+  background: #3b2025;
+  border: 1px solid #74343b;
+}
+
+.status.success {
+  color: #75f0a4;
+  background: #173a2a;
+  border: 1px solid #28734a;
+  font-size: 20px;
+  text-align: center;
+  padding: 17px 10px;
 }
 
 .stat {
@@ -219,13 +252,6 @@ button:disabled {
   transition: width .3s;
 }
 
-.note {
-  color: #929baa;
-  font-size: 12px;
-  line-height: 1.5;
-  margin-top: 18px;
-}
-
 .themes {
   color: #aab4c3;
   font-size: 12px;
@@ -233,10 +259,29 @@ button:disabled {
   margin-top: 12px;
 }
 
+.note {
+  color: #929baa;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 18px;
+}
+
 @media(max-width: 720px) {
-  .layout { grid-template-columns: 1fr; }
-  body { padding: 12px; }
-  h1 { font-size: 26px; }
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  body {
+    padding: 12px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+
+  .piece {
+    font-size: clamp(30px, 10vw, 58px);
+  }
 }
 </style>
 </head>
@@ -250,9 +295,10 @@ button:disabled {
 
 <div class="container">
 
-  <h1>Puzzle Arena</h1>
+  <h1>Puzzle Contriving</h1>
+
   <p class="subtitle">
-    Solve real chess puzzles and improve your rating.
+    Bobby Fischer: "Chess is life."
   </p>
 
   <div class="layout">
@@ -330,12 +376,11 @@ button:disabled {
 
 <script>
 const game = new Chess();
-
 const boardElement = document.getElementById("board");
 
 const symbols = {
-  wk: "♔", wq: "♕", wr: "♖",
-  wb: "♗", wn: "♘", wp: "♙",
+  wk: "♚", wq: "♛", wr: "♜",
+  wb: "♝", wn: "♞", wp: "♟",
   bk: "♚", bq: "♛", br: "♜",
   bb: "♝", bn: "♞", bp: "♟"
 };
@@ -353,10 +398,12 @@ let flipped = false;
 let lastMove = null;
 
 let hintLevel = 0;
-let opponentThinking = false;
-let puzzleSolved = false;
 let hintCount = 0;
 let hintSquare = null;
+
+let opponentThinking = false;
+let puzzleSolved = false;
+let wrongMovePending = false;
 
 let solvedIds = [];
 let noHintIds = [];
@@ -368,10 +415,14 @@ function loadProgress() {
       localStorage.getItem(STORAGE_KEY) || "{}"
     );
 
-    solvedIds = saved.solvedIds || [];
-    noHintIds = saved.noHintIds || [];
-    totalHints = saved.totalHints || 0;
-    currentIndex = saved.currentIndex || 0;
+    solvedIds = Array.isArray(saved.solvedIds)
+      ? saved.solvedIds : [];
+
+    noHintIds = Array.isArray(saved.noHintIds)
+      ? saved.noHintIds : [];
+
+    totalHints = Number(saved.totalHints) || 0;
+    currentIndex = Number(saved.currentIndex) || 0;
 
   } catch (error) {
     solvedIds = [];
@@ -411,12 +462,10 @@ function updateStats() {
     percent + "%";
 }
 
-function setMessage(message) {
-  document.getElementById("status").textContent = message;
-}
-
-function moveUci(move) {
-  return move.from + move.to + (move.promotion || "");
+function setMessage(message, type = "") {
+  const status = document.getElementById("status");
+  status.textContent = message;
+  status.className = "status " + type;
 }
 
 function applyUci(uci) {
@@ -455,7 +504,8 @@ async function loadPuzzles() {
 
   } catch (error) {
     setMessage(
-      "Puzzle loading failed. Make sure puzzles.json is in the same folder as puzzle-arena.html."
+      "Could not load puzzles.json. Check that it is in the same folder as puzzle-arena.html.",
+      "wrong"
     );
 
     document.getElementById("gameStatus").textContent =
@@ -478,6 +528,7 @@ function startPuzzle(index) {
   hintSquare = null;
   opponentThinking = false;
   puzzleSolved = false;
+  wrongMovePending = false;
 
   try {
     game.load(currentPuzzle.fen);
@@ -488,7 +539,7 @@ function startPuzzle(index) {
       throw new Error("Invalid puzzle moves.");
     }
 
-    // First move is the opponent's setup move.
+    // Lichess first move is the opponent's setup move.
     const setupMove = applyUci(moves[0]);
 
     if (!setupMove) {
@@ -502,7 +553,7 @@ function startPuzzle(index) {
 
     puzzleMoveIndex = 1;
 
-    // Put the solving side at the bottom.
+    // The solving side is placed at the bottom.
     flipped = game.turn() === "b";
 
     document.getElementById("puzzleNumber").textContent =
@@ -522,7 +573,7 @@ function startPuzzle(index) {
     renderBoard();
 
   } catch (error) {
-    setMessage("Puzzle error: " + error.message);
+    setMessage("Puzzle error: " + error.message, "wrong");
     document.getElementById("gameStatus").textContent =
       "Puzzle Error";
   }
@@ -599,6 +650,7 @@ function handleClick(square) {
   if (
     puzzleSolved ||
     opponentThinking ||
+    wrongMovePending ||
     !currentPuzzle
   ) return;
 
@@ -612,11 +664,11 @@ function handleClick(square) {
     const expectedFrom = expected.substring(0, 2);
     const expectedTo = expected.substring(2, 4);
 
-    // Check if the selected move matches the puzzle solution.
-    if (
+    const isCorrect =
       selected === expectedFrom &&
-      square === expectedTo
-    ) {
+      square === expectedTo;
+
+    if (isCorrect) {
       const move = game.move({
         from: selected,
         to: square,
@@ -642,31 +694,66 @@ function handleClick(square) {
         if (puzzleMoveIndex >= currentPuzzle.moves.length) {
           finishPuzzle();
         } else {
-          setMessage("Correct! Opponent is thinking...");
           opponentThinking = true;
-
-          setTimeout(playOpponentMove, 550);
+          setMessage("Correct move! Opponent is thinking...");
+          setTimeout(playOpponentMove, 600);
         }
 
         return;
       }
     }
 
-    // Wrong move.
-    if (
-      piece &&
-      piece.color === game.turn()
-    ) {
+    // Show a wrong legal move briefly, then undo it.
+    const wrongMove = game.move({
+      from: selected,
+      to: square,
+      promotion: "q"
+    });
+
+    if (wrongMove) {
+      const previousLastMove = lastMove
+        ? { ...lastMove }
+        : null;
+
+      lastMove = {
+        from: wrongMove.from,
+        to: wrongMove.to
+      };
+
+      selected = null;
+      legalTargets = [];
+      hintSquare = null;
+      wrongMovePending = true;
+
+      renderBoard();
+      setMessage("❌ WRONG MOVE! Try again.", "wrong");
+
+      setTimeout(() => {
+        game.undo();
+
+        lastMove = previousLastMove;
+        wrongMovePending = false;
+
+        selected = null;
+        legalTargets = [];
+
+        renderBoard();
+        setMessage("Try another move!");
+      }, 1000);
+
+      return;
+    }
+
+    // If another friendly piece is selected, switch selection.
+    if (piece && piece.color === game.turn()) {
       selectPiece(square);
-      setMessage("That is not the solution. Try another move.");
       return;
     }
 
     selected = null;
     legalTargets = [];
-
     renderBoard();
-    setMessage("Incorrect move. Try again!");
+    setMessage("Illegal move. Choose a highlighted square.", "wrong");
     return;
   }
 
@@ -679,7 +766,7 @@ function selectPiece(square) {
   selected = square;
 
   legalTargets = game.moves({
-    square,
+    square: square,
     verbose: true
   }).map(move => move.to);
 
@@ -695,7 +782,7 @@ function playOpponentMove() {
   opponentThinking = false;
 
   if (!move) {
-    setMessage("Puzzle move error. Please restart.");
+    setMessage("Puzzle move error. Please restart.", "wrong");
     return;
   }
 
@@ -718,6 +805,7 @@ function playOpponentMove() {
 function finishPuzzle() {
   puzzleSolved = true;
   opponentThinking = false;
+  wrongMovePending = false;
 
   const id = currentPuzzle.id;
 
@@ -732,12 +820,13 @@ function finishPuzzle() {
   }
 
   document.getElementById("gameStatus").textContent =
-    "Solved!";
+    "Puzzle Solved!";
 
   setMessage(
     hintCount === 0
-      ? "Excellent! Puzzle solved without hints! 🎉"
-      : "Puzzle solved! Great work! 🎉"
+      ? "🎉 PUZZLE SOLVED! Excellent work — no hints used!"
+      : "🎉 PUZZLE SOLVED! Great job!",
+    "success"
   );
 
   updateStats();
@@ -747,6 +836,7 @@ function getHint() {
   if (
     puzzleSolved ||
     opponentThinking ||
+    wrongMovePending ||
     !currentPuzzle
   ) return;
 
@@ -755,10 +845,12 @@ function getHint() {
   if (!expected) return;
 
   hintLevel = Math.min(hintLevel + 1, 2);
-  hintCount++;
-  totalHints++;
 
-  saveProgress();
+  if (hintLevel <= 2) {
+    hintCount++;
+    totalHints++;
+    saveProgress();
+  }
 
   const from = expected.substring(0, 2);
   const to = expected.substring(2, 4);
@@ -781,7 +873,6 @@ function nextPuzzle() {
   const nextIndex = (currentIndex + 1) % puzzles.length;
 
   startPuzzle(nextIndex);
-
   saveProgress();
 }
 
@@ -802,7 +893,7 @@ function updateInfo() {
 
   if (puzzleSolved) {
     document.getElementById("gameStatus").textContent =
-      "Solved!";
+      "Puzzle Solved!";
   } else if (opponentThinking) {
     document.getElementById("gameStatus").textContent =
       "Opponent Moving";
