@@ -3,8 +3,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PuzzleForge — Puzzle Arena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PuzzleForge - Chess Arena</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <style>
 * {
@@ -17,29 +19,28 @@ body {
   background: #10131a;
   color: #f1f3f7;
   font-family: Arial, sans-serif;
-  padding: 20px;
+  padding: 16px;
 }
 
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .logo {
   font-size: 22px;
   font-weight: bold;
-  color: #ffffff;
 }
 
 header a {
-  color: #b8c0ce;
+  color: #c4cad4;
   text-decoration: none;
 }
 
 .container {
-  max-width: 1100px;
+  max-width: 1050px;
   margin: auto;
 }
 
@@ -50,33 +51,33 @@ h1 {
 
 .subtitle {
   color: #929baa;
-  margin-bottom: 25px;
+  margin-bottom: 24px;
 }
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.8fr);
-  gap: 25px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(240px, .8fr);
+  gap: 22px;
   align-items: start;
 }
 
 .card {
   background: #1a1f29;
-  border: 1px solid #2b3240;
+  border: 1px solid #303846;
   border-radius: 14px;
-  padding: 18px;
+  padding: 16px;
 }
 
 .board {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(8, 1fr);
   width: min(100%, 560px);
   aspect-ratio: 1 / 1;
-  margin: 0 auto;
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  margin: auto;
   border: 3px solid #343c49;
   border-radius: 6px;
+  overflow: hidden;
 }
 
 .square {
@@ -84,16 +85,12 @@ h1 {
   height: 100%;
   min-width: 0;
   min-height: 0;
-  aspect-ratio: 1 / 1;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 0;
-  margin: 0;
-  border: none;
-  box-sizing: border-box;
-  font-size: clamp(22px, 5vw, 48px);
+  justify-content: center;
+  position: relative;
   cursor: pointer;
+  user-select: none;
 }
 
 .light {
@@ -108,67 +105,88 @@ h1 {
   background: #e6d45b;
 }
 
-.square.possible {
-  box-shadow: inset 0 0 0 5px #d9bd55;
+.square.last-move {
+  background: #c9c45b;
 }
 
 .piece {
+  font-family: "DejaVu Sans", "Segoe UI Symbol", serif;
+  font-size: clamp(32px, 9vw, 66px);
   line-height: 1;
   pointer-events: none;
 }
 
+/* Solid white pieces */
 .white-piece {
-  color: #fff;
-  text-shadow: 1px 2px 3px #333;
+  color: white;
+  filter: brightness(0) invert(1)
+          drop-shadow(0 1px 1px #222);
 }
 
+/* Solid black pieces */
 .black-piece {
   color: #171717;
-  text-shadow: 0 1px 1px #aaa;
+  filter: drop-shadow(0 1px 1px #777);
+}
+
+.square.possible::after {
+  content: "";
+  position: absolute;
+  width: 25%;
+  height: 25%;
+  border-radius: 50%;
+  background: #263b2e99;
+  pointer-events: none;
+}
+
+.square.capture::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 5px solid #263b2e88;
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .controls {
   display: flex;
-  gap: 10px;
+  gap: 9px;
   flex-wrap: wrap;
   margin-top: 16px;
 }
 
 button {
+  padding: 12px 15px;
+  border: 1px solid #465166;
+  border-radius: 8px;
   background: #303a4b;
   color: white;
-  border: 1px solid #414d61;
-  padding: 11px 16px;
-  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
 }
 
 button:hover {
-  background: #43516a;
+  background: #46546b;
 }
 
 .primary {
   background: #b6a05a;
   color: #111;
-  border: none;
   font-weight: bold;
+  border: none;
 }
 
-.primary:hover {
-  background: #d0b96c;
-}
-
-.info-title {
-  font-size: 17px;
-  margin-bottom: 14px;
+.status {
+  color: #d1d6df;
+  margin-top: 16px;
+  line-height: 1.5;
 }
 
 .stat {
   background: #222936;
   padding: 14px;
   border-radius: 9px;
-  margin-bottom: 12px;
+  margin-top: 12px;
 }
 
 .stat small {
@@ -177,44 +195,28 @@ button:hover {
 
 .stat strong {
   display: block;
-  font-size: 22px;
+  font-size: 20px;
   margin-top: 5px;
 }
 
-.status {
-  color: #c5cbd5;
-  margin-top: 15px;
-  line-height: 1.5;
-}
-
-.hint-box {
-  background: #222936;
-  padding: 14px;
-  border-radius: 9px;
-  margin-top: 15px;
-  color: #c5cbd5;
-  line-height: 1.5;
-  min-height: 55px;
-}
-
 .note {
-  color: #8e99a9;
+  color: #929baa;
   font-size: 12px;
-  margin-top: 20px;
   line-height: 1.5;
+  margin-top: 18px;
 }
 
-@media (max-width: 750px) {
-  body {
-    padding: 14px;
-  }
-
+@media(max-width: 720px) {
   .layout {
     grid-template-columns: 1fr;
   }
 
+  body {
+    padding: 12px;
+  }
+
   h1 {
-    font-size: 25px;
+    font-size: 26px;
   }
 }
 </style>
@@ -230,64 +232,56 @@ button:hover {
 <div class="container">
 
   <h1>Puzzle Arena</h1>
-  <p class="subtitle">Train your chess skills, one puzzle at a time.</p>
+  <p class="subtitle">
+    Train your chess skills, one move at a time.
+  </p>
 
   <div class="layout">
 
     <section class="card">
 
-      <div style="display:flex;justify-content:space-between;margin-bottom:15px;">
-        <strong>Daily Challenge</strong>
-        <span style="color:#b6a05a;">Puzzle 001 / 280</span>
+      <div style="margin-bottom:15px">
+        <strong>Chess Arena</strong>
       </div>
 
       <div id="board" class="board"></div>
 
       <div class="controls">
-        <button onclick="showHint()">💡 Hint</button>
         <button onclick="flipBoard()">⇅ Flip Board</button>
-        <button onclick="resetBoard()">↻ Reset</button>
-        <button class="primary" onclick="nextPuzzle()">Next Puzzle →</button>
+        <button onclick="undoMove()">↶ Undo</button>
+        <button onclick="resetGame()">↻ Reset</button>
+        <button class="primary" onclick="newGame()">New Game</button>
       </div>
 
       <p id="status" class="status">
-        Select a piece to begin.
+        White to move. Select a piece.
       </p>
-
-      <div id="hint" class="hint-box">
-        Your hint will appear here.
-      </div>
 
     </section>
 
     <aside class="card">
 
-      <h2 class="info-title">Puzzle Information</h2>
+      <h3>Game Information</h3>
 
       <div class="stat">
-        <small>Difficulty</small>
-        <strong>Intermediate</strong>
+        <small>Current Turn</small>
+        <strong id="turn">White</strong>
       </div>
 
       <div class="stat">
-        <small>Rating</small>
-        <strong>1950–2050</strong>
+        <small>Total Moves</small>
+        <strong id="moves">0</strong>
       </div>
 
       <div class="stat">
-        <small>Puzzles Completed</small>
-        <strong id="completed">0 / 280</strong>
-      </div>
-
-      <div class="stat">
-        <small>Hints Used</small>
-        <strong id="hintsUsed">0</strong>
+        <small>Game Status</small>
+        <strong id="gameStatus">In Progress</strong>
       </div>
 
       <p class="note">
-        Select a chess piece and then select another square.
-        This prototype currently demonstrates the board interface.
-        Full puzzle validation and legal chess moves are not implemented yet.
+        Legal chess moves are enabled.
+        Check, checkmate, captures and castling
+        are handled by the chess engine.
       </p>
 
     </aside>
@@ -296,120 +290,173 @@ button:hover {
 </div>
 
 <script>
-const initialPosition = [
-  ["♜","♞","♝","♛","♚","♝","♞","♜"],
-  ["♟","♟","♟","♟","♟","♟","♟","♟"],
-  ["","","","","","","",""],
-  ["","","","","","","",""],
-  ["","","","","","","",""],
-  ["","","","","","","",""],
-  ["♙","♙","♙","♙","♙","♙","♙","♙"],
-  ["♖","♘","♗","♕","♔","♗","♘","♖"]
-];
-
-let board = initialPosition.map(row => [...row]);
-let selected = null;
-let flipped = false;
-let hintCount = 0;
-let completedCount = 0;
+const game = new Chess();
 
 const boardElement = document.getElementById("board");
+
+const symbols = {
+  wk: "♚", wq: "♛", wr: "♜",
+  wb: "♝", wn: "♞", wp: "♟",
+  bk: "♚", bq: "♛", br: "♜",
+  bb: "♝", bn: "♞", bp: "♟"
+};
+
+let selected = null;
+let flipped = false;
+let legalTargets = [];
+let lastMove = null;
 
 function renderBoard() {
   boardElement.innerHTML = "";
 
-  for (let row = 0; row < 8; row++) {
-    for (let col = 0; col < 8; col++) {
+  const position = game.board();
 
-      let actualRow = flipped ? 7 - row : row;
-      let actualCol = flipped ? 7 - col : col;
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+
+      const row = flipped ? 7 - r : r;
+      const col = flipped ? 7 - c : c;
 
       const square = document.createElement("div");
 
-      square.className =
-        "square " +
-        ((row + col) % 2 === 0 ? "light" : "dark");
+      square.className = "square " +
+        ((r + c) % 2 === 0 ? "light" : "dark");
 
-      if (
-        selected &&
-        selected.row === actualRow &&
-        selected.col === actualCol
-      ) {
+      const file = "abcdefgh"[col];
+      const rank = 8 - row;
+      const squareName = file + rank;
+
+      const piece = position[row][col];
+
+      if (selected === squareName) {
         square.classList.add("selected");
       }
 
-      const piece = board[actualRow][actualCol];
+      if (lastMove &&
+          (lastMove.from === squareName ||
+           lastMove.to === squareName)) {
+        square.classList.add("last-move");
+      }
+
+      if (legalTargets.includes(squareName)) {
+        if (piece) {
+          square.classList.add("capture");
+        } else {
+          square.classList.add("possible");
+        }
+      }
 
       if (piece) {
         const pieceElement = document.createElement("span");
-        pieceElement.className = "piece";
 
-        const whitePieces = "♙♖♘♗♕♔";
+        pieceElement.textContent =
+          symbols[piece.color + piece.type];
 
-        pieceElement.classList.add(
-          whitePieces.includes(piece) ? "white-piece" : "black-piece"
-        );
+        pieceElement.className = "piece " +
+          (piece.color === "w" ? "white-piece" : "black-piece");
 
-        pieceElement.textContent = piece;
         square.appendChild(pieceElement);
       }
 
       square.addEventListener("click", () => {
-        handleSquareClick(actualRow, actualCol);
+        handleClick(squareName);
       });
 
       boardElement.appendChild(square);
     }
   }
+
+  updateInfo();
 }
 
-function handleSquareClick(row, col) {
+function handleClick(square) {
 
-  if (selected === null) {
+  if (game.game_over()) return;
 
-    if (board[row][col] !== "") {
-      selected = { row, col };
+  const piece = game.get(square);
 
-      document.getElementById("status").textContent =
-        "Piece selected. Now select a destination square.";
+  if (selected) {
+
+    const move = game.move({
+      from: selected,
+      to: square,
+      promotion: "q"
+    });
+
+    if (move) {
+      lastMove = {
+        from: move.from,
+        to: move.to
+      };
+
+      selected = null;
+      legalTargets = [];
 
       renderBoard();
+      return;
     }
 
-    return;
-  }
+    if (piece && piece.color === game.turn()) {
+      selectPiece(square);
+      return;
+    }
 
-  const fromRow = selected.row;
-  const fromCol = selected.col;
-
-  if (fromRow === row && fromCol === col) {
     selected = null;
+    legalTargets = [];
+
     renderBoard();
     return;
   }
 
-  board[row][col] = board[fromRow][fromCol];
-  board[fromRow][fromCol] = "";
+  if (piece && piece.color === game.turn()) {
+    selectPiece(square);
+  }
+}
 
-  selected = null;
+function selectPiece(square) {
+  selected = square;
 
-  document.getElementById("status").textContent =
-    "Move displayed. This demo does not check legal moves.";
+  legalTargets = game.moves({
+    square: square,
+    verbose: true
+  }).map(move => move.to);
 
   renderBoard();
 }
 
-function resetBoard() {
-  board = initialPosition.map(row => [...row]);
-  selected = null;
+function updateInfo() {
 
-  document.getElementById("status").textContent =
-    "Board reset to starting position.";
+  document.getElementById("turn").textContent =
+    game.turn() === "w" ? "White" : "Black";
 
-  document.getElementById("hint").textContent =
-    "Your hint will appear here.";
+  document.getElementById("moves").textContent =
+    game.history().length;
 
-  renderBoard();
+  let status = "In Progress";
+  let message = game.turn() === "w"
+    ? "White to move."
+    : "Black to move.";
+
+  if (game.in_checkmate()) {
+    status = "Checkmate";
+    message = "Checkmate! " +
+      (game.turn() === "w" ? "Black" : "White") + " wins.";
+
+  } else if (game.in_stalemate()) {
+    status = "Stalemate";
+    message = "Draw by stalemate.";
+
+  } else if (game.in_draw()) {
+    status = "Draw";
+    message = "The game is drawn.";
+
+  } else if (game.in_check()) {
+    status = "Check";
+    message += " Check!";
+  }
+
+  document.getElementById("gameStatus").textContent = status;
+  document.getElementById("status").textContent = message;
 }
 
 function flipBoard() {
@@ -417,25 +464,36 @@ function flipBoard() {
   renderBoard();
 }
 
-function showHint() {
-  hintCount++;
+function undoMove() {
+  const move = game.undo();
 
-  document.getElementById("hintsUsed").textContent = hintCount;
+  if (move) {
+    selected = null;
+    legalTargets = [];
 
-  document.getElementById("hint").textContent =
-    "Hint: Look for checks, captures, and threats. Try to find the strongest forcing move.";
+    const history = game.history({ verbose: true });
+    const previous = history[history.length - 1];
+
+    lastMove = previous
+      ? { from: previous.from, to: previous.to }
+      : null;
+
+    renderBoard();
+  }
 }
 
-function nextPuzzle() {
-  completedCount++;
+function resetGame() {
+  game.reset();
 
-  document.getElementById("completed").textContent =
-    completedCount + " / 280";
+  selected = null;
+  legalTargets = [];
+  lastMove = null;
 
-  resetBoard();
+  renderBoard();
+}
 
-  document.getElementById("status").textContent =
-    "Next puzzle selected. Puzzle data will be connected in a future update.";
+function newGame() {
+  resetGame();
 }
 
 renderBoard();
