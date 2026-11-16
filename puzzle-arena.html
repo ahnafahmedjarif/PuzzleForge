@@ -150,7 +150,7 @@ h1 {
     transition: transform 0.18s ease, filter 0.18s ease;
 }
 
-/* WHITE PIECES — Pure White + Soft Black Outline */
+/* White Pieces */
 .white-piece {
     color: #ffffff;
     -webkit-text-stroke: 1px #292929;
@@ -161,7 +161,7 @@ h1 {
     filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
 }
 
-/* BLACK PIECES — Black Grey + Soft White Outline */
+/* Black Pieces */
 .black-piece {
     color: #292d32;
     -webkit-text-stroke: 1px #e8e8e8;
@@ -170,6 +170,20 @@ h1 {
         1px 2px 2px rgba(0, 0, 0, 0.65),
         0 0 2px rgba(255, 255, 255, 0.25);
     filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.45));
+}
+
+/* Hover Effect */
+.piece:hover {
+    transform: scale(1.06);
+}
+
+/* Mobile */
+@media (max-width: 720px) {
+    .piece {
+        width: 92%;
+        height: 92%;
+        font-size: clamp(26px, 7vw, 44px);
+    }
 }
 
 /* Subtle hover effect */
