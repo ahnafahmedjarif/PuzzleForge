@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PuzzleForge - Puzzle Contriving</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#10131a;color:#f1f3f7;font-family:Arial,sans-serif;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;gap:10px}
+.logo{font-size:22px;font-weight:bold}header a{color:#c4cad4;text-decoration:none}
+.container{max-width:1050px;margin:auto}h1{font-size:30px;margin-bottom:8px}
+.subtitle{color:#d2bd78;font-size:15px;margin-bottom:24px;font-style:italic}
+.layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.8fr);gap:22px;align-items:start}
+.card{background:#1a1f29;border:1px solid #303846;border-radius:14px;padding:16px}
+.top-info{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+.rating{color:#d7bd70;font-weight:bold}
+/* Coordinates are displayed inside the board squares. */
+.board-wrap{width:min(100%,560px);margin:auto}
+.board{width:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));border:3px solid #343c49;border-radius:6px;overflow:hidden}
+.square-coordinate{position:absolute;color:#263b2e;font-size:clamp(8px,1.35vw,11px);font-weight:700;line-height:1;z-index:4;pointer-events:none;text-shadow:0 0 2px rgba(255,255,255,.35)}
+.square-coordinate.rank{top:2px;left:3px}
+.square-coordinate.file{right:3px;bottom:2px}
+.square{width:100%;height:100%;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;user-select:none}
+.light{background:#e5e1d5}.dark{background:#789477}.square.selected{background:#e6d45b}.square.last-move{background:#c9c45b}.square.hint{background:#e6bd42}
+.piece{font-family:"DejaVu Sans","Segoe UI Symbol","Noto Sans Symbols 2",sans-serif;font-size:clamp(34px,6vw,58px);font-weight:400;line-height:1;display:flex;align-items:center;justify-content:center;user-select:none;pointer-events:none;position:relative;z-index:2}
+.white-piece{color:#fff;-webkit-text-stroke:.7px #333;text-shadow:0 2px 2px rgba(0,0,0,.28);filter:drop-shadow(0 1px 1px rgba(0,0,0,.2))}
+.black-piece{color:#222;-webkit-text-stroke:.6px #eee;text-shadow:0 2px 2px rgba(0,0,0,.25);filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.piece:hover{transform:scale(1.06)}
+.square.possible::after{content:"";position:absolute;width:25%;height:25%;border-radius:50%;background:#263b2e99;pointer-events:none}
+.square.capture::after{content:"";position:absolute;inset:3px;border:5px solid #263b2e88;border-radius:50%;pointer-events:none}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+button{padding:12px 15px;border:1px solid #465166;border-radius:8px;background:#303a4b;color:white;cursor:pointer;font-size:14px}
+button:hover{background:#46546b}button:disabled{opacity:.45;cursor:not-allowed}
+.primary{background:#b6a05a;color:#111;font-weight:bold;border:none}
+.status{color:#fff;font-size:16px;font-weight:bold;margin-top:18px;line-height:1.6;min-height:55px;padding:10px;border-radius:9px;background:#222936}
+.status.wrong{color:#ff7777;background:#3b2025;border:1px solid #74343b}
+.status.success{color:#75f0a4;background:#173a2a;border:1px solid #28734a;font-size:20px;text-align:center;padding:17px 10px}
+.stat{background:#222936;padding:14px;border-radius:9px;margin-top:12px}.stat small{color:#9da7b6}
+.stat strong{display:block;font-size:20px;margin-top:5px}
+.progress-track{height:9px;background:#303846;border-radius:10px;overflow:hidden;margin-top:10px}
+.progress-fill{height:100%;width:0%;background:#b6a05a;transition:width .3s}
+.themes{color:#aab4c3;font-size:12px;line-height:1.6;margin-top:12px}
+.note{color:#929baa;font-size:12px;line-height:1.5;margin-top:18px}
+@media(max-width:720px){.layout{grid-template-columns:1fr}body{padding:12px}h1{font-size:26px}.piece{width:92%;height:92%;font-size:clamp(30px,10vw,58px);transform:scale(1.03)}}
+</style>
+</head>
+<body>
+<header><div class="logo">♟ PuzzleForge</div><a href="index.html">← Dashboard</a></header>
+<div class="container">
+<h1>Puzzle Contriving</h1>
+<p class="subtitle">Bobby Fischer: "Chess is life."</p>
+<div class="layout">
+<section class="card">
+<div class="top-info"><strong id="puzzleNumber">Loading puzzles...</strong><span class="rating" id="rating">Rating: --</span></div>
+<div class="board-wrap">
+  <div id="board" class="board"></div>
+</div>
+<div class="controls">
+<button onclick="flipBoard()">⇅ Flip Board</button>
+<button onclick="restartPuzzle()">↻ Restart</button>
+<button onclick="getHint()">💡 Hint</button>
+<button onclick="previousPuzzle()">← Previous Puzzle</button>
+<button class="primary" onclick="nextPuzzle()">Next Puzzle →</button>
+</div>
+<p id="status" class="status">Loading puzzle database...</p>
+<div class="themes" id="themes"></div>
+</section>
+<aside class="card">
+<h3>Your Progress</h3>
+<div class="stat"><small>Puzzles Solved</small><strong id="solved">0 / 280</strong></div>
+<div class="stat"><small>Solved Without Hint</small><strong id="noHint">0</strong></div>
+<div class="stat"><small>Hints Used</small><strong id="hintsUsed">0</strong></div>
+<div class="stat"><small>Completion</small><strong id="percentage">0%</strong><div class="progress-track"><div class="progress-fill" id="progressFill"></div></div></div>
+<div class="stat"><small>Current Turn</small><strong id="turn">--</strong></div>
+<div class="stat"><small>Game Status</small><strong id="gameStatus">Loading</strong></div>
+<p class="note">Your progress is saved in this browser.<br>Puzzle data is loaded from puzzles.json.<br>Stockfish files must be inside the engine folder.</p>
+</aside>
+</div>
+</div>
+<script>
+const game = new Chess();
+const boardElement = document.getElementById("board");
+const symbols = {wk:"♚",wq:"♛",wr:"♜",wb:"♝",wn:"♞",wp:"♟",bk:"♚",bq:"♛",br:"♜",bb:"♝",bn:"♞",bp:"♟"};
+const STORAGE_KEY = "puzzleforge_progress_v1";
+
+/* Stockfish is used only to evaluate a wrong move. No best move or PV is displayed.
+   Required files: engine/stockfish-19-lite-single.js and .wasm */
+let stockfishWorker = null;
+let engineReady = false;
+let engineStarting = false;
+let engineFailed = false;
+let engineQueue = Promise.resolve();
+
+let puzzles = [], currentIndex = 0, currentPuzzle = null;
+let puzzleMoveIndex = 0, selected = null, legalTargets = [], flipped = false, lastMove = null;
+let hintLevel = 0, hintCount = 0, hintSquare = null;
+let opponentThinking = false, puzzleSolved = false, wrongMovePending = false;
+let solvedIds = [], noHintIds = [], totalHints = 0;
+let wrongMoveTimer = null;
+
+function loadProgress(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");
+    solvedIds=Array.isArray(saved.solvedIds)?saved.solvedIds:[];
+    noHintIds=Array.isArray(saved.noHintIds)?saved.noHintIds:[];
+    totalHints=Number(saved.totalHints)||0;
+    currentIndex=Number(saved.currentIndex)||0;
+  }catch(e){solvedIds=[];noHintIds=[];totalHints=0;currentIndex=0;}
+}
+function saveProgress(){localStorage.setItem(STORAGE_KEY,JSON.stringify({solvedIds,noHintIds,totalHints,currentIndex}));}
+function updateStats(){
+  const total=puzzles.length||280, solved=solvedIds.length, percent=Math.round(solved/total*100);
+  document.getElementById("solved").textContent=solved+" / "+total;
+  document.getElementById("noHint").textContent=noHintIds.length;
+  document.getElementById("hintsUsed").textContent=totalHints;
+  document.getElementById("percentage").textContent=percent+"%";
+  document.getElementById("progressFill").style.width=percent+"%";
+}
+function setMessage(message,type=""){
+  const status=document.getElementById("status");status.textContent=message;status.className="status "+type;
+}
+function applyUci(uci){
+  if(!uci||uci.length<4)return null;
+  return game.move({from:uci.substring(0,2),to:uci.substring(2,4),promotion:uci.length>4?uci[4]:"q"});
+}
+
+/* -------- Stockfish initialization and serialized UCI analysis -------- */
+function startStockfish(){
+  if(stockfishWorker||engineStarting||engineFailed)return;
+  engineStarting=true;
+  try{
+    stockfishWorker=new Worker("engine/stockfish-19-lite-single.js");
+    stockfishWorker.onmessage=(event)=>{
+      const msg=typeof event.data==="string"?event.data:(event.data&&event.data.text)||"";
+      if(msg==="uciok"){
+        stockfishWorker.postMessage("setoption name Threads value 1");
+        stockfishWorker.postMessage("isready");
+      }else if(msg==="readyok"){
+        engineReady=true;engineStarting=false;engineFailed=false;
+      }
+    };
+    stockfishWorker.onerror=(event)=>{
+      engineReady=false;engineStarting=false;engineFailed=true;
+      console.error("Stockfish worker failed to load. Check engine JS/WASM paths.",event);
+    };
+    stockfishWorker.postMessage("uci");
+  }catch(e){
+    stockfishWorker=null;engineReady=false;engineStarting=false;engineFailed=true;
+    console.error("Could not start Stockfish:",e);
+  }
+}
+function scoreToWhite(message,fen){
+  const m=message.match(/\bscore (cp|mate) (-?\d+)/);if(!m)return null;
+  const stm=fen.split(" ")[1], value=Number(m[2]);
+  if(m[1]==="mate"){
+    const white=stm==="w"?value:-value;
+    return white>0?10000-white:white<0?-10000-white:0;
+  }
+  const cp=value/100;return stm==="w"?cp:-cp;
+}
+function analyzeFen(fen,depth=12){
+  return new Promise((resolve,reject)=>{
+    if(!stockfishWorker||!engineReady){reject(new Error("Engine not ready"));return;}
+    let score=null,bestMove=null,done=false;
+    const baseHandler=stockfishWorker.onmessage;
+    const timeout=setTimeout(()=>{
+      if(done)return;done=true;stockfishWorker.onmessage=baseHandler;reject(new Error("Analysis timed out"));
+    },18000);
+    stockfishWorker.onmessage=(event)=>{
+      const msg=typeof event.data==="string"?event.data:(event.data&&event.data.text)||"";
+      if(msg.startsWith("info ")){const value=scoreToWhite(msg,fen);if(value!==null)score=value;}
+      if(msg.startsWith("bestmove")){
+        if(done)return;done=true;clearTimeout(timeout);
+        const match=msg.match(/^bestmove\s+(\S+)/);
+        bestMove=match&&match[1]!=="(none)"?match[1]:null;
+        stockfishWorker.onmessage=baseHandler;
+        resolve({score,bestMove});
+      }
+    };
+    stockfishWorker.postMessage("position fen "+fen);
+    stockfishWorker.postMessage("go depth "+depth);
+  });
+}
+function uciToSan(fen,uci){
+  if(!uci||uci.length<4)return null;
+  try{
+    const temp=new Chess(fen);
+    const move=temp.move({from:uci.slice(0,2),to:uci.slice(2,4),promotion:uci.length>4?uci[4]:"q"});
+    return move?{san:move.san,flags:move.flags,captured:move.captured||null,checkmate:temp.in_checkmate(),check:temp.in_check()}:null;
+  }catch(e){return null;}
+}
+function pieceName(piece){
+  return ({p:"pawn",n:"knight",b:"bishop",r:"rook",q:"queen",k:"king"})[piece]||"piece";
+}
+function makeExplanation(beforeResult,afterResult,moverColor,afterFen){
+  if(!beforeResult||!afterResult||beforeResult.score===null||afterResult.score===null){
+    return "Stockfish could not complete the evaluation. Please check that both engine files are installed correctly.";
+  }
+  const before=moverColor==="w"?beforeResult.score:-beforeResult.score;
+  const after=moverColor==="w"?afterResult.score:-afterResult.score;
+  const loss=before-after;
+  const reply=uciToSan(afterFen,afterResult.bestMove);
+  let reason="This reply creates a strong tactical or positional threat and leaves your position under pressure.";
+  if(reply){
+    if(reply.checkmate) reason="This move delivers checkmate, so the position is immediately lost.";
+    else if(reply.check) reason="This move gives check, forcing your king to respond instead of allowing you to carry out your plan.";
+    else if(reply.captured) reason="This move captures your " + pieceName(reply.captured) + ", winning material.";
+    else reason="This move is the engine's strongest reply. It creates a concrete threat and leaves your position at a disadvantage.";
+  }
+  const moveText=reply?"The opponent's strongest reply is " + reply.san + ". ":"Stockfish could not identify a legal reply to display. ";
+  let evaluationText;
+  if(loss>=5)evaluationText="The evaluation drops by about " + loss.toFixed(1) + " pawns, which is a decisive swing.";
+  else if(loss>=2)evaluationText="The evaluation drops by about " + loss.toFixed(1) + " pawns, a major disadvantage.";
+  else if(loss>=0.8)evaluationText="The evaluation drops by about " + loss.toFixed(1) + " pawns, giving the opponent a clear advantage.";
+  else if(loss>=0.3)evaluationText="The evaluation drops by about " + loss.toFixed(1) + " pawns, leaving you in a less comfortable position.";
+  else evaluationText="The engine finds only a small evaluation change, but this move misses the puzzle's best continuation.";
+  return moveText + reason + " " + evaluationText;
+}
+function restoreAfterWrongMove(delay=5500){
+  if(wrongMoveTimer)clearTimeout(wrongMoveTimer);
+  wrongMoveTimer=setTimeout(()=>{
+    if(!wrongMovePending)return;
+    game.undo();
+    lastMove=wrongMovePreviousLastMove;
+    wrongMovePending=false;
+    selected=null;legalTargets=[];
+    renderBoard();
+    setMessage("Try another move!");
+    wrongMoveTimer=null;
+  },delay);
+}
+let wrongMovePreviousLastMove=null;
+
+async function explainWrongMove(beforeFen,afterFen,moverColor){
+  if(!stockfishWorker&&!engineFailed)startStockfish();
+  setMessage("❌ Wrong move. Stockfish is starting / analyzing...","wrong");
+  const job=engineQueue.then(async()=>{
+    let tries=0;
+    while(!engineReady&&!engineFailed&&tries<100){
+      await new Promise(r=>setTimeout(r,200));tries++;
+    }
+    if(!engineReady)throw new Error("Stockfish did not become ready. Check JS and WASM files.");
+    const before=await analyzeFen(beforeFen,15);
+    const after=await analyzeFen(afterFen,15);
+    return makeExplanation(before,after,moverColor,afterFen);
+  });
+  engineQueue=job.catch(()=>{});
+  try{
+    const explanation=await job;
+    if(wrongMovePending){
+      setMessage("❌ WRONG MOVE! "+explanation,"wrong");
+      restoreAfterWrongMove(6500);
+    }
+  }catch(e){
+    console.error("Stockfish explanation error:",e);
+    if(wrongMovePending){
+      setMessage("❌ WRONG MOVE! Stockfish could not start. Check that stockfish-19-lite-single.js and stockfish-19-lite-single.wasm are present in the engine folder with the correct filenames.","wrong");
+      restoreAfterWrongMove(6500);
+    }
+  }
+}
+
+async function loadPuzzles(){
+  loadProgress();
+  try{
+    const response=await fetch("puzzles.json");if(!response.ok)throw new Error("Could not load puzzles.json");
+    puzzles=await response.json();if(!Array.isArray(puzzles)||!puzzles.length)throw new Error("Puzzle database is empty.");
+    currentIndex=Math.min(currentIndex,puzzles.length-1);updateStats();startPuzzle(currentIndex);startStockfish();
+  }catch(error){
+    setMessage("Could not load puzzles.json. Check that it is in the same folder as arena.html.","wrong");
+    document.getElementById("gameStatus").textContent="Database Error";
+  }
+}
+function startPuzzle(index){
+  if(!puzzles.length)return;
+  if(wrongMoveTimer){clearTimeout(wrongMoveTimer);wrongMoveTimer=null;}
+  currentIndex=(index+puzzles.length)%puzzles.length;currentPuzzle=puzzles[currentIndex];
+  puzzleMoveIndex=0;selected=null;legalTargets=[];lastMove=null;hintLevel=0;hintCount=0;hintSquare=null;
+  opponentThinking=false;puzzleSolved=false;wrongMovePending=false;
+  try{
+    game.load(currentPuzzle.fen);const moves=currentPuzzle.moves;
+    if(!moves||moves.length<2)throw new Error("Invalid puzzle moves.");
+    const setupMove=applyUci(moves[0]);if(!setupMove)throw new Error("Could not apply setup move.");
+    lastMove={from:setupMove.from,to:setupMove.to};puzzleMoveIndex=1;flipped=game.turn()==="b";
+    document.getElementById("puzzleNumber").textContent="Puzzle "+(currentIndex+1)+" / "+puzzles.length;
+    document.getElementById("rating").textContent="Rating: "+currentPuzzle.rating;
+    document.getElementById("themes").textContent="Themes: "+(currentPuzzle.themes||[]).join(", ");
+    document.getElementById("gameStatus").textContent="In Progress";
+    setMessage("Find the best move!");renderBoard();saveProgress();
+  }catch(error){setMessage("Puzzle error: "+error.message,"wrong");document.getElementById("gameStatus").textContent="Puzzle Error";}
+}
+function renderBoard(){
+  boardElement.innerHTML="";const position=game.board();
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const row=flipped?7-r:r,col=flipped?7-c:c;
+    const square=document.createElement("div");square.className="square "+((r+c)%2===0?"light":"dark");
+    const squareName="abcdefgh"[col]+(8-row),piece=position[row][col];
+    if(selected===squareName)square.classList.add("selected");
+    if(lastMove&&(lastMove.from===squareName||lastMove.to===squareName))square.classList.add("last-move");
+    if(hintSquare===squareName)square.classList.add("hint");
+    if(legalTargets.includes(squareName))square.classList.add(piece?"capture":"possible");
+    if(piece){const el=document.createElement("span");el.textContent=symbols[piece.color+piece.type];el.className="piece "+(piece.color==="w"?"white-piece":"black-piece");square.appendChild(el);}
+    /* Show rank on the left edge and file on the bottom edge, inside the squares. */
+    if(c===0){const rankLabel=document.createElement("span");rankLabel.className="square-coordinate rank";rankLabel.textContent=String(8-row);square.appendChild(rankLabel);}
+    if(r===7){const fileLabel=document.createElement("span");fileLabel.className="square-coordinate file";fileLabel.textContent="abcdefgh"[col];square.appendChild(fileLabel);}
+    square.addEventListener("click",()=>handleClick(squareName));boardElement.appendChild(square);
+  }
+  updateInfo();
+}
+function handleClick(square){
+  if(puzzleSolved||opponentThinking||wrongMovePending||!currentPuzzle)return;
+  const piece=game.get(square);
+  if(selected){
+    const expected=currentPuzzle.moves[puzzleMoveIndex];if(!expected)return;
+    const expectedFrom=expected.substring(0,2),expectedTo=expected.substring(2,4);
+    if(selected===expectedFrom&&square===expectedTo){
+      const move=game.move({from:selected,to:square,promotion:expected.length>4?expected[4]:"q"});
+      if(move){lastMove={from:move.from,to:move.to};selected=null;legalTargets=[];hintSquare=null;puzzleMoveIndex++;renderBoard();
+        if(puzzleMoveIndex>=currentPuzzle.moves.length)finishPuzzle();
+        else{opponentThinking=true;setMessage("Correct move! Opponent is thinking...");setTimeout(playOpponentMove,600);}return;
+      }
+    }
+    const beforeFen=game.fen(),moverColor=game.turn();
+    const wrongMove=game.move({from:selected,to:square,promotion:"q"});
+    if(wrongMove){
+      const afterFen=game.fen();
+      wrongMovePreviousLastMove=lastMove?{...lastMove}:null;
+      lastMove={from:wrongMove.from,to:wrongMove.to};selected=null;legalTargets=[];hintSquare=null;wrongMovePending=true;
+      renderBoard();explainWrongMove(beforeFen,afterFen,moverColor);
+      return;
+    }
+    if(piece&&piece.color===game.turn()){selectPiece(square);return;}
+    selected=null;legalTargets=[];renderBoard();setMessage("Illegal move. Choose a highlighted square.","wrong");return;
+  }
+  if(piece&&piece.color===game.turn())selectPiece(square);
+}
+function selectPiece(square){selected=square;legalTargets=game.moves({square,verbose:true}).map(move=>move.to);renderBoard();}
+function playOpponentMove(){
+  if(puzzleSolved||!currentPuzzle)return;
+  const move=applyUci(currentPuzzle.moves[puzzleMoveIndex]);opponentThinking=false;
+  if(!move){setMessage("Puzzle move error. Please restart.","wrong");return;}
+  lastMove={from:move.from,to:move.to};puzzleMoveIndex++;renderBoard();
+  if(puzzleMoveIndex>=currentPuzzle.moves.length)finishPuzzle();else setMessage("Your turn. Find the next correct move!");
+}
+function finishPuzzle(){
+  puzzleSolved=true;opponentThinking=false;wrongMovePending=false;
+  const id=currentPuzzle.id;if(!solvedIds.includes(id)){solvedIds.push(id);if(hintCount===0)noHintIds.push(id);saveProgress();}
+  document.getElementById("gameStatus").textContent="Puzzle Solved!";
+  setMessage(hintCount===0?"🍅 PUZZLE SOLVED! Excellent work — no hints used!":"🍅 PUZZLE SOLVED! Great job!","success");updateStats();
+}
+function getHint(){
+  if(puzzleSolved||opponentThinking||wrongMovePending||!currentPuzzle)return;
+  const expected=currentPuzzle.moves[puzzleMoveIndex];if(!expected)return;
+  if(hintLevel<2){hintLevel++;hintCount++;totalHints++;}
+  const from=expected.substring(0,2),to=expected.substring(2,4);
+  if(hintLevel===1){hintSquare=from;setMessage("Hint 1: Look at the highlighted starting square.");}
+  else{hintSquare=to;setMessage("Hint 2: Move the piece to the highlighted square.");}
+  saveProgress();updateStats();renderBoard();
+}
+function previousPuzzle(){if(!puzzles.length)return;startPuzzle((currentIndex-1+puzzles.length)%puzzles.length);}
+function nextPuzzle(){if(!puzzles.length)return;startPuzzle((currentIndex+1)%puzzles.length);}
+function restartPuzzle(){if(!puzzles.length)return;startPuzzle(currentIndex);}
+function flipBoard(){flipped=!flipped;renderBoard();}
+function updateInfo(){
+  document.getElementById("turn").textContent=game.turn()==="w"?"White":"Black";
+  if(puzzleSolved)document.getElementById("gameStatus").textContent="Puzzle Solved!";
+  else if(opponentThinking)document.getElementById("gameStatus").textContent="Opponent Moving";
+  else document.getElementById("gameStatus").textContent=game.in_check()?"Check":"In Progress";
+}
+loadPuzzles();
+</script>
+</body>
+</html>
