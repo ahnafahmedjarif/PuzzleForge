@@ -21,7 +21,6 @@
 }
 
 *{box-sizing:border-box}
-
 html{scroll-behavior:smooth}
 
 body{
@@ -212,9 +211,7 @@ body{
   color:#111;
 }
 
-.auth-btn:hover{
-  filter:brightness(1.12);
-}
+.auth-btn:hover{filter:brightness(1.12)}
 
 .auth-btn:disabled{
   opacity:.6;
@@ -240,9 +237,7 @@ body{
   padding:18px;
 }
 
-.auth-overlay.open{
-  display:grid;
-}
+.auth-overlay.open{display:grid}
 
 .auth-dialog{
   width:min(100%,420px);
@@ -299,9 +294,7 @@ body{
 }
 
 @media(max-width:620px){
-  .app{
-    display:block;
-  }
+  .app{display:block}
 
   .sidebar{
     width:auto;
@@ -334,30 +327,19 @@ body{
     height:16px;
   }
 
-  .main{
-    padding:25px 15px;
-  }
+  .main{padding:25px 15px}
 
   .topline{
     align-items:flex-start;
     flex-wrap:wrap;
   }
 
-  .auth-actions{
-    justify-content:flex-start;
-  }
+  .auth-actions{justify-content:flex-start}
+  .auth-user{max-width:130px}
 
-  .auth-user{
-    max-width:130px;
-  }
+  .home-links{grid-template-columns:1fr}
 
-  .home-links{
-    grid-template-columns:1fr;
-  }
-
-  .session-card{
-    min-height:125px;
-  }
+  .session-card{min-height:125px}
 }
 </style>
 </head>
@@ -381,8 +363,18 @@ body{
       <span>PuzzleForge</span>
     </div>
 
-    <!-- Navigation -->
+    <!-- Navigation: requested order -->
     <nav class="nav">
+
+      <a class="active" href="dashboard.html">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="8" height="8" rx="1.5"/>
+          <rect x="14" y="3" width="7" height="5" rx="1.5"/>
+          <rect x="14" y="11" width="7" height="10" rx="1.5"/>
+          <rect x="3" y="14" width="8" height="7" rx="1.5"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
 
       <a href="puzzle-arena.html">
         <svg viewBox="0 0 24 24">
@@ -394,9 +386,9 @@ body{
 
       <a href="woodpecker.html">
         <svg viewBox="0 0 24 24">
-          <path d="M12 3v18M5 7l7-4 7 4M5 17l7 4 7-4"/>
-          <path d="M5 7v10M19 7v10"/>
-          <circle cx="12" cy="12" r="2"/>
+          <path d="M4 19V5M4 19h17"/>
+          <path d="m7 15 3-4 3 2 4-7"/>
+          <path d="m15 6 2 0 0 2"/>
         </svg>
         <span>Woodpecker</span>
       </a>
@@ -456,29 +448,35 @@ body{
       </div>
     </div>
 
-    <!-- Homepage buttons in requested order -->
+    <!-- Homepage buttons: requested order -->
     <section class="home-links">
 
+      <a href="dashboard.html" class="session-card">
+        <h3>01. DASHBOARD</h3>
+        <p>View your personal training dashboard.</p>
+        <span>Open Dashboard →</span>
+      </a>
+
       <a href="puzzle-arena.html" class="session-card">
-        <h3>01. PUZZLE CONTRIVING</h3>
+        <h3>02. PUZZLE CONTRIVING</h3>
         <p>Practice chess puzzles and improve your tactical skills.</p>
         <span>Start Training →</span>
       </a>
 
       <a href="woodpecker.html" class="session-card">
-        <h3>02. WOODPECKER</h3>
-        <p>Repeat tactical puzzles and improve your solving speed.</p>
-        <span>Start Woodpecker Training →</span>
+        <h3>03. WOODPECKER</h3>
+        <p>Practice your Woodpecker training cycle and sharpen your tactical memory.</p>
+        <span>Open Woodpecker →</span>
       </a>
 
       <a href="stats.html" class="session-card">
-        <h3>03. STATS</h3>
+        <h3>04. STATS</h3>
         <p>Explore your chess training statistics and progress.</p>
         <span>View Stats →</span>
       </a>
 
       <a href="library.html" class="session-card">
-        <h3>04. LIBRARY</h3>
+        <h3>05. LIBRARY</h3>
         <p>Browse and explore your puzzle collection.</p>
         <span>Open Library →</span>
       </a>
