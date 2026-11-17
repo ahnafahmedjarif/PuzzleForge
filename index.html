@@ -1018,3 +1018,613 @@ body{
       history.length;
 
     const totalPuzzles = history.reduce(function(total,round){
+      return total + Math.max(0,Number(round.count)||0);
+    },0);
+
+    document.getElementById("woodPuzzles").textContent =
+      totalPuzzles;
+
+    const validTimes = history
+      .map(round=>Number(round.milliseconds))
+      .filter(time=>Number.isFinite(time)&&time>0);
+
+    const bestTime = validTimes.length
+      ? Math.min(...validTimes)
+      : null;
+
+    document.getElementById("woodBest").textContent =
+      bestTime===null ? "—" : formatTime(bestTime);
+
+    const validMistakes = history
+      .map(round=>Number(round.mistakes))
+      .filter(value=>Number.isFinite(value)&&value>=0);
+
+    const fewestMistakes = validMistakes.length
+      ? Math.min(...validMistakes)
+      : null;
+
+    document.getElementById("woodMistakes").textContent =
+      fewestMistakes===null ? "—" : fewestMistakes;
+  }
+
+
+  // SAVE PROFILE
+
+  document.getElementById("saveProfile")
+    .addEventListener("click",function(){
+
+      const fullName =
+        document.getElementById("profileFullName").value.trim();
+
+      let username =
+        document.getElementById("profileUsername").value.trim();
+
+      username = username.replace(/^@+/,"");
+
+      const message =
+        document.getElementById("profileMessage");
+
+      if(!fullName || !username){
+        message.style.color="#e5a09a";
+        message.textContent=
+          "Please enter both your name and username.";
+        return;
+      }
+
+      const profile = {
+        fullName:fullName,
+        username:username
+      };
+
+      try{
+        localStorage.setItem(
+          PROFILE_KEY,
+          JSON.stringify(profile)
+        );
+
+        message.style.color="#a9c99b";
+        message.textContent="Profile saved successfully!";
+
+      }catch(e){
+
+        message.style.color="#e5a09a";
+        message.textContent=
+          "Could not save profile. Check browser storage.";
+      }
+    });
+
+
+  // PROFILE PHOTO
+
+  const avatarImage =
+    document.getElementById("profileAvatar");
+
+  const avatarInput =
+    document.getElementById("avatarInput");
+
+  const removeAvatar =
+    document.getElementById("removeAvatar");
+
+  const defaultAvatar =
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2310141d'/%3E%3Ccircle cx='50' cy='36' r='18' fill='%239299a8'/%3E%3Cpath d='M15 100c2-25 16-37 35-37s33 12 35 37' fill='%239299a8'/%3E%3C/svg%3E";
+
+  function loadAvatar(){
+
+    try{
+      const saved = localStorage.getItem(AVATAR_KEY);
+      avatarImage.src = saved || defaultAvatar;
+    }catch(e){
+      avatarImage.src = defaultAvatar;
+    }
+  }
+
+  avatarInput.addEventListener("change",function(){
+
+    const file = this.files && this.files[0];
+
+    if(!file)return;
+
+    if(!file.type.startsWith("image/")){
+      alert("Please select a valid image.");
+      this.value="";
+      return;
+    }
+
+    if(file.size>10*1024*1024){
+      alert("Please choose an image smaller than 10 MB.");
+      this.value="";
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(event){
+
+      const image = new Image();
+
+      image.onload = function(){
+
+        const maxSize = 500;
+
+        const scale = Math.min(
+          maxSize/image.width,
+          maxSize/image.height,
+          1
+        );
+
+        const width = Math.max(1,Math.round(image.width*scale));
+        const height = Math.max(1,Math.round(image.height*scale));
+
+        const canvas = document.createElement("canvas");
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext("2d");
+
+        context.drawImage(image,0,0,width,height);
+
+        const compressed = canvas.toDataURL(
+          "image/jpeg",
+          0.78
+        );
+
+        try{
+
+          localStorage.setItem(
+            AVATAR_KEY,
+            compressed
+          );
+
+          avatarImage.src = compressed;
+
+          document.getElementById("profileMessage").textContent =
+            "Profile photo updated!";
+
+        }catch(error){
+
+          alert(
+            "Could not save this photo. Try a smaller image."
+          );
+        }
+      };
+
+      image.onerror = function(){
+        alert("Could not read this image.");
+        avatarInput.value="";
+      };
+
+      image.src = event.target.result;
+    };
+
+    reader.onerror = function(){
+      alert("Could not read the selected file.");
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+
+  removeAvatar.addEventListener("click",function(){
+
+    try{
+      localStorage.removeItem(AVATAR_KEY);
+    }catch(e){}
+
+    avatarImage.src = defaultAvatar;
+    avatarInput.value="";
+
+    document.getElementById("profileMessage").textContent =
+      "Profile photo removed.";
+  });
+
+
+  // TRAINING HISTORY
+
+  function renderTrainingHistory(){
+
+    const container =
+      document.getElementById("trainingHistoryList");
+
+    const progress = readProgress();
+    const wood = readStorage(WOOD_KEY);
+
+    const daily =
+      progress.dailySolved && typeof progress.dailySolved==="object"
+        ? progress.dailySolved
+        : {};
+
+    const history =
+      Array.isArray(wood.history)
+        ? wood.history
+        : [];
+
+    const records = [];
+
+
+    // Puzzle Contriving records
+
+    Object.keys(daily).forEach(date=>{
+
+      const count = Math.max(0,Number(daily[date])||0);
+
+      if(count>0){
+
+        records.push({
+          date:date,
+          type:"Puzzle Contriving",
+          detail:count+" puzzles completed",
+          sortDate:date
+        });
+      }
+    });
+
+
+    // Woodpecker records
+
+    history.forEach(round=>{
+
+      const validDate = round.date
+        ? new Date(round.date)
+        : null;
+
+      const dateLabel =
+        validDate && !isNaN(validDate.getTime())
+          ? validDate.toLocaleDateString()
+          : "Date unavailable";
+
+      records.push({
+
+        date:dateLabel,
+
+        type:"Woodpecker Round",
+
+        detail:
+          (Number(round.count)||0)+" puzzles · "+
+          (Number(round.mistakes)||0)+" mistakes · "+
+          (round.time||"Time unavailable"),
+
+        sortDate:
+          validDate && !isNaN(validDate.getTime())
+            ? validDate.getTime()
+            : 0
+      });
+    });
+
+
+    records.sort((a,b)=>{
+
+      const timeA = typeof a.sortDate==="number"
+        ? a.sortDate
+        : new Date(a.sortDate).getTime();
+
+      const timeB = typeof b.sortDate==="number"
+        ? b.sortDate
+        : new Date(b.sortDate).getTime();
+
+      return timeB-timeA;
+    });
+
+
+    container.replaceChildren();
+
+    if(!records.length){
+
+      const empty = document.createElement("p");
+      empty.textContent="No training records yet.";
+      container.appendChild(empty);
+      return;
+    }
+
+
+    records.slice(0,15).forEach(record=>{
+
+      const item = document.createElement("div");
+      item.className="history-item";
+
+      const left = document.createElement("div");
+
+      const title = document.createElement("strong");
+      title.textContent=record.type;
+
+      const detail = document.createElement("div");
+      detail.className="history-detail";
+      detail.textContent=record.detail;
+
+      left.append(title,detail);
+
+      const date = document.createElement("span");
+      date.textContent=record.date;
+
+      item.append(left,date);
+
+      container.appendChild(item);
+    });
+  }
+
+
+  // DAILY PERFORMANCE GRAPH
+
+  function renderPerformance(){
+
+    const progress = readProgress();
+
+    const daily =
+      progress.dailySolved && typeof progress.dailySolved==="object"
+        ? progress.dailySolved
+        : {};
+
+    const chart =
+      document.getElementById("performanceChart");
+
+    chart.replaceChildren();
+
+    const days = [];
+
+    for(let offset=13;offset>=0;offset--){
+
+      const date = new Date();
+
+      date.setHours(0,0,0,0);
+      date.setDate(date.getDate()-offset);
+
+      days.push({
+        date:date,
+        count:Math.max(
+          0,
+          Number(daily[dateKey(date)])||0
+        )
+      });
+    }
+
+    const max = Math.max(
+      1,
+      ...days.map(day=>day.count)
+    );
+
+
+    days.forEach(day=>{
+
+      const column = document.createElement("div");
+      column.className="performance-column";
+
+      const value = document.createElement("strong");
+      value.textContent=day.count;
+
+      const bar = document.createElement("div");
+      bar.className="performance-bar";
+
+      bar.style.height =
+        (day.count?Math.max(4,day.count/max*100):2)+"%";
+
+      const label = document.createElement("small");
+
+      label.textContent =
+        day.date.getDate()+"/"+(day.date.getMonth()+1);
+
+      column.append(value,bar,label);
+      chart.appendChild(column);
+    });
+
+
+    // WOODPECKER TIME PROGRESS
+
+    const wood = readStorage(WOOD_KEY);
+
+    const history =
+      Array.isArray(wood.history)
+        ? wood.history
+        : [];
+
+    const timeChart =
+      document.getElementById("woodPerformanceChart");
+
+    timeChart.replaceChildren();
+
+    const recent = history
+      .filter(round=>
+        Number.isFinite(Number(round.milliseconds)) &&
+        Number(round.milliseconds)>0
+      )
+      .slice(-10);
+
+    if(!recent.length){
+
+      const empty = document.createElement("p");
+
+      empty.textContent =
+        "Complete a Woodpecker round to see your time progress.";
+
+      timeChart.appendChild(empty);
+      return;
+    }
+
+    const times = recent.map(round=>Number(round.milliseconds));
+
+    const slowest = Math.max(...times,1);
+
+    recent.forEach((round,index)=>{
+
+      const column = document.createElement("div");
+      column.className="performance-column";
+
+      const value = document.createElement("strong");
+      value.textContent=round.time || formatTime(Number(round.milliseconds));
+
+      const bar = document.createElement("div");
+      bar.className="performance-bar";
+
+      bar.style.height =
+        Math.max(
+          5,
+          Number(round.milliseconds)/slowest*100
+        )+"%";
+
+      const label = document.createElement("small");
+      label.textContent="R"+(index+1);
+
+      column.append(value,bar,label);
+      timeChart.appendChild(column);
+    });
+  }
+
+
+  // ORIGINAL SEVEN-DAY DASHBOARD CHART
+
+  function render(){
+
+    const data = readProgress();
+
+    const solved =
+      Array.isArray(data.solvedIds)
+        ? data.solvedIds.length
+        : 0;
+
+    const noHint =
+      Array.isArray(data.noHintIds)
+        ? data.noHintIds.length
+        : 0;
+
+    const attempts = Math.max(
+      0,
+      Number(data.totalAttempts)||0
+    );
+
+    const correct = Math.max(
+      0,
+      Number(data.correctMoves)||0
+    );
+
+    document.getElementById("dashSolved").textContent =
+      solved;
+
+    document.getElementById("dashNoHint").textContent =
+      noHint;
+
+    document.getElementById("dashAccuracy").textContent =
+      (attempts?Math.round(correct/attempts*100):0)+"%";
+
+    document.getElementById("dashStreak").textContent =
+      currentStreak(data.solvedDates);
+
+
+    const chart =
+      document.getElementById("progressChart");
+
+    chart.replaceChildren();
+
+    const counts =
+      data.dailySolved && typeof data.dailySolved==="object"
+        ? data.dailySolved
+        : {};
+
+    const days = [];
+
+    for(let offset=6;offset>=0;offset--){
+
+      const date = new Date();
+
+      date.setHours(0,0,0,0);
+      date.setDate(date.getDate()-offset);
+
+      days.push({
+        date:date,
+        count:Math.max(
+          0,
+          Number(counts[dateKey(date)])||0
+        )
+      });
+    }
+
+    const max = Math.max(
+      1,
+      ...days.map(day=>day.count)
+    );
+
+    days.forEach(day=>{
+
+      const column = document.createElement("div");
+      column.className="chart-day";
+
+      const value = document.createElement("strong");
+      value.textContent=day.count;
+
+      const track = document.createElement("div");
+      track.className="chart-bar-track";
+
+      const bar = document.createElement("div");
+      bar.className="chart-bar";
+
+      bar.style.height =
+        (day.count?Math.max(5,day.count/max*100):2)+"%";
+
+      bar.title =
+        day.count+" puzzle"+
+        (day.count===1?"":"s")+" solved";
+
+      track.appendChild(bar);
+
+      const label = document.createElement("small");
+
+      label.textContent =
+        day.date.toLocaleDateString(
+          undefined,
+          {weekday:"short"}
+        );
+
+      column.append(value,track,label);
+      chart.appendChild(column);
+    });
+
+    renderProfile();
+  }
+
+
+  // REFRESH ALL NEW FEATURES
+
+  function renderNewFeatures(){
+
+    loadAvatar();
+    renderTrainingHistory();
+    renderPerformance();
+  }
+
+
+  // INITIAL RENDER
+
+  render();
+  renderNewFeatures();
+
+
+  // REFRESH WHEN DATA CHANGES IN OTHER PUZZLEFORGE PAGES
+
+  window.addEventListener("storage",function(event){
+
+    if(
+      event.key===KEY ||
+      event.key===PROFILE_KEY ||
+      event.key===WOOD_KEY ||
+      event.key===AVATAR_KEY ||
+      event.key===null
+    ){
+
+      render();
+      renderNewFeatures();
+    }
+  });
+
+
+  // REFRESH WHEN RETURNING TO DASHBOARD
+
+  window.addEventListener("focus",function(){
+
+    render();
+    renderNewFeatures();
+  });
+
+
+})();
+</script>
+
+</body>
+</html>
