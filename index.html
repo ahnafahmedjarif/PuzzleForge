@@ -154,7 +154,6 @@ body{
 .avatar-area{
   display:flex;
   align-items:center;
-  gap:16px;
   margin:18px 0;
 }
 
@@ -162,37 +161,22 @@ body{
   width:88px;
   height:88px;
   border-radius:50%;
-  object-fit:cover;
   border:2px solid var(--gold);
   background:#10141d;
+  display:grid;
+  place-items:center;
   flex:none;
 }
 
-.avatar-upload{
-  display:grid;
-  gap:8px;
-  min-width:0;
+.profile-avatar svg{
+  width:43px;
+  height:43px;
+  fill:none;
+  stroke:#e5e7eb;
+  stroke-width:1.5;
+  stroke-linecap:round;
+  stroke-linejoin:round;
 }
-
-.avatar-upload strong{font-size:13px}
-
-.avatar-upload input{
-  max-width:220px;
-  color:var(--muted);
-  font-size:12px;
-}
-
-.avatar-upload button{
-  width:max-content;
-  background:#252c39;
-  color:white;
-  border:1px solid var(--line);
-  border-radius:7px;
-  padding:8px 12px;
-  cursor:pointer;
-}
-
-.avatar-upload button:hover{border-color:var(--gold)}
 
 .profile-fields{display:grid;gap:13px}
 
@@ -634,32 +618,14 @@ body{
 
       <div>
 
+        <!-- DEFAULT GENERIC USER ICON -->
         <div class="avatar-area">
-
-          <img
-            id="profileAvatar"
-            class="profile-avatar"
-            alt="Profile photo"
-          >
-
-          <div class="avatar-upload">
-            <strong>Profile Photo</strong>
-
-            <input
-              type="file"
-              id="avatarInput"
-              accept="image/*"
-            >
-
-            <button type="button" id="removeAvatar">
-              Remove Photo
-            </button>
-
-            <span class="profile-note">
-              Upload your own photo.
-            </span>
+          <div class="profile-avatar" role="img" aria-label="Default user icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+            </svg>
           </div>
-
         </div>
 
         <div class="profile-fields">
@@ -917,7 +883,6 @@ body{
   const KEY = "puzzleforge_progress_v1";
   const PROFILE_KEY = "puzzleforge_profile_v1";
   const WOOD_KEY = "puzzleforge_woodpecker_v1";
-  const AVATAR_KEY = "puzzleforge_avatar_v1";
 
 
   // STORAGE HELPERS
@@ -1092,131 +1057,6 @@ body{
           "Could not save profile. Check browser storage.";
       }
     });
-
-
-  // PROFILE PHOTO
-
-  const avatarImage =
-    document.getElementById("profileAvatar");
-
-  const avatarInput =
-    document.getElementById("avatarInput");
-
-  const removeAvatar =
-    document.getElementById("removeAvatar");
-
-  const defaultAvatar =
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2310141d'/%3E%3Ccircle cx='50' cy='36' r='18' fill='%239299a8'/%3E%3Cpath d='M15 100c2-25 16-37 35-37s33 12 35 37' fill='%239299a8'/%3E%3C/svg%3E";
-
-  function loadAvatar(){
-
-    try{
-      const saved = localStorage.getItem(AVATAR_KEY);
-      avatarImage.src = saved || defaultAvatar;
-    }catch(e){
-      avatarImage.src = defaultAvatar;
-    }
-  }
-
-  avatarInput.addEventListener("change",function(){
-
-    const file = this.files && this.files[0];
-
-    if(!file)return;
-
-    if(!file.type.startsWith("image/")){
-      alert("Please select a valid image.");
-      this.value="";
-      return;
-    }
-
-    if(file.size>10*1024*1024){
-      alert("Please choose an image smaller than 10 MB.");
-      this.value="";
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = function(event){
-
-      const image = new Image();
-
-      image.onload = function(){
-
-        const maxSize = 500;
-
-        const scale = Math.min(
-          maxSize/image.width,
-          maxSize/image.height,
-          1
-        );
-
-        const width = Math.max(1,Math.round(image.width*scale));
-        const height = Math.max(1,Math.round(image.height*scale));
-
-        const canvas = document.createElement("canvas");
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const context = canvas.getContext("2d");
-
-        context.drawImage(image,0,0,width,height);
-
-        const compressed = canvas.toDataURL(
-          "image/jpeg",
-          0.78
-        );
-
-        try{
-
-          localStorage.setItem(
-            AVATAR_KEY,
-            compressed
-          );
-
-          avatarImage.src = compressed;
-
-          document.getElementById("profileMessage").textContent =
-            "Profile photo updated!";
-
-        }catch(error){
-
-          alert(
-            "Could not save this photo. Try a smaller image."
-          );
-        }
-      };
-
-      image.onerror = function(){
-        alert("Could not read this image.");
-        avatarInput.value="";
-      };
-
-      image.src = event.target.result;
-    };
-
-    reader.onerror = function(){
-      alert("Could not read the selected file.");
-    };
-
-    reader.readAsDataURL(file);
-  });
-
-
-  removeAvatar.addEventListener("click",function(){
-
-    try{
-      localStorage.removeItem(AVATAR_KEY);
-    }catch(e){}
-
-    avatarImage.src = defaultAvatar;
-    avatarInput.value="";
-
-    document.getElementById("profileMessage").textContent =
-      "Profile photo removed.";
-  });
 
 
   // TRAINING HISTORY
@@ -1580,11 +1420,9 @@ body{
   }
 
 
-  // REFRESH ALL NEW FEATURES
+  // REFRESH ALL FEATURES
 
   function renderNewFeatures(){
-
-    loadAvatar();
     renderTrainingHistory();
     renderPerformance();
   }
@@ -1604,7 +1442,6 @@ body{
       event.key===KEY ||
       event.key===PROFILE_KEY ||
       event.key===WOOD_KEY ||
-      event.key===AVATAR_KEY ||
       event.key===null
     ){
 
