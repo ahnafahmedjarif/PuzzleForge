@@ -76,19 +76,27 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .square.selected{background:#e6d45b!important}
 .square.last-move{background:#c9c45b}
 .square.hint{background:#e6bd42}
+
+/* Solid piece style — same as Puzzle Arena */
 .piece{
   font-family:"DejaVu Sans","Segoe UI Symbol","Noto Sans Symbols 2",sans-serif;
-  font-size:clamp(34px,6vw,58px);font-weight:400;line-height:1;
+  font-size:clamp(34px,6vw,58px);
+  font-weight:400;
+  line-height:1;
   display:flex;align-items:center;justify-content:center;
   user-select:none;pointer-events:none;position:relative;z-index:2;
 }
 .white-piece{
-  color:#fff;-webkit-text-stroke:.7px #333;
+  color:#fff;
+  -webkit-text-fill-color:#fff;
+  -webkit-text-stroke:.8px #333;
   text-shadow:0 2px 2px rgba(0,0,0,.28);
   filter:drop-shadow(0 1px 1px rgba(0,0,0,.2));
 }
 .black-piece{
-  color:#222;-webkit-text-stroke:.6px #eee;
+  color:#222;
+  -webkit-text-fill-color:#222;
+  -webkit-text-stroke:.6px #eee;
   text-shadow:0 2px 2px rgba(0,0,0,.25);
   filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));
 }
@@ -245,9 +253,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
 const $=id=>document.getElementById(id);
 const STORE="puzzleforge_woodpecker_v1";
 
-/* Same piece symbol mapping as Puzzle Contriving */
+/*
+  Use filled chess glyphs for both sides.
+  CSS applies white/black colors separately.
+*/
 const symbols={
-  wk:"♔",wq:"♕",wr:"♖",wb:"♗",wn:"♘",wp:"♙",
+  wk:"♚",wq:"♛",wr:"♜",wb:"♝",wn:"♞",wp:"♟",
   bk:"♚",bq:"♛",br:"♜",bb:"♝",bn:"♞",bp:"♟"
 };
 
@@ -273,7 +284,6 @@ let roundStart=0;
 let roundHistory=[];
 let waiting=false;
 
-/* Lifetime Woodpecker data */
 let lifetimeStats={
   rounds:0,
   puzzles:0,
@@ -450,7 +460,6 @@ function saveHistory(){
       puzzleRoundCounts:puzzleRoundCounts
     }));
 
-    // Schedule Firestore sync for signed-in users.
     if(window.PF&&typeof PF.scheduleSync==="function"){
       PF.scheduleSync();
     }
@@ -511,7 +520,6 @@ async function loadPuzzles(){
     const combined=data.map(normalizePuzzle).filter(Boolean);
     const existingIds=new Set(combined.map(p=>String(p.id)));
 
-    // Load public community puzzles from Firestore.
     if(window.PF){
       try{
         if(PF.authReady){
@@ -529,10 +537,7 @@ async function loadPuzzles(){
           communityPuzzles.forEach(raw=>{
             const puzzle=normalizePuzzle(raw);
 
-            if(
-              puzzle&&
-              !existingIds.has(String(puzzle.id))
-            ){
+            if(puzzle&&!existingIds.has(String(puzzle.id))){
               combined.push(puzzle);
               existingIds.add(String(puzzle.id));
             }
@@ -540,10 +545,7 @@ async function loadPuzzles(){
         }
 
       }catch(cloudError){
-        console.warn(
-          "Could not load community puzzles:",
-          cloudError
-        );
+        console.warn("Could not load community puzzles:",cloudError);
       }
     }
 
@@ -925,7 +927,6 @@ function finishRound(){
     lifetimeStats.fewestMistakes=roundMistakes;
   }
 
-  // Count each puzzle at most once per completed round.
   puzzleIds.forEach(id=>{
     puzzleRoundCounts[id]=(puzzleRoundCounts[id]||0)+1;
   });
@@ -984,7 +985,6 @@ $("restartBtn").addEventListener("click",restartPuzzle);
 
 async function initializeWoodpecker(){
 
-  // Wait for Firebase authentication and initial cloud sync.
   if(window.PF){
     try{
       if(PF.authReady){
@@ -1001,7 +1001,7 @@ async function initializeWoodpecker(){
     updateAccountStatus(null);
   }
 
-  // Read history after cloud initialization so merged data is available.
+  // Read history after Firebase initial sync.
   readHistory();
   renderHistory();
 
