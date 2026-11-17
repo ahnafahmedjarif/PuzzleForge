@@ -43,29 +43,15 @@ body{
   padding:28px 16px;
 }
 
+/* Dashboard-matching brand */
 .brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
+  display:block;
   padding:0 8px 30px;
   font-size:20px;
-  font-weight:700;
-  letter-spacing:-.5px;
-}
-
-.brand-mark{
-  width:34px;
-  height:34px;
-  display:grid;
-  place-items:center;
-  border:1px solid #444b58;
-  border-radius:9px;
-  color:#fff;
-}
-
-.brand-mark svg{
-  width:21px;
-  height:21px;
+  font-weight:750;
+  letter-spacing:normal;
+  text-decoration:none;
+  color:white;
 }
 
 .nav{
@@ -351,17 +337,8 @@ body{
   <!-- Sidebar -->
   <aside class="sidebar" aria-label="Main navigation">
 
-    <div class="brand">
-      <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.7"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 20h8M9 17h6l1 3H8l1-3Z"/>
-          <path d="M8 17c.3-2.1 1.4-3.4 3-4.2V10H9V7h2V4h2v3h2v3h-2v2.8c1.6.8 2.7 2.1 3 4.2"/>
-        </svg>
-      </span>
-      <span>PuzzleForge</span>
-    </div>
+    <!-- Dashboard-matching logo -->
+    <a class="brand" href="index.html">♟ PuzzleForge</a>
 
     <!-- Navigation: requested order -->
     <nav class="nav">
