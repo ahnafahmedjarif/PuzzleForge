@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PuzzleForge | Woodpecker Training</title>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <style>
@@ -25,6 +26,7 @@ header{
 }
 header a{color:var(--accent);text-decoration:none;font-weight:700}
 .brand{font-weight:800;font-size:19px}
+.account-info{font-size:12px;color:var(--muted);margin-top:5px}
 main{max-width:1050px;margin:24px auto;padding:0 16px}
 .intro{margin-bottom:18px}
 .intro h1{margin:0 0 6px;font-size:clamp(25px,5vw,34px)}
@@ -57,8 +59,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
   gap:18px;align-items:start;
 }
 .board-wrap{width:min(100%,560px);margin:auto}
-
-/* Board layout */
 .board{
   width:100%;aspect-ratio:1/1;display:grid;
   grid-template-columns:repeat(8,minmax(0,1fr));
@@ -76,8 +76,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .square.selected{background:#e6d45b!important}
 .square.last-move{background:#c9c45b}
 .square.hint{background:#e6bd42}
-
-/* Same chess piece style as Puzzle Contriving */
 .piece{
   font-family:"DejaVu Sans","Segoe UI Symbol","Noto Sans Symbols 2",sans-serif;
   font-size:clamp(34px,6vw,58px);font-weight:400;line-height:1;
@@ -95,8 +93,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
   filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));
 }
 .piece:hover{transform:scale(1.06)}
-
-/* Board coordinates: same positioning as Puzzle Contriving */
 .square-coordinate{
   position:absolute;color:#263b2e;
   font-size:clamp(8px,1.35vw,11px);font-weight:700;
@@ -105,7 +101,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
 }
 .square-coordinate.rank{top:2px;left:3px}
 .square-coordinate.file{right:3px;bottom:2px}
-
 .square.target::after{
   content:"";position:absolute;width:25%;height:25%;
   border-radius:50%;background:#263b2e99;pointer-events:none;
@@ -114,7 +109,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
   content:"";position:absolute;inset:3px;
   border:5px solid #263b2e88;border-radius:50%;pointer-events:none;
 }
-
 .side h2{margin:0 0 8px}
 .message{
   min-height:54px;padding:12px;border-radius:10px;
@@ -126,6 +120,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .note{font-size:13px;color:var(--muted);line-height:1.5}
 .hidden{display:none!important}
 .result{font-size:18px;font-weight:800;margin:5px 0}
+.history-item{
+  padding:10px 0;border-bottom:1px solid #344653;
+  font-size:13px;color:var(--muted);line-height:1.6;
+}
+.history-item:last-child{border-bottom:0}
 @media(max-width:760px){
   .game-layout{grid-template-columns:1fr}
   .board-wrap{max-width:min(92vw,520px)}
@@ -139,12 +138,17 @@ button:disabled{opacity:.45;cursor:not-allowed}
 </head>
 
 <body>
+
 <header>
-  <div class="brand">♟ PuzzleForge</div>
+  <div>
+    <div class="brand">♟ PuzzleForge</div>
+    <div class="account-info" id="accountStatus">Checking account...</div>
+  </div>
   <a href="index.html">← Back to Dashboard</a>
 </header>
 
 <main>
+
 <section class="intro">
   <h1>Woodpecker Training</h1>
   <p>Solve the same deck repeatedly. Aim to finish each round faster while keeping mistakes low.</p>
@@ -161,6 +165,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
         <option value="all">All available puzzles</option>
       </select>
     </div>
+
     <div>
       <label for="order">Puzzle order</label>
       <select id="order">
@@ -168,8 +173,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
         <option value="easy">Lowest rating first</option>
       </select>
     </div>
-    <div><button class="primary" id="startBtn">Start training</button></div>
+
+    <div>
+      <button class="primary" id="startBtn" disabled>Start training</button>
+    </div>
   </div>
+
   <p class="note" id="loadInfo">Loading your PuzzleForge puzzle deck…</p>
 </section>
 
@@ -180,22 +189,29 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <div class="stat"><strong id="timeStat">00:00</strong><span>Time</span></div>
     <div class="stat"><strong id="mistakeStat">0</strong><span>Mistakes</span></div>
   </div>
+
   <div class="progress"><div id="progressBar"></div></div>
 
   <div class="game-layout">
     <div class="board-wrap">
       <div class="board" id="board" aria-label="Chess board"></div>
     </div>
+
     <div class="side">
       <h2 id="puzzleHeading">Puzzle 1</h2>
       <div class="note" id="puzzleMeta">Find the best continuation.</div>
       <div class="message" id="message">Your puzzle will appear here.</div>
+
       <div class="actions">
         <button id="flipBtn">Flip board</button>
         <button id="restartBtn">Restart puzzle</button>
         <button id="endBtn">End training</button>
       </div>
-      <p class="note">A wrong legal move counts as a mistake. Keep trying until you find the correct move. The same deck is repeated in every round.</p>
+
+      <p class="note">
+        A wrong legal move counts as a mistake. Keep trying until you find the correct move.
+        The same deck is repeated in every round.
+      </p>
     </div>
   </div>
 </section>
@@ -203,6 +219,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <section class="panel hidden" id="roundComplete">
   <div class="result" id="completeTitle">Round complete!</div>
   <p id="completeText"></p>
+
   <div class="actions">
     <button class="primary" id="nextRoundBtn">Start next round</button>
     <button id="newDeckBtn">Choose a new deck</button>
@@ -213,24 +230,48 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <h2>Previous rounds</h2>
   <div id="history"></div>
 </section>
+
 </main>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-cloud.js"></script>
 
 <script>
 (function(){
+
 const $=id=>document.getElementById(id);
 const STORE="puzzleforge_woodpecker_v1";
 
-/* Exact same symbol mapping as Puzzle Contriving */
+/* Same piece symbol mapping as Puzzle Contriving */
 const symbols={
-  wk:"♚",wq:"♛",wr:"♜",wb:"♝",wn:"♞",wp:"♟",
+  wk:"♔",wq:"♕",wr:"♖",wb:"♗",wn:"♘",wp:"♙",
   bk:"♚",bq:"♛",br:"♜",bb:"♝",bn:"♞",bp:"♟"
 };
 
-let puzzles=[],deck=[],game=null,current=null;
-let moveIndex=0,selected=null,legalTargets=[],flipped=false;
-let round=1,mistakes=0,startedAt=0,tick=null;
-let completedCount=0,roundMistakes=0,roundStart=0;
-let roundHistory=[],waiting=false;
+let puzzles=[];
+let deck=[];
+let game=null;
+let current=null;
+
+let moveIndex=0;
+let selected=null;
+let legalTargets=[];
+let flipped=false;
+
+let round=1;
+let mistakes=0;
+let startedAt=0;
+let tick=null;
+
+let completedCount=0;
+let roundMistakes=0;
+let roundStart=0;
+
+let roundHistory=[];
+let waiting=false;
 
 /* Lifetime Woodpecker data */
 let lifetimeStats={
@@ -239,13 +280,65 @@ let lifetimeStats={
   bestMilliseconds:null,
   fewestMistakes:null
 };
+
 let puzzleRoundCounts={};
+
+
+/* ---------------- ACCOUNT STATUS ---------------- */
+
+function updateAccountStatus(user){
+  const status=$("accountStatus");
+
+  if(user){
+    status.textContent="Signed in: "+(
+      user.displayName||user.email||"Google account"
+    );
+  }else{
+    status.textContent="Guest mode · Sign in from Dashboard to sync";
+  }
+}
+
+window.addEventListener("puzzleforge:auth",event=>{
+  updateAccountStatus(
+    event.detail?.user||(window.PF&&PF.user)||null
+  );
+});
+
+window.addEventListener("puzzleforge:cloud-synced",()=>{
+  updateAccountStatus((window.PF&&PF.user)||null);
+});
+
+window.addEventListener("puzzleforge:sync-error",event=>{
+  console.error("PuzzleForge cloud sync error:",event.detail);
+});
+
+
+/* ---------------- PUZZLE HELPERS ---------------- */
 
 function puzzleKey(puzzle){
   if(!puzzle)return null;
-  if(puzzle.id!==undefined&&puzzle.id!==null)return String(puzzle.id);
+
+  if(puzzle.id!==undefined&&puzzle.id!==null){
+    return String(puzzle.id);
+  }
+
   if(puzzle.fen)return String(puzzle.fen);
+
   return null;
+}
+
+function normalizePuzzle(puzzle){
+  if(!puzzle||!puzzle.fen||
+     !Array.isArray(puzzle.moves)||puzzle.moves.length<2){
+    return null;
+  }
+
+  return {
+    ...puzzle,
+    id:puzzleKey(puzzle),
+    rating:Number(puzzle.rating)||1500,
+    themes:Array.isArray(puzzle.themes)?puzzle.themes:[]
+  };
 }
 
 function validNumber(value){
@@ -253,60 +346,98 @@ function validNumber(value){
     Number.isFinite(Number(value))&&Number(value)>=0;
 }
 
+
+/* ---------------- HISTORY AND CLOUD SYNC ---------------- */
+
 function readHistory(){
   try{
     const x=JSON.parse(localStorage.getItem(STORE)||"{}");
+
     roundHistory=Array.isArray(x.history)?x.history:[];
 
     if(x.lifetimeStats&&typeof x.lifetimeStats==="object"){
       lifetimeStats={
         rounds:validNumber(x.lifetimeStats.rounds)
-          ?Number(x.lifetimeStats.rounds):roundHistory.length,
+          ?Number(x.lifetimeStats.rounds)
+          :roundHistory.length,
+
         puzzles:validNumber(x.lifetimeStats.puzzles)
           ?Number(x.lifetimeStats.puzzles)
-          :roundHistory.reduce((sum,r)=>sum+Math.max(0,Number(r.count)||0),0),
+          :roundHistory.reduce(
+            (sum,r)=>sum+Math.max(0,Number(r.count)||0),0
+          ),
+
         bestMilliseconds:validNumber(x.lifetimeStats.bestMilliseconds)
-          ?Number(x.lifetimeStats.bestMilliseconds):null,
+          ?Number(x.lifetimeStats.bestMilliseconds)
+          :null,
+
         fewestMistakes:validNumber(x.lifetimeStats.fewestMistakes)
-          ?Number(x.lifetimeStats.fewestMistakes):null
+          ?Number(x.lifetimeStats.fewestMistakes)
+          :null
       };
+
     }else{
-      /* First-time migration: recover what is available in old history. */
       const validTimes=roundHistory
         .map(r=>Number(r.milliseconds))
         .filter(n=>Number.isFinite(n)&&n>0);
+
       const validMistakes=roundHistory
         .map(r=>Number(r.mistakes))
         .filter(n=>Number.isFinite(n)&&n>=0);
 
       lifetimeStats={
         rounds:roundHistory.length,
-        puzzles:roundHistory.reduce((sum,r)=>sum+Math.max(0,Number(r.count)||0),0),
-        bestMilliseconds:validTimes.length?Math.min(...validTimes):null,
-        fewestMistakes:validMistakes.length?Math.min(...validMistakes):null
+
+        puzzles:roundHistory.reduce(
+          (sum,r)=>sum+Math.max(0,Number(r.count)||0),0
+        ),
+
+        bestMilliseconds:validTimes.length
+          ?Math.min(...validTimes):null,
+
+        fewestMistakes:validMistakes.length
+          ?Math.min(...validMistakes):null
       };
     }
 
-    if(x.puzzleRoundCounts&&typeof x.puzzleRoundCounts==="object"&&
-       !Array.isArray(x.puzzleRoundCounts)){
+    if(
+      x.puzzleRoundCounts&&
+      typeof x.puzzleRoundCounts==="object"&&
+      !Array.isArray(x.puzzleRoundCounts)
+    ){
       puzzleRoundCounts={};
+
       Object.keys(x.puzzleRoundCounts).forEach(id=>{
         const count=Number(x.puzzleRoundCounts[id]);
-        if(Number.isFinite(count)&&count>0)puzzleRoundCounts[id]=Math.floor(count);
+
+        if(Number.isFinite(count)&&count>0){
+          puzzleRoundCounts[id]=Math.floor(count);
+        }
       });
+
     }else{
-      /* Rebuild counts if any previous round records contain puzzle IDs. */
       puzzleRoundCounts={};
+
       roundHistory.forEach(record=>{
-        const ids=Array.isArray(record.puzzleIds)?record.puzzleIds:[];
+        const ids=Array.isArray(record.puzzleIds)
+          ?record.puzzleIds:[];
+
         [...new Set(ids.map(String))].forEach(id=>{
           puzzleRoundCounts[id]=(puzzleRoundCounts[id]||0)+1;
         });
       });
     }
+
   }catch(e){
     roundHistory=[];
-    lifetimeStats={rounds:0,puzzles:0,bestMilliseconds:null,fewestMistakes:null};
+
+    lifetimeStats={
+      rounds:0,
+      puzzles:0,
+      bestMilliseconds:null,
+      fewestMistakes:null
+    };
+
     puzzleRoundCounts={};
   }
 }
@@ -318,9 +449,16 @@ function saveHistory(){
       lifetimeStats:lifetimeStats,
       puzzleRoundCounts:puzzleRoundCounts
     }));
+
+    // Schedule Firestore sync for signed-in users.
+    if(window.PF&&typeof PF.scheduleSync==="function"){
+      PF.scheduleSync();
+    }
+
   }catch(e){
     console.warn("Could not save Woodpecker history:",e);
   }
+
   renderHistory();
 }
 
@@ -329,36 +467,104 @@ function renderHistory(){
     $("historyPanel").classList.add("hidden");
     return;
   }
+
   $("historyPanel").classList.remove("hidden");
+
   $("history").innerHTML=roundHistory.slice().reverse().map((r,i)=>
-    `<p class="note">Round ${roundHistory.length-i}: <b>${r.time}</b> · ${r.mistakes} mistakes · ${r.count} puzzles</p>`
+    `<div class="history-item">
+      <b>Round ${roundHistory.length-i}</b>:
+      ${r.time} · ${r.mistakes} mistakes · ${r.count} puzzles
+    </div>`
   ).join("");
 }
 
+
+/* ---------------- TIME AND DECK ---------------- */
+
 function timeString(ms){
   const s=Math.floor(ms/1000);
+
   return String(Math.floor(s/60)).padStart(2,"0")+":"+
     String(s%60).padStart(2,"0");
 }
-function elapsed(){return Date.now()-startedAt;}
+
+function elapsed(){
+  return Date.now()-startedAt;
+}
 
 async function loadPuzzles(){
+  $("startBtn").disabled=true;
+
   try{
     const res=await fetch("puzzles.json",{cache:"no-store"});
-    if(!res.ok)throw Error("Could not load puzzles.json ("+res.status+")");
+
+    if(!res.ok){
+      throw Error("Could not load puzzles.json ("+res.status+")");
+    }
+
     const data=await res.json();
-    if(!Array.isArray(data))throw Error("puzzles.json must contain a JSON array");
-    puzzles=data.filter(p=>p&&p.fen&&Array.isArray(p.moves)&&p.moves.length>=2);
-    $("loadInfo").textContent=`Loaded ${puzzles.length} usable puzzles from puzzles.json.`;
+
+    if(!Array.isArray(data)){
+      throw Error("puzzles.json must contain a JSON array");
+    }
+
+    const combined=data.map(normalizePuzzle).filter(Boolean);
+    const existingIds=new Set(combined.map(p=>String(p.id)));
+
+    // Load public community puzzles from Firestore.
+    if(window.PF){
+      try{
+        if(PF.authReady){
+          await PF.authReady;
+        }
+
+        if(typeof PF.getPublicPuzzles==="function"){
+          const result=await PF.getPublicPuzzles();
+
+          const communityPuzzles=Array.isArray(result)
+            ?result
+            :(result&&Array.isArray(result.puzzles)
+              ?result.puzzles:[]);
+
+          communityPuzzles.forEach(raw=>{
+            const puzzle=normalizePuzzle(raw);
+
+            if(
+              puzzle&&
+              !existingIds.has(String(puzzle.id))
+            ){
+              combined.push(puzzle);
+              existingIds.add(String(puzzle.id));
+            }
+          });
+        }
+
+      }catch(cloudError){
+        console.warn(
+          "Could not load community puzzles:",
+          cloudError
+        );
+      }
+    }
+
+    puzzles=combined;
+
+    $("loadInfo").textContent=
+      `Loaded ${puzzles.length} usable puzzles, including public community uploads.`;
+
     $("startBtn").disabled=!puzzles.length;
+
   }catch(e){
-    $("loadInfo").textContent="Could not load puzzles.json. Check that it is in the repository root and that the website is running over GitHub Pages. Details: "+e.message;
+    $("loadInfo").textContent=
+      "Could not load puzzles.json. Check that it is in the repository root and that the website is running over GitHub Pages. Details: "+e.message;
+
     $("startBtn").disabled=true;
   }
 }
 
 function makeDeck(){
   let list=puzzles.slice();
+
   if($("order").value==="easy"){
     list.sort((a,b)=>(a.rating||0)-(b.rating||0));
   }else{
@@ -367,10 +573,16 @@ function makeDeck(){
       [list[i],list[j]]=[list[j],list[i]];
     }
   }
+
   const n=$("deckSize").value==="all"
-    ?list.length:Math.min(Number($("deckSize").value),list.length);
+    ?list.length
+    :Math.min(Number($("deckSize").value),list.length);
+
   return list.slice(0,n);
 }
+
+
+/* ---------------- TRAINING FLOW ---------------- */
 
 function beginTraining(isNext){
   if(!isNext){
@@ -380,6 +592,7 @@ function beginTraining(isNext){
   }else{
     round++;
   }
+
   if(!deck.length)return;
 
   $("setup").classList.add("hidden");
@@ -389,11 +602,16 @@ function beginTraining(isNext){
   completedCount=0;
   mistakes=0;
   roundMistakes=0;
+
   roundStart=Date.now();
   startedAt=roundStart;
 
   clearInterval(tick);
-  tick=setInterval(()=>$("timeStat").textContent=timeString(elapsed()),250);
+
+  tick=setInterval(()=>{
+    $("timeStat").textContent=timeString(elapsed());
+  },250);
+
   loadPuzzle();
 }
 
@@ -404,7 +622,15 @@ function loadPuzzle(){
   }
 
   current=deck[completedCount];
-  game=new Chess(current.fen);
+
+  try{
+    game=new Chess(current.fen);
+  }catch(e){
+    console.error("Invalid puzzle FEN:",current,e);
+    skipBrokenPuzzle();
+    return;
+  }
+
   moveIndex=0;
   selected=null;
   legalTargets=[];
@@ -422,70 +648,106 @@ function loadPuzzle(){
   }
 
   moveIndex=1;
-  $("puzzleHeading").textContent=`Puzzle ${completedCount+1} of ${deck.length}`;
-  $("puzzleMeta").textContent=`Rating: ${current.rating||"—"} · Round ${round}`;
+
+  $("puzzleHeading").textContent=
+    `Puzzle ${completedCount+1} of ${deck.length}`;
+
+  $("puzzleMeta").textContent=
+    `Rating: ${current.rating||"—"} · Round ${round}`;
+
   $("message").textContent="Find the best move.";
+
   updateStats();
   renderBoard();
 }
 
 function skipBrokenPuzzle(){
+  console.warn("Skipping invalid puzzle:",current);
+
   completedCount++;
+  updateStats();
   loadPuzzle();
 }
 
 function updateStats(){
   $("roundStat").textContent=round;
-  $("progressStat").textContent=`${completedCount}/${deck.length}`;
+  $("progressStat").textContent=
+    `${completedCount}/${deck.length}`;
+
   $("mistakeStat").textContent=mistakes;
-  $("progressBar").style.width=(completedCount/deck.length*100)+"%";
+
+  $("progressBar").style.width=
+    (deck.length?completedCount/deck.length*100:0)+"%";
 }
 
-/* Board renderer uses the same orientation and coordinate approach
-   as Puzzle Contriving. */
+
+/* ---------------- BOARD ---------------- */
+
 function renderBoard(){
   if(!game)return;
+
   const position=game.board();
   const root=$("board");
+
   root.innerHTML="";
 
   for(let r=0;r<8;r++){
     for(let c=0;c<8;c++){
+
       const row=flipped?7-r:r;
       const col=flipped?7-c:c;
+
       const squareName="abcdefgh"[col]+(8-row);
       const piece=position[row][col];
 
       const square=document.createElement("div");
-      square.className="square "+((r+c)%2===0?"light":"dark");
 
-      if(selected===squareName)square.classList.add("selected");
+      square.className="square "+(
+        (r+c)%2===0?"light":"dark"
+      );
+
+      if(selected===squareName){
+        square.classList.add("selected");
+      }
+
       if(legalTargets.includes(squareName)){
         square.classList.add(piece?"capture":"target");
       }
 
       if(piece){
         const el=document.createElement("span");
+
         el.textContent=symbols[piece.color+piece.type];
-        el.className="piece "+(piece.color==="w"?"white-piece":"black-piece");
+
+        el.className="piece "+(
+          piece.color==="w"?"white-piece":"black-piece"
+        );
+
         square.appendChild(el);
       }
 
       if(c===0){
         const rankLabel=document.createElement("span");
+
         rankLabel.className="square-coordinate rank";
         rankLabel.textContent=String(8-row);
+
         square.appendChild(rankLabel);
       }
 
       if(r===7){
         const fileLabel=document.createElement("span");
+
         fileLabel.className="square-coordinate file";
         fileLabel.textContent="abcdefgh"[col];
+
         square.appendChild(fileLabel);
       }
 
-      square.addEventListener("click",()=>tapSquare(squareName));
+      square.addEventListener("click",()=>{
+        tapSquare(squareName);
+      });
+
       root.appendChild(square);
     }
   }
@@ -493,6 +755,7 @@ function renderBoard(){
 
 function tapSquare(sq){
   if(waiting||!game)return;
+
   const piece=game.get(sq);
 
   if(selected){
@@ -503,34 +766,54 @@ function tapSquare(sq){
       return;
     }
 
-    const move=game.move({from:selected,to:sq,promotion:"q"});
+    const move=game.move({
+      from:selected,
+      to:sq,
+      promotion:"q"
+    });
+
     if(move){
       const uci=move.from+move.to+(move.promotion||"");
+
       selected=null;
       legalTargets=[];
+
       renderBoard();
       checkMove(uci,move);
+
       return;
     }
   }
 
   if(piece&&piece.color===game.turn()){
     selected=sq;
-    legalTargets=game.moves({square:sq,verbose:true}).map(m=>m.to);
+
+    legalTargets=game.moves({
+      square:sq,
+      verbose:true
+    }).map(m=>m.to);
+
     renderBoard();
   }
 }
+
+
+/* ---------------- MOVE CHECKING ---------------- */
 
 function checkMove(uci,move){
   const expected=current.moves[moveIndex];
 
   if(uci!==expected){
     game.undo();
+
     mistakes++;
     roundMistakes++;
+
     updateStats();
     renderBoard();
+
     $("message").textContent="Not quite. Try another move.";
+
     return;
   }
 
@@ -538,14 +821,18 @@ function checkMove(uci,move){
 
   if(moveIndex>=current.moves.length){
     $("message").textContent="Correct! Puzzle completed.";
+
     completedCount++;
     updateStats();
+
     waiting=true;
+
     setTimeout(loadPuzzle,650);
     return;
   }
 
   const reply=current.moves[moveIndex];
+
   const response=game.move({
     from:reply.slice(0,2),
     to:reply.slice(2,4),
@@ -553,36 +840,59 @@ function checkMove(uci,move){
   });
 
   if(!response){
-    $("message").textContent="Puzzle data issue: opponent move could not be played.";
+    $("message").textContent=
+      "Puzzle data issue: opponent move could not be played.";
+
     completedCount++;
     updateStats();
+
     waiting=true;
+
     setTimeout(loadPuzzle,800);
     return;
   }
 
   moveIndex++;
+
   renderBoard();
+
   $("message").textContent="Good move. Find the next move.";
 
   if(moveIndex>=current.moves.length){
     completedCount++;
     updateStats();
+
     waiting=true;
+
     setTimeout(loadPuzzle,650);
   }
 }
 
+
+/* ---------------- CONTROLS ---------------- */
+
 function restartPuzzle(){
   if(!current)return;
+
   const idx=completedCount;
+
   loadPuzzle();
+
   completedCount=idx;
   updateStats();
 }
 
+function flipBoard(){
+  flipped=!flipped;
+  renderBoard();
+}
+
+
+/* ---------------- ROUND COMPLETION ---------------- */
+
 function finishRound(){
   clearInterval(tick);
+
   const duration=Date.now()-roundStart;
 
   const puzzleIds=[...new Set(
@@ -598,7 +908,6 @@ function finishRound(){
     date:new Date().toISOString()
   };
 
-  /* Update lifetime totals. */
   lifetimeStats.rounds++;
   lifetimeStats.puzzles+=deck.length;
 
@@ -616,18 +925,22 @@ function finishRound(){
     lifetimeStats.fewestMistakes=roundMistakes;
   }
 
-  /* Count each puzzle at most once per completed round. */
+  // Count each puzzle at most once per completed round.
   puzzleIds.forEach(id=>{
     puzzleRoundCounts[id]=(puzzleRoundCounts[id]||0)+1;
   });
 
   roundHistory.push(rec);
   roundHistory=roundHistory.slice(-20);
+
   saveHistory();
 
   $("training").classList.add("hidden");
   $("roundComplete").classList.remove("hidden");
-  $("completeTitle").textContent=`Round ${round} completed!`;
+
+  $("completeTitle").textContent=
+    `Round ${round} completed!`;
+
   $("completeText").textContent=
     `You solved ${deck.length} puzzles in ${rec.time} with ${roundMistakes} mistakes.`+
     (roundHistory.length>1
@@ -637,30 +950,69 @@ function finishRound(){
 
 function endTraining(){
   clearInterval(tick);
+
   $("training").classList.add("hidden");
   $("roundComplete").classList.add("hidden");
   $("setup").classList.remove("hidden");
-  $("loadInfo").textContent="Training ended. Choose a deck and start again.";
+
+  $("loadInfo").textContent=
+    "Training ended. Choose a deck and start again.";
+
   renderHistory();
 }
+
+
+/* ---------------- BUTTON EVENTS ---------------- */
 
 $("startBtn").addEventListener("click",()=>{
   readHistory();
   beginTraining(false);
 });
-$("nextRoundBtn").addEventListener("click",()=>beginTraining(true));
+
+$("nextRoundBtn").addEventListener("click",()=>{
+  beginTraining(true);
+});
+
 $("newDeckBtn").addEventListener("click",endTraining);
 $("endBtn").addEventListener("click",endTraining);
-$("flipBtn").addEventListener("click",()=>{
-  flipped=!flipped;
-  renderBoard();
-});
+
+$("flipBtn").addEventListener("click",flipBoard);
 $("restartBtn").addEventListener("click",restartPuzzle);
 
-loadPuzzles();
-readHistory();
-renderHistory();
+
+/* ---------------- INITIALIZATION ---------------- */
+
+async function initializeWoodpecker(){
+
+  // Wait for Firebase authentication and initial cloud sync.
+  if(window.PF){
+    try{
+      if(PF.authReady){
+        await PF.authReady;
+      }
+
+      updateAccountStatus(PF.user||null);
+
+    }catch(error){
+      console.warn("Firebase initialization issue:",error);
+      updateAccountStatus(null);
+    }
+  }else{
+    updateAccountStatus(null);
+  }
+
+  // Read history after cloud initialization so merged data is available.
+  readHistory();
+  renderHistory();
+
+  // Load built-in and public community puzzles.
+  await loadPuzzles();
+}
+
+initializeWoodpecker();
+
 })();
 </script>
+
 </body>
 </html>
