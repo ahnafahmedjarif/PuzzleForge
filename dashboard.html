@@ -8,7 +8,8 @@
 <title>Dashboard — PuzzleForge</title>
 <style>
 :root{color-scheme:dark;--bg:#090b10;--panel:#171b24;--line:#292f3b;--text:#f4f5f7;--muted:#9299a8;--gold:#cbb36a}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,Arial,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,Arial,sans-serif}
 .container{width:min(1050px,calc(100% - 32px));margin:auto}
 header{border-bottom:1px solid var(--line);padding:17px 0}
 nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -16,7 +17,8 @@ nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-
 nav a,.btn{color:var(--text);text-decoration:none;background:#171b24;border:1px solid #343b48;border-radius:8px;padding:9px 13px;font-size:13px}
 nav a:hover,.btn:hover{border-color:var(--gold)}
 main{padding:35px 0 60px}
-h1{font-size:32px;margin:0 0 5px}h2{font-size:17px;margin:0 0 5px}
+h1{font-size:32px;margin:0 0 5px}
+h2{font-size:17px;margin:0 0 5px}
 .muted{color:var(--muted);font-size:13px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:20px}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin-top:22px}
@@ -24,23 +26,34 @@ h1{font-size:32px;margin:0 0 5px}h2{font-size:17px;margin:0 0 5px}
 .value{font-size:27px;font-weight:750;margin-top:8px}
 .label{color:var(--muted);font-size:12px}
 input{width:100%;background:#0e121a;border:1px solid #343b48;border-radius:8px;padding:11px;color:white;margin:6px 0 13px}
+input:read-only{opacity:.75;cursor:default;border-color:#292f3b}
 button{cursor:pointer}
 .action{background:var(--gold);color:#111;border:0;border-radius:8px;padding:10px 15px;font-weight:700}
+.action:hover{filter:brightness(1.08)}
 .message{font-size:12px;margin-left:8px;color:#a9c99b}
 .links{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
 .links a{padding:11px 14px;background:#10141d;border:1px solid var(--line);border-radius:9px;text-decoration:none;font-size:13px}
-@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}h1{font-size:27px}}
+@media(max-width:700px){
+.stats{grid-template-columns:repeat(2,1fr)}
+.grid{grid-template-columns:1fr}
+h1{font-size:27px}
+}
 </style>
 </head>
 <body>
-<header><div class="container"><nav>
+
+<header>
+<div class="container">
+<nav>
 <a class="brand" href="index.html">♟ PuzzleForge</a>
 <div>
 <a href="index.html">Home</a>
 <a href="stats.html">Statistics</a>
 <a href="library.html">Library</a>
 </div>
-</nav></div></header>
+</nav>
+</div>
+</header>
 
 <main class="container">
 <h1>Dashboard</h1>
@@ -49,32 +62,61 @@ button{cursor:pointer}
 <section class="card" style="margin-top:22px">
 <h2>My Profile</h2>
 <p class="muted">Your PuzzleForge identity</p>
+
 <label class="muted" for="fullName">Full Name</label>
 <input id="fullName" maxlength="60" placeholder="Your full name">
+
 <label class="muted" for="username">Username</label>
 <input id="username" maxlength="30" placeholder="Your username">
-<button class="action" id="saveProfile">Save Profile</button>
-<span class="message" id="profileMessage"></span>
+
+<button class="action" id="saveProfile" type="button">Save Profile</button>
+<span class="message" id="profileMessage" aria-live="polite"></span>
 </section>
 
 <section class="stats">
-<div class="card"><div class="label">Puzzles completed</div><div class="value" id="solved">0</div></div>
-<div class="card"><div class="label">Solved without hints</div><div class="value" id="noHint">0</div></div>
-<div class="card"><div class="label">Accuracy</div><div class="value" id="accuracy">0%</div></div>
-<div class="card"><div class="label">Current streak</div><div class="value" id="streak">0</div></div>
+<div class="card">
+<div class="label">Puzzles completed</div>
+<div class="value" id="solved">0</div>
+</div>
+<div class="card">
+<div class="label">Solved without hints</div>
+<div class="value" id="noHint">0</div>
+</div>
+<div class="card">
+<div class="label">Accuracy</div>
+<div class="value" id="accuracy">0%</div>
+</div>
+<div class="card">
+<div class="label">Current streak</div>
+<div class="value" id="streak">0</div>
+</div>
 </section>
 
 <section class="grid">
 <div class="card">
 <h2>Woodpecker Records</h2>
 <p class="muted">Your lifetime training records</p>
+
 <div class="stats" style="grid-template-columns:repeat(2,1fr)">
-<div><div class="label">Rounds</div><div class="value" id="rounds">0</div></div>
-<div><div class="label">Puzzles played</div><div class="value" id="woodPuzzles">0</div></div>
-<div><div class="label">Best time</div><div class="value" id="best">—</div></div>
-<div><div class="label">Fewest mistakes</div><div class="value" id="mistakes">—</div></div>
+<div>
+<div class="label">Rounds</div>
+<div class="value" id="rounds">0</div>
+</div>
+<div>
+<div class="label">Puzzles played</div>
+<div class="value" id="woodPuzzles">0</div>
+</div>
+<div>
+<div class="label">Best time</div>
+<div class="value" id="best">—</div>
+</div>
+<div>
+<div class="label">Fewest mistakes</div>
+<div class="value" id="mistakes">—</div>
 </div>
 </div>
+</div>
+
 <div class="card">
 <h2>Training Workspace</h2>
 <p class="muted">Continue your chess training.</p>
@@ -92,59 +134,231 @@ button{cursor:pointer}
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="firebase-cloud.js"></script>
+
 <script>
 (()=>{
 "use strict";
+
 const $=id=>document.getElementById(id);
-const keys={progress:"puzzleforge_progress_v1",profile:"puzzleforge_profile_v1",wood:"puzzleforge_woodpecker_v1"};
-function read(key){try{return JSON.parse(localStorage.getItem(key)||"{}")}catch(e){return {}}}
-function write(key,value){localStorage.setItem(key,JSON.stringify(value));window.PF?.scheduleSync?.()}
-function dateKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-function streak(dates){
- const set=new Set(Array.isArray(dates)?dates:[]);let d=new Date();d.setHours(0,0,0,0);
- if(!set.has(dateKey(d)))d.setDate(d.getDate()-1);
- let n=0;while(set.has(dateKey(d))){n++;d.setDate(d.getDate()-1)}return n;
+
+const keys={
+ progress:"puzzleforge_progress_v1",
+ profile:"puzzleforge_profile_v1",
+ wood:"puzzleforge_woodpecker_v1"
+};
+
+let editingProfile=false;
+
+function read(key){
+ try{
+  return JSON.parse(localStorage.getItem(key)||"{}");
+ }catch(e){
+  return {};
+ }
 }
-function time(ms){if(!Number.isFinite(ms)||ms<0)return "—";let s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+
+function write(key,value){
+ localStorage.setItem(key,JSON.stringify(value));
+ window.PF?.scheduleSync?.();
+}
+
+function hasProfile(profile){
+ return Boolean(
+  (profile.fullName||"").trim() &&
+  (profile.username||"").trim()
+ );
+}
+
+/* PROFILE DISPLAY */
+function renderProfile(){
+ const profile=read(keys.profile);
+ const saved=hasProfile(profile);
+
+ if(!editingProfile){
+  $("fullName").value=profile.fullName||"";
+  $("username").value=profile.username||"";
+ }
+
+ const locked=saved&&!editingProfile;
+
+ $("fullName").readOnly=locked;
+ $("username").readOnly=locked;
+
+ $("saveProfile").textContent=
+  saved
+   ?(editingProfile?"Save Changes":"Edit Profile")
+   :"Save Profile";
+}
+
+function dateKey(d){
+ return d.getFullYear()+"-"+
+ String(d.getMonth()+1).padStart(2,"0")+"-"+
+ String(d.getDate()).padStart(2,"0");
+}
+
+function streak(dates){
+ const set=new Set(Array.isArray(dates)?dates:[]);
+ let d=new Date();
+ d.setHours(0,0,0,0);
+
+ if(!set.has(dateKey(d))){
+  d.setDate(d.getDate()-1);
+ }
+
+ let n=0;
+
+ while(set.has(dateKey(d))){
+  n++;
+  d.setDate(d.getDate()-1);
+ }
+
+ return n;
+}
+
+function time(ms){
+ if(!Number.isFinite(ms)||ms<0)return "—";
+
+ let s=Math.floor(ms/1000);
+
+ return String(Math.floor(s/60)).padStart(2,"0")+":"+
+ String(s%60).padStart(2,"0");
+}
+
+/* DASHBOARD RENDER */
 function render(){
- const p=read(keys.progress),w=read(keys.wood),profile=read(keys.profile);
- $("fullName").value=profile.fullName||"";
- $("username").value=profile.username||"";
- $("solved").textContent=Array.isArray(p.solvedIds)?p.solvedIds.length:0;
- $("noHint").textContent=Array.isArray(p.noHintIds)?p.noHintIds.length:0;
- const a=Number(p.totalAttempts)||0,c=Number(p.correctMoves)||0;
- $("accuracy").textContent=(a?Math.round(c/a*100):0)+"%";
+ const p=read(keys.progress);
+ const w=read(keys.wood);
+
+ renderProfile();
+
+ $("solved").textContent=
+  Array.isArray(p.solvedIds)?p.solvedIds.length:0;
+
+ $("noHint").textContent=
+  Array.isArray(p.noHintIds)?p.noHintIds.length:0;
+
+ const a=Number(p.totalAttempts)||0;
+ const c=Number(p.correctMoves)||0;
+
+ $("accuracy").textContent=
+  (a?Math.round(c/a*100):0)+"%";
+
  $("streak").textContent=streak(p.solvedDates);
+
  const h=Array.isArray(w.history)?w.history:[];
  const l=w.lifetimeStats||{};
+
  $("rounds").textContent=Number(l.rounds)||h.length;
- $("woodPuzzles").textContent=Number(l.puzzles)||h.reduce((n,r)=>n+(Number(r.count)||0),0);
- const times=h.map(r=>Number(r.milliseconds)).filter(n=>n>0);
- const best=Number.isFinite(Number(l.bestMilliseconds))&&l.bestMilliseconds!==null?Number(l.bestMilliseconds):(times.length?Math.min(...times):null);
- const ms=h.map(r=>Number(r.mistakes)).filter(n=>n>=0);
- const few=Number.isFinite(Number(l.fewestMistakes))&&l.fewestMistakes!==null?Number(l.fewestMistakes):(ms.length?Math.min(...ms):null);
+
+ $("woodPuzzles").textContent=
+  Number(l.puzzles)||
+  h.reduce((n,r)=>n+(Number(r.count)||0),0);
+
+ const times=h
+  .map(r=>Number(r.milliseconds))
+  .filter(n=>n>0);
+
+ const best=
+  Number.isFinite(Number(l.bestMilliseconds))&&
+  l.bestMilliseconds!==null
+   ?Number(l.bestMilliseconds)
+   :(times.length?Math.min(...times):null);
+
+ const ms=h
+  .map(r=>Number(r.mistakes))
+  .filter(n=>n>=0);
+
+ const few=
+  Number.isFinite(Number(l.fewestMistakes))&&
+  l.fewestMistakes!==null
+   ?Number(l.fewestMistakes)
+   :(ms.length?Math.min(...ms):null);
+
  $("best").textContent=best===null?"—":time(best);
  $("mistakes").textContent=few===null?"—":few;
 }
+
+/* SAVE / EDIT PROFILE */
 $("saveProfile").addEventListener("click",()=>{
- const fullName=$("fullName").value.trim(),username=$("username").value.trim().replace(/^@+/,"");
- if(!fullName||!username){$("profileMessage").textContent="Enter both fields.";return}
- write(keys.profile,{fullName,username});
- $("profileMessage").textContent="Profile saved.";
+ const profile=read(keys.profile);
+ const saved=hasProfile(profile);
+
+ // Existing profile: enter edit mode.
+ if(saved&&!editingProfile){
+  editingProfile=true;
+  $("profileMessage").textContent="You can now edit your profile.";
+
+  renderProfile();
+  $("fullName").focus();
+  return;
+ }
+
+ const fullName=$("fullName").value.trim();
+
+ const username=$("username").value
+  .trim()
+  .replace(/^@+/,"");
+
+ if(!fullName||!username){
+  $("profileMessage").textContent="Enter both fields.";
+  return;
+ }
+
+ if(username.length>30){
+  $("profileMessage").textContent="Username must be 30 characters or less.";
+  return;
+ }
+
+ // Save new profile or update existing profile.
+ write(keys.profile,{
+  ...profile,
+  fullName,
+  username
+ });
+
+ editingProfile=false;
+
+ renderProfile();
+
+ $("profileMessage").textContent=
+  saved
+   ?"Profile updated successfully."
+   :"Profile saved successfully.";
 });
+
+/* LIVE UPDATES */
 window.addEventListener("storage",render);
-window.addEventListener("puzzleforge:cloud-synced",render);
+
+window.addEventListener("puzzleforge:cloud-synced",()=>{
+ editingProfile=false;
+ render();
+});
+
 window.addEventListener("puzzleforge:auth",e=>{
  const u=e.detail?.user??window.PF?.user;
- $("account").textContent=u?"Signed in as "+(u.displayName||u.email):"Browsing as guest · Sign in from Home to sync";
+
+ $("account").textContent=u
+  ?"Signed in as "+(u.displayName||u.email)
+  :"Browsing as guest · Sign in from Home to sync";
 });
+
+/* INITIALIZATION */
 async function init(){
- if(window.PF?.authReady)await window.PF.authReady;
+ if(window.PF?.authReady){
+  await window.PF.authReady;
+ }
+
  const u=window.PF?.user;
- $("account").textContent=u?"Signed in as "+(u.displayName||u.email):"Browsing as guest · Sign in from Home to sync";
+
+ $("account").textContent=u
+  ?"Signed in as "+(u.displayName||u.email)
+  :"Browsing as guest · Sign in from Home to sync";
+
  render();
 }
+
 init().catch(console.error);
+
 })();
 </script>
 </body>
