@@ -10,488 +10,196 @@
 <style>
 :root{
   color-scheme:dark;
-  --bg:#090b10;
-  --sidebar:#080a0f;
-  --panel:#171b24;
-  --line:#292f3b;
-  --text:#f4f5f7;
-  --muted:#9299a8;
-  --active:#202631;
-  --gold:#b6a05a;
+  --bg:#090b10;--sidebar:#080a0f;--panel:#171b24;
+  --line:#292f3b;--text:#f4f5f7;--muted:#9299a8;
+  --active:#202631;--gold:#b6a05a;
 }
 *{box-sizing:border-box}
-
 html{scroll-behavior:smooth}
-
 body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
+  margin:0;background:var(--bg);color:var(--text);
   font:15px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
 }
-
 .app{min-height:100vh;display:flex}
-
 .sidebar{
-  width:260px;
-  flex:0 0 260px;
-  background:var(--sidebar);
-  border-right:1px solid var(--line);
-  padding:28px 16px;
+  width:260px;flex:0 0 260px;background:var(--sidebar);
+  border-right:1px solid var(--line);padding:28px 16px;
 }
-
 .brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:0 8px 30px;
-  font-size:20px;
-  font-weight:700;
-  letter-spacing:-.5px;
+  display:flex;align-items:center;gap:12px;padding:0 8px 30px;
+  font-size:20px;font-weight:700;letter-spacing:-.5px;
 }
-
 .brand-mark{
-  width:34px;
-  height:34px;
-  display:grid;
-  place-items:center;
-  border:1px solid #444b58;
-  border-radius:9px;
-  color:#fff;
+  width:34px;height:34px;display:grid;place-items:center;
+  border:1px solid #444b58;border-radius:9px;color:#fff;
 }
-
 .brand-mark svg{width:21px;height:21px}
-
 .nav{display:grid;gap:7px}
-
 .nav a{
-  display:flex;
-  align-items:center;
-  gap:13px;
-  min-height:46px;
-  padding:0 12px;
-  border-radius:9px;
-  color:#e5e7eb;
-  text-decoration:none;
-  font-weight:500;
+  display:flex;align-items:center;gap:13px;min-height:46px;
+  padding:0 12px;border-radius:9px;color:#e5e7eb;
+  text-decoration:none;font-weight:500;
 }
-
-.nav a:hover,.nav a.active{
-  background:var(--active);
-  color:#fff;
-}
-
+.nav a:hover,.nav a.active{background:var(--active);color:#fff}
 .nav svg{
-  height:19px;
-  width:19px;
-  stroke:currentColor;
-  fill:none;
-  stroke-width:1.7;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-  flex:none;
+  height:19px;width:19px;stroke:currentColor;fill:none;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none;
 }
-
 .main{
-  flex:1;
-  min-width:0;
-  padding:38px clamp(20px,4vw,56px);
-  max-width:1500px;
-  margin:0 auto;
+  flex:1;min-width:0;padding:38px clamp(20px,4vw,56px);
+  max-width:1500px;margin:0 auto;
 }
-
 .topline{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:28px;
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;
 }
-
 .eyebrow{
-  font-size:12px;
-  text-transform:uppercase;
-  letter-spacing:1.5px;
-  color:var(--muted);
-  font-weight:650;
+  font-size:12px;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--muted);font-weight:650;
 }
-
-.heading{
-  font-size:clamp(25px,3vw,34px);
-  letter-spacing:-1px;
-  margin:5px 0 0;
-}
-
+.heading{font-size:clamp(25px,3vw,34px);letter-spacing:-1px;margin:5px 0 0}
 .sub{color:var(--muted);margin:7px 0 0}
-
 .pill{
-  border:1px solid #343b48;
-  background:#141821;
-  color:#e4e7ed;
-  padding:8px 12px;
-  border-radius:99px;
-  font-size:12px;
+  border:1px solid #343b48;background:#141821;color:#e4e7ed;
+  padding:8px 12px;border-radius:99px;font-size:12px;
 }
-
 .card{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:20px;
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:14px;padding:20px;
 }
-
 .card h2{font-size:16px;margin:0 0 5px}
 .card p{margin:0;color:var(--muted);font-size:13px}
-
-/* Profile and statistics */
-
 .profile-grid{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  gap:22px;
-  margin-top:18px;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:22px;margin-top:18px;
 }
-
-.avatar-area{
-  display:flex;
-  align-items:center;
-  margin:18px 0;
-}
-
+.avatar-area{display:flex;align-items:center;margin:18px 0}
 .profile-avatar{
-  width:88px;
-  height:88px;
-  border-radius:50%;
-  border:2px solid var(--gold);
-  background:#10141d;
-  display:grid;
-  place-items:center;
-  flex:none;
+  width:88px;height:88px;border-radius:50%;border:2px solid var(--gold);
+  background:#10141d;display:grid;place-items:center;flex:none;
 }
-
 .profile-avatar svg{
-  width:43px;
-  height:43px;
-  fill:none;
-  stroke:#e5e7eb;
-  stroke-width:1.5;
-  stroke-linecap:round;
-  stroke-linejoin:round;
+  width:43px;height:43px;fill:none;stroke:#e5e7eb;stroke-width:1.5;
+  stroke-linecap:round;stroke-linejoin:round;
 }
-
 .profile-fields{display:grid;gap:13px}
-
 .profile-fields label{
-  display:block;
-  color:var(--muted);
-  font-size:12px;
-  margin-bottom:6px;
+  display:block;color:var(--muted);font-size:12px;margin-bottom:6px;
 }
-
 .profile-fields input{
-  width:100%;
-  background:#0e121a;
-  color:var(--text);
-  border:1px solid #343b48;
-  border-radius:8px;
-  padding:12px;
-  font:inherit;
-  outline:none;
+  width:100%;background:#0e121a;color:var(--text);
+  border:1px solid #343b48;border-radius:8px;padding:12px;
+  font:inherit;outline:none;
 }
-
 .profile-fields input:focus{border-color:var(--gold)}
-
-.profile-actions{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-}
-
+.profile-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .action-btn{
-  background:var(--gold);
-  color:#111;
-  border:0;
-  border-radius:8px;
-  padding:10px 17px;
-  font-weight:700;
-  cursor:pointer;
+  background:var(--gold);color:#111;border:0;border-radius:8px;
+  padding:10px 17px;font-weight:700;cursor:pointer;
 }
-
 .action-btn:hover{filter:brightness(1.1)}
-
 .profile-message{font-size:12px;color:#a9c99b}
-
-.profile-note{
-  color:var(--muted);
-  font-size:11px;
-  margin-top:14px;
-}
-
+.profile-note{color:var(--muted);font-size:11px;margin-top:14px}
 .stats{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:14px;
-  margin:26px 0;
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;margin:26px 0;
 }
-
 .stat-label{color:var(--muted);font-size:13px}
-
 .stat-value{
-  font-size:30px;
-  font-weight:700;
-  letter-spacing:-1px;
-  margin-top:8px;
+  font-size:30px;font-weight:700;letter-spacing:-1px;margin-top:8px;
 }
-
 .stat-note{font-size:12px;color:var(--muted);margin-top:4px}
-
 .profile-stats{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-  margin-top:15px;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;margin-top:15px;
 }
-
 .profile-stat{
-  background:#10141d;
-  border:1px solid var(--line);
-  border-radius:10px;
-  padding:13px;
-  min-width:0;
+  background:#10141d;border:1px solid var(--line);
+  border-radius:10px;padding:13px;min-width:0;
 }
-
-.profile-stat span{
-  display:block;
-  color:var(--muted);
-  font-size:11px;
-}
-
+.profile-stat span{display:block;color:var(--muted);font-size:11px}
 .profile-stat strong{
-  display:block;
-  font-size:20px;
-  margin-top:5px;
-  overflow-wrap:anywhere;
+  display:block;font-size:20px;margin-top:5px;overflow-wrap:anywhere;
 }
-
-/* Analytics */
-
 .content-grid{
-  display:grid;
-  grid-template-columns:minmax(0,1.45fr) minmax(270px,1fr);
-  gap:16px;
+  display:grid;grid-template-columns:minmax(0,1.45fr) minmax(270px,1fr);gap:16px;
 }
-
 .progress-chart{
-  height:210px;
-  margin-top:22px;
-  display:flex;
-  align-items:stretch;
-  gap:10px;
-  border-bottom:1px solid var(--line);
-  padding:8px 4px 0;
+  height:210px;margin-top:22px;display:flex;align-items:stretch;gap:10px;
+  border-bottom:1px solid var(--line);padding:8px 4px 0;
 }
-
 .chart-day{
-  flex:1;
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-end;
-  gap:7px;
+  flex:1;min-width:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-end;gap:7px;
 }
-
 .chart-bar-track{
-  height:155px;
-  width:100%;
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
-  border-bottom:1px solid var(--line);
+  height:155px;width:100%;display:flex;align-items:flex-end;
+  justify-content:center;border-bottom:1px solid var(--line);
   background:repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 49px,
-    #2a303b 50px
+    to bottom,transparent 0,transparent 49px,#2a303b 50px
   );
 }
-
 .chart-bar{
-  width:min(30px,75%);
-  min-height:3px;
-  border-radius:5px 5px 0 0;
-  background:var(--gold);
-  transition:height .2s;
+  width:min(30px,75%);min-height:3px;border-radius:5px 5px 0 0;
+  background:var(--gold);transition:height .2s;
 }
-
 .chart-day small{font-size:11px;color:var(--muted)}
 .chart-day strong{font-size:11px;color:var(--text);font-weight:600}
-
 .deck{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:13px 0;
-  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 0;border-bottom:1px solid var(--line);
 }
-
 .deck:last-child{border:0}
 .deck strong{font-size:13px}
-
-.deck small{
-  display:block;
-  color:var(--muted);
-  font-size:12px;
-}
-
-/* Training history */
-
-.history-list{
-  display:grid;
-  gap:9px;
-  margin-top:16px;
-}
-
+.deck small{display:block;color:var(--muted);font-size:12px}
+.deck .stat-value{font-size:22px;margin:0}
+.history-list{display:grid;gap:9px;margin-top:16px}
 .history-item{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  padding:12px;
-  border:1px solid var(--line);
-  border-radius:9px;
-  background:#10141d;
-  font-size:12px;
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:12px;border:1px solid var(--line);border-radius:9px;
+  background:#10141d;font-size:12px;
 }
-
-.history-item span{
-  color:var(--muted);
-  flex:none;
-  text-align:right;
-}
-
-.history-detail{
-  color:var(--muted);
-  overflow-wrap:anywhere;
-}
-
-/* Performance charts */
-
+.history-item span{color:var(--muted);flex:none;text-align:right}
+.history-detail{color:var(--muted);overflow-wrap:anywhere}
 .performance-chart{
-  height:190px;
-  display:flex;
-  align-items:flex-end;
-  gap:10px;
-  margin-top:20px;
-  padding:10px 4px 0;
-  border-bottom:1px solid var(--line);
+  height:190px;display:flex;align-items:flex-end;gap:10px;
+  margin-top:20px;padding:10px 4px 0;border-bottom:1px solid var(--line);
   overflow:hidden;
 }
-
 .performance-column{
-  flex:1;
-  min-width:0;
-  height:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-end;
-  gap:6px;
+  flex:1;min-width:0;height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-end;gap:6px;
 }
-
 .performance-bar{
-  width:min(28px,80%);
-  min-height:3px;
-  background:var(--gold);
+  width:min(28px,80%);min-height:3px;background:var(--gold);
   border-radius:5px 5px 0 0;
 }
-
-.performance-column small{
-  color:var(--muted);
-  font-size:10px;
-  white-space:nowrap;
-}
-
-.performance-column strong{
-  font-size:10px;
-  white-space:nowrap;
-}
-
-/* Session cards */
-
+.performance-column small{color:var(--muted);font-size:10px;white-space:nowrap}
+.performance-column strong{font-size:10px;white-space:nowrap}
 .session-card{
-  display:block;
-  text-decoration:none;
-  color:var(--text);
-  background:#10141d;
-  border:1px solid var(--line);
-  border-radius:11px;
-  padding:17px;
-  margin-top:14px;
-  transition:border-color .2s,transform .2s;
+  display:block;text-decoration:none;color:var(--text);background:#10141d;
+  border:1px solid var(--line);border-radius:11px;padding:17px;
+  margin-top:14px;transition:border-color .2s,transform .2s;
 }
-
-.session-card:hover{
-  border-color:var(--gold);
-  transform:translateY(-2px);
-}
-
-.session-card h3{
-  font-size:14px;
-  margin:0 0 7px;
-  letter-spacing:.4px;
-}
-
-.session-card p{
-  margin:0 0 12px;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.session-card span{
-  color:#c9b575;
-  font-size:12px;
-  font-weight:700;
-}
-
-/* Responsive */
-
+.session-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.session-card h3{font-size:14px;margin:0 0 7px;letter-spacing:.4px}
+.session-card p{margin:0 0 12px;color:var(--muted);font-size:13px}
+.session-card span{color:#c9b575;font-size:12px;font-weight:700}
 @media(max-width:900px){
   .sidebar{width:228px;flex-basis:228px}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .content-grid{grid-template-columns:1fr}
 }
-
 @media(max-width:620px){
   .app{display:block}
-
   .sidebar{
-    width:auto;
-    border-right:0;
-    border-bottom:1px solid var(--line);
+    width:auto;border-right:0;border-bottom:1px solid var(--line);
     padding:16px 14px;
   }
-
   .brand{padding:0 4px 14px;font-size:18px}
-
-  .nav{
-    display:flex;
-    overflow-x:auto;
-    gap:6px;
-    padding-bottom:2px;
-  }
-
-  .nav a{
-    white-space:nowrap;
-    min-height:40px;
-    padding:0 11px;
-    font-size:12px;
-  }
-
+  .nav{display:flex;overflow-x:auto;gap:6px;padding-bottom:2px}
+  .nav a{white-space:nowrap;min-height:40px;padding:0 11px;font-size:12px}
   .nav svg{width:16px;height:16px}
-
   .main{padding:25px 15px}
-
   .stats{gap:9px;margin:18px 0}
   .card{padding:16px}
   .stat-value{font-size:26px}
@@ -505,12 +213,8 @@ body{
 </head>
 
 <body>
-
 <div class="app">
-
-<!-- SIDEBAR -->
 <aside class="sidebar" aria-label="Main navigation">
-
   <div class="brand">
     <span class="brand-mark" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -522,82 +226,42 @@ body{
   </div>
 
   <nav class="nav">
-
     <a class="active" href="#dashboard" aria-current="page">
-      <svg viewBox="0 0 24 24">
-        <rect x="3" y="3" width="8" height="8" rx="1.5"/>
-        <rect x="14" y="3" width="7" height="5" rx="1.5"/>
-        <rect x="14" y="11" width="7" height="10" rx="1.5"/>
-        <rect x="3" y="14" width="8" height="7" rx="1.5"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="11" width="7" height="10" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/></svg>
       <span>Dashboard</span>
     </a>
-
     <a href="#profile">
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="8" r="4"/>
-        <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
       <span>My Profile</span>
     </a>
-
     <a href="#sessions">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 3 4 7.5v9L12 21l8-4.5v-9L12 3Z"/>
-        <path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12.1V21"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9L12 3Z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12.1V21"/></svg>
       <span>Session Formats</span>
     </a>
-
     <a href="#analytics">
-      <svg viewBox="0 0 24 24">
-        <path d="M4 19V5M4 19h17"/>
-        <path d="m7 15 4-4 3 2 6-7"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>
       <span>Progress &amp; Analytics</span>
     </a>
-
     <a href="#trainingHistory">
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="9"/>
-        <path d="M12 7v5l3 2"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
       <span>Training History</span>
     </a>
-
     <a href="#performance">
-      <svg viewBox="0 0 24 24">
-        <path d="M4 19V5M4 19h17"/>
-        <path d="m7 15 4-4 3 2 6-7"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>
       <span>Performance</span>
     </a>
-
     <a href="#woodpecker">
-      <svg viewBox="0 0 24 24">
-        <path d="M4 7h16M4 12h16M4 17h16"/>
-        <circle cx="8" cy="7" r="2.2" fill="#080a0f"/>
-        <circle cx="15" cy="12" r="2.2" fill="#080a0f"/>
-        <circle cx="10" cy="17" r="2.2" fill="#080a0f"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="8" cy="7" r="2.2" fill="#080a0f"/><circle cx="15" cy="12" r="2.2" fill="#080a0f"/><circle cx="10" cy="17" r="2.2" fill="#080a0f"/></svg>
       <span>Woodpecker Records</span>
     </a>
-
     <a href="#library">
-      <svg viewBox="0 0 24 24">
-        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5v-12Z"/>
-        <path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5v-12Z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/></svg>
       <span>Library</span>
     </a>
-
   </nav>
 </aside>
 
-
-<!-- MAIN DASHBOARD -->
 <main class="main" id="dashboard">
-
   <div class="topline">
     <div>
       <div class="eyebrow">Chess training workspace</div>
@@ -607,18 +271,12 @@ body{
     <span class="pill">Personal workspace</span>
   </div>
 
-
-  <!-- MY PROFILE -->
   <section class="card" id="profile">
-
     <h2>My Profile</h2>
     <p>Your personal PuzzleForge identity.</p>
 
     <div class="profile-grid">
-
       <div>
-
-        <!-- DEFAULT GENERIC USER ICON -->
         <div class="avatar-area">
           <div class="profile-avatar" role="img" aria-label="Default user icon">
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -629,275 +287,138 @@ body{
         </div>
 
         <div class="profile-fields">
-
           <div>
             <label for="profileFullName">Full Name</label>
-            <input
-              type="text"
-              id="profileFullName"
-              placeholder="Enter your full name"
-              maxlength="60"
-            >
+            <input type="text" id="profileFullName" placeholder="Enter your full name" maxlength="60">
           </div>
-
           <div>
             <label for="profileUsername">Username</label>
-            <input
-              type="text"
-              id="profileUsername"
-              placeholder="Enter your username"
-              maxlength="30"
-            >
+            <input type="text" id="profileUsername" placeholder="Enter your username" maxlength="30">
           </div>
-
           <div class="profile-actions">
-            <button class="action-btn" id="saveProfile" type="button">
-              Save Profile
-            </button>
-
+            <button class="action-btn" id="saveProfile" type="button">Save Profile</button>
             <span class="profile-message" id="profileMessage"></span>
           </div>
-
         </div>
-
       </div>
 
-
-      <!-- WOODPECKER RECORDS -->
       <div id="woodpecker">
-
         <h2>Woodpecker Training Records</h2>
-        <p>Your completed Woodpecker rounds.</p>
-
+        <p>Your lifetime Woodpecker training statistics.</p>
         <div class="profile-stats">
-
-          <div class="profile-stat">
-            <span>Rounds Completed</span>
-            <strong id="woodRounds">0</strong>
-          </div>
-
-          <div class="profile-stat">
-            <span>Total Puzzles Played</span>
-            <strong id="woodPuzzles">0</strong>
-          </div>
-
-          <div class="profile-stat">
-            <span>Best Time</span>
-            <strong id="woodBest">—</strong>
-          </div>
-
-          <div class="profile-stat">
-            <span>Fewest Mistakes</span>
-            <strong id="woodMistakes">—</strong>
-          </div>
-
+          <div class="profile-stat"><span>Rounds Completed</span><strong id="woodRounds">0</strong></div>
+          <div class="profile-stat"><span>Total Puzzles Played</span><strong id="woodPuzzles">0</strong></div>
+          <div class="profile-stat"><span>Best Time</span><strong id="woodBest">—</strong></div>
+          <div class="profile-stat"><span>Fewest Mistakes</span><strong id="woodMistakes">—</strong></div>
         </div>
-
       </div>
-
     </div>
 
     <div class="profile-note">
-      Your profile is stored in this browser on this device.
-      It does not automatically sync across different devices.
+      Your profile and training records are stored in this browser on this device.
+      They do not automatically sync across different devices.
     </div>
-
   </section>
 
-
-  <!-- MAIN STATISTICS -->
   <section class="stats" aria-label="Training statistics">
-
     <div class="card">
       <div class="stat-label">Puzzles completed</div>
       <div class="stat-value" id="dashSolved">0</div>
       <div class="stat-note">Unique puzzles solved</div>
     </div>
-
     <div class="card">
       <div class="stat-label">Solved without hints</div>
       <div class="stat-value" id="dashNoHint">0</div>
       <div class="stat-note">Independent solutions</div>
     </div>
-
     <div class="card">
       <div class="stat-label">Accuracy</div>
       <div class="stat-value" id="dashAccuracy">0%</div>
       <div class="stat-note">Correct moves / attempted moves</div>
     </div>
-
     <div class="card">
       <div class="stat-label">Current streak</div>
       <div class="stat-value" id="dashStreak">0</div>
       <div class="stat-note">Consecutive training days</div>
     </div>
-
   </section>
 
-
-  <!-- ANALYTICS -->
   <section class="content-grid">
-
     <div class="card" id="analytics">
       <h2>Progress &amp; Analytics</h2>
       <p>Your puzzle completions over the last seven days.</p>
-
-      <div
-        class="progress-chart"
-        id="progressChart"
-        role="img"
-        aria-label="Puzzles solved over the last seven days"
-      ></div>
+      <div class="progress-chart" id="progressChart" role="img" aria-label="Puzzles solved over the last seven days"></div>
     </div>
-
 
     <div class="card">
       <h2>Woodpecker Deck Overview</h2>
       <p>Review your tactical training decks.</p>
 
       <div class="deck">
-        <div>
-          <strong>New</strong>
-          <small>Not yet attempted</small>
-        </div>
-        <span class="stat-value">—</span>
+        <div><strong>New</strong><small>Not yet attempted in a completed round</small></div>
+        <span class="stat-value" id="woodDeckNew">—</span>
       </div>
-
       <div class="deck">
-        <div>
-          <strong>Learning</strong>
-          <small>Currently in practice</small>
-        </div>
-        <span class="stat-value">—</span>
+        <div><strong>Learning</strong><small>Practiced in 1–2 completed rounds</small></div>
+        <span class="stat-value" id="woodDeckLearning">—</span>
       </div>
-
       <div class="deck">
-        <div>
-          <strong>Graduated</strong>
-          <small>Completed review cycle</small>
-        </div>
-        <span class="stat-value">—</span>
+        <div><strong>Graduated</strong><small>Practiced in 3+ completed rounds</small></div>
+        <span class="stat-value" id="woodDeckGraduated">—</span>
       </div>
-
     </div>
-
   </section>
 
-
-  <!-- TRAINING HISTORY -->
-  <section
-    class="card"
-    id="trainingHistory"
-    style="margin-top:16px"
-  >
-
+  <section class="card" id="trainingHistory" style="margin-top:16px">
     <h2>Training History</h2>
     <p>Your recent puzzle and Woodpecker training records.</p>
-
-    <div class="history-list" id="trainingHistoryList">
-      <p>No training records yet.</p>
-    </div>
-
+    <div class="history-list" id="trainingHistoryList"><p>No training records yet.</p></div>
   </section>
 
-
-  <!-- PERSONAL PERFORMANCE -->
-  <section
-    class="card"
-    id="performance"
-    style="margin-top:16px"
-  >
-
+  <section class="card" id="performance" style="margin-top:16px">
     <h2>Personal Performance</h2>
-    <p>Your daily puzzle-solving activity over the last 14 days.</p>
+    <p>Your daily puzzle-solving activity over the last 7 days.</p>
+    <div class="performance-chart" id="performanceChart"></div>
 
-    <div
-      class="performance-chart"
-      id="performanceChart"
-    ></div>
-
-    <h2 style="margin-top:28px">
-      Woodpecker Time Progress
-    </h2>
-
-    <p>
-      Compare your recent round completion times. Lower is better.
-    </p>
-
-    <div
-      class="performance-chart"
-      id="woodPerformanceChart"
-    ></div>
-
+    <h2 style="margin-top:28px">Woodpecker Time Progress</h2>
+    <p>Compare your recent round completion times. Lower is better.</p>
+    <div class="performance-chart" id="woodPerformanceChart"></div>
   </section>
 
-
-  <!-- SESSION FORMATS -->
-  <section
-    class="card"
-    id="sessions"
-    style="margin-top:16px"
-  >
-
+  <section class="card" id="sessions" style="margin-top:16px">
     <h2>Session Formats</h2>
     <p>Choose your training mode.</p>
-
     <a href="puzzle-arena.html" class="session-card">
       <h3>♟ PUZZLE CONTRIVING</h3>
-      <p>
-        Practice chess puzzles and improve your tactical skills.
-      </p>
+      <p>Practice chess puzzles and improve your tactical skills.</p>
       <span>Start Training →</span>
     </a>
-
     <a href="woodpecker.html" class="session-card">
       <h3>♟ WOODPECKER TRAINING</h3>
-      <p>
-        Repeat tactical puzzles and improve your solving speed.
-      </p>
+      <p>Repeat tactical puzzles and improve your solving speed.</p>
       <span>Start Woodpecker Training →</span>
     </a>
-
   </section>
 
-
-  <!-- LIBRARY -->
-  <section
-    class="card"
-    id="library"
-    style="margin-top:16px"
-  >
+  <section class="card" id="library" style="margin-top:16px">
     <h2>Library</h2>
-    <p>
-      Your chess resources and puzzle collections will be organized here.
-    </p>
+    <p>Your chess resources and puzzle collections will be organized here.</p>
   </section>
-
 </main>
 </div>
 
-
 <script>
 (function(){
-
-  const KEY = "puzzleforge_progress_v1";
-  const PROFILE_KEY = "puzzleforge_profile_v1";
-  const WOOD_KEY = "puzzleforge_woodpecker_v1";
-
-
-  // STORAGE HELPERS
+  const KEY="puzzleforge_progress_v1";
+  const PROFILE_KEY="puzzleforge_profile_v1";
+  const WOOD_KEY="puzzleforge_woodpecker_v1";
 
   function readStorage(key){
-    try{
-      return JSON.parse(localStorage.getItem(key)||"{}");
-    }catch(e){
-      return {};
-    }
+    try{return JSON.parse(localStorage.getItem(key)||"{}");}
+    catch(e){return {};}
   }
 
-  function readProgress(){
-    return readStorage(KEY);
-  }
+  function readProgress(){return readStorage(KEY);}
 
   function dateKey(date){
     return date.getFullYear()+"-"+
@@ -905,513 +426,306 @@ body{
       String(date.getDate()).padStart(2,"0");
   }
 
-
-  // STREAK CALCULATION
-
   function currentStreak(dates){
-
-    const set = new Set(Array.isArray(dates)?dates:[]);
-
-    const today = new Date();
-
-    let cursor = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    );
-
-    if(!set.has(dateKey(cursor))){
-      cursor.setDate(cursor.getDate()-1);
-    }
-
-    let streak = 0;
-
+    const set=new Set(Array.isArray(dates)?dates:[]);
+    const today=new Date();
+    let cursor=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+    if(!set.has(dateKey(cursor)))cursor.setDate(cursor.getDate()-1);
+    let streak=0;
     while(set.has(dateKey(cursor))){
       streak++;
       cursor.setDate(cursor.getDate()-1);
     }
-
     return streak;
   }
 
-
-  // TIME FORMATTING
-
   function formatTime(milliseconds){
-
-    if(!Number.isFinite(milliseconds)||milliseconds<0){
-      return "—";
-    }
-
-    const totalSeconds = Math.floor(milliseconds/1000);
-    const minutes = Math.floor(totalSeconds/60);
-    const seconds = totalSeconds%60;
-
-    return String(minutes).padStart(2,"0")+":"+
-      String(seconds).padStart(2,"0");
+    if(!Number.isFinite(milliseconds)||milliseconds<0)return "—";
+    const totalSeconds=Math.floor(milliseconds/1000);
+    const minutes=Math.floor(totalSeconds/60);
+    const seconds=totalSeconds%60;
+    return String(minutes).padStart(2,"0")+":"+String(seconds).padStart(2,"0");
   }
 
-
-  // PROFILE
+  function validNonNegative(value){
+    return value!==null&&value!==undefined&&value!==""&&
+      Number.isFinite(Number(value))&&Number(value)>=0;
+  }
 
   function renderProfile(){
+    const profile=readStorage(PROFILE_KEY);
+    const fullNameInput=document.getElementById("profileFullName");
+    const usernameInput=document.getElementById("profileUsername");
 
-    const profile = readStorage(PROFILE_KEY);
+    if(document.activeElement!==fullNameInput)fullNameInput.value=profile.fullName||"";
+    if(document.activeElement!==usernameInput)usernameInput.value=profile.username||"";
 
-    const fullNameInput =
-      document.getElementById("profileFullName");
+    const wood=readStorage(WOOD_KEY);
+    const history=Array.isArray(wood.history)?wood.history:[];
+    const lifetime=wood.lifetimeStats&&typeof wood.lifetimeStats==="object"
+      ?wood.lifetimeStats:null;
 
-    const usernameInput =
-      document.getElementById("profileUsername");
+    const rounds=lifetime&&validNonNegative(lifetime.rounds)
+      ?Number(lifetime.rounds):history.length;
 
-    // Do not overwrite a field while the user is editing it.
-    if(document.activeElement!==fullNameInput){
-      fullNameInput.value = profile.fullName || "";
-    }
+    const totalPuzzles=lifetime&&validNonNegative(lifetime.puzzles)
+      ?Number(lifetime.puzzles)
+      :history.reduce((total,round)=>total+Math.max(0,Number(round.count)||0),0);
 
-    if(document.activeElement!==usernameInput){
-      usernameInput.value = profile.username || "";
-    }
-
-    const wood = readStorage(WOOD_KEY);
-
-    const history = Array.isArray(wood.history)
-      ? wood.history
-      : [];
-
-    document.getElementById("woodRounds").textContent =
-      history.length;
-
-    const totalPuzzles = history.reduce(function(total,round){
-      return total + Math.max(0,Number(round.count)||0);
-    },0);
-
-    document.getElementById("woodPuzzles").textContent =
-      totalPuzzles;
-
-    const validTimes = history
+    const validTimes=history
       .map(round=>Number(round.milliseconds))
       .filter(time=>Number.isFinite(time)&&time>0);
 
-    const bestTime = validTimes.length
-      ? Math.min(...validTimes)
-      : null;
+    const fallbackBest=validTimes.length?Math.min(...validTimes):null;
+    const bestTime=lifetime&&validNonNegative(lifetime.bestMilliseconds)
+      ?Number(lifetime.bestMilliseconds):fallbackBest;
 
-    document.getElementById("woodBest").textContent =
-      bestTime===null ? "—" : formatTime(bestTime);
-
-    const validMistakes = history
+    const validMistakes=history
       .map(round=>Number(round.mistakes))
       .filter(value=>Number.isFinite(value)&&value>=0);
 
-    const fewestMistakes = validMistakes.length
-      ? Math.min(...validMistakes)
-      : null;
+    const fallbackMistakes=validMistakes.length?Math.min(...validMistakes):null;
+    const fewestMistakes=lifetime&&validNonNegative(lifetime.fewestMistakes)
+      ?Number(lifetime.fewestMistakes):fallbackMistakes;
 
-    document.getElementById("woodMistakes").textContent =
-      fewestMistakes===null ? "—" : fewestMistakes;
+    document.getElementById("woodRounds").textContent=rounds;
+    document.getElementById("woodPuzzles").textContent=totalPuzzles;
+    document.getElementById("woodBest").textContent=bestTime===null?"—":formatTime(bestTime);
+    document.getElementById("woodMistakes").textContent=fewestMistakes===null?"—":fewestMistakes;
   }
 
+  document.getElementById("saveProfile").addEventListener("click",function(){
+    const fullName=document.getElementById("profileFullName").value.trim();
+    let username=document.getElementById("profileUsername").value.trim();
+    username=username.replace(/^@+/,"");
+    const message=document.getElementById("profileMessage");
 
-  // SAVE PROFILE
+    if(!fullName||!username){
+      message.style.color="#e5a09a";
+      message.textContent="Please enter both your name and username.";
+      return;
+    }
 
-  document.getElementById("saveProfile")
-    .addEventListener("click",function(){
-
-      const fullName =
-        document.getElementById("profileFullName").value.trim();
-
-      let username =
-        document.getElementById("profileUsername").value.trim();
-
-      username = username.replace(/^@+/,"");
-
-      const message =
-        document.getElementById("profileMessage");
-
-      if(!fullName || !username){
-        message.style.color="#e5a09a";
-        message.textContent=
-          "Please enter both your name and username.";
-        return;
-      }
-
-      const profile = {
-        fullName:fullName,
-        username:username
-      };
-
-      try{
-        localStorage.setItem(
-          PROFILE_KEY,
-          JSON.stringify(profile)
-        );
-
-        message.style.color="#a9c99b";
-        message.textContent="Profile saved successfully!";
-
-      }catch(e){
-
-        message.style.color="#e5a09a";
-        message.textContent=
-          "Could not save profile. Check browser storage.";
-      }
-    });
-
-
-  // TRAINING HISTORY
+    try{
+      localStorage.setItem(PROFILE_KEY,JSON.stringify({fullName,username}));
+      message.style.color="#a9c99b";
+      message.textContent="Profile saved successfully!";
+    }catch(e){
+      message.style.color="#e5a09a";
+      message.textContent="Could not save profile. Check browser storage.";
+    }
+  });
 
   function renderTrainingHistory(){
-
-    const container =
-      document.getElementById("trainingHistoryList");
-
-    const progress = readProgress();
-    const wood = readStorage(WOOD_KEY);
-
-    const daily =
-      progress.dailySolved && typeof progress.dailySolved==="object"
-        ? progress.dailySolved
-        : {};
-
-    const history =
-      Array.isArray(wood.history)
-        ? wood.history
-        : [];
-
-    const records = [];
-
-
-    // Puzzle Contriving records
+    const container=document.getElementById("trainingHistoryList");
+    const progress=readProgress();
+    const wood=readStorage(WOOD_KEY);
+    const daily=progress.dailySolved&&typeof progress.dailySolved==="object"
+      ?progress.dailySolved:{};
+    const history=Array.isArray(wood.history)?wood.history:[];
+    const records=[];
 
     Object.keys(daily).forEach(date=>{
-
-      const count = Math.max(0,Number(daily[date])||0);
-
+      const count=Math.max(0,Number(daily[date])||0);
       if(count>0){
-
         records.push({
-          date:date,
-          type:"Puzzle Contriving",
-          detail:count+" puzzles completed",
-          sortDate:date
+          date:date,type:"Puzzle Contriving",
+          detail:count+" puzzles completed",sortDate:date
         });
       }
     });
 
-
-    // Woodpecker records
-
     history.forEach(round=>{
-
-      const validDate = round.date
-        ? new Date(round.date)
-        : null;
-
-      const dateLabel =
-        validDate && !isNaN(validDate.getTime())
-          ? validDate.toLocaleDateString()
-          : "Date unavailable";
-
+      const validDate=round.date?new Date(round.date):null;
+      const dateLabel=validDate&&!isNaN(validDate.getTime())
+        ?validDate.toLocaleDateString():"Date unavailable";
       records.push({
-
-        date:dateLabel,
-
-        type:"Woodpecker Round",
-
-        detail:
-          (Number(round.count)||0)+" puzzles · "+
+        date:dateLabel,type:"Woodpecker Round",
+        detail:(Number(round.count)||0)+" puzzles · "+
           (Number(round.mistakes)||0)+" mistakes · "+
           (round.time||"Time unavailable"),
-
-        sortDate:
-          validDate && !isNaN(validDate.getTime())
-            ? validDate.getTime()
-            : 0
+        sortDate:validDate&&!isNaN(validDate.getTime())?validDate.getTime():0
       });
     });
 
-
     records.sort((a,b)=>{
-
-      const timeA = typeof a.sortDate==="number"
-        ? a.sortDate
-        : new Date(a.sortDate).getTime();
-
-      const timeB = typeof b.sortDate==="number"
-        ? b.sortDate
-        : new Date(b.sortDate).getTime();
-
+      const timeA=typeof a.sortDate==="number"?a.sortDate:new Date(a.sortDate).getTime();
+      const timeB=typeof b.sortDate==="number"?b.sortDate:new Date(b.sortDate).getTime();
       return timeB-timeA;
     });
 
-
     container.replaceChildren();
-
     if(!records.length){
-
-      const empty = document.createElement("p");
+      const empty=document.createElement("p");
       empty.textContent="No training records yet.";
       container.appendChild(empty);
       return;
     }
 
-
     records.slice(0,15).forEach(record=>{
-
-      const item = document.createElement("div");
+      const item=document.createElement("div");
       item.className="history-item";
-
-      const left = document.createElement("div");
-
-      const title = document.createElement("strong");
+      const left=document.createElement("div");
+      const title=document.createElement("strong");
       title.textContent=record.type;
-
-      const detail = document.createElement("div");
+      const detail=document.createElement("div");
       detail.className="history-detail";
       detail.textContent=record.detail;
-
       left.append(title,detail);
-
-      const date = document.createElement("span");
+      const date=document.createElement("span");
       date.textContent=record.date;
-
       item.append(left,date);
-
       container.appendChild(item);
     });
   }
 
-
-  // DAILY PERFORMANCE GRAPH
-
   function renderPerformance(){
-
-    const progress = readProgress();
-
-    const daily =
-      progress.dailySolved && typeof progress.dailySolved==="object"
-        ? progress.dailySolved
-        : {};
-
-    const chart =
-      document.getElementById("performanceChart");
-
+    const progress=readProgress();
+    const daily=progress.dailySolved&&typeof progress.dailySolved==="object"
+      ?progress.dailySolved:{};
+    const chart=document.getElementById("performanceChart");
     chart.replaceChildren();
 
-    const days = [];
-
-    for(let offset=13;offset>=0;offset--){
-
-      const date = new Date();
-
+    const days=[];
+    for(let offset=6;offset>=0;offset--){
+      const date=new Date();
       date.setHours(0,0,0,0);
       date.setDate(date.getDate()-offset);
-
       days.push({
-        date:date,
-        count:Math.max(
-          0,
-          Number(daily[dateKey(date)])||0
-        )
+        date,
+        count:Math.max(0,Number(daily[dateKey(date)])||0)
       });
     }
 
-    const max = Math.max(
-      1,
-      ...days.map(day=>day.count)
-    );
-
-
+    const max=Math.max(1,...days.map(day=>day.count));
     days.forEach(day=>{
-
-      const column = document.createElement("div");
+      const column=document.createElement("div");
       column.className="performance-column";
-
-      const value = document.createElement("strong");
+      const value=document.createElement("strong");
       value.textContent=day.count;
-
-      const bar = document.createElement("div");
+      const bar=document.createElement("div");
       bar.className="performance-bar";
-
-      bar.style.height =
-        (day.count?Math.max(4,day.count/max*100):2)+"%";
-
-      const label = document.createElement("small");
-
-      label.textContent =
-        day.date.getDate()+"/"+(day.date.getMonth()+1);
-
+      bar.style.height=(day.count?Math.max(4,day.count/max*100):2)+"%";
+      const label=document.createElement("small");
+      label.textContent=day.date.getDate()+"/"+(day.date.getMonth()+1);
       column.append(value,bar,label);
       chart.appendChild(column);
     });
 
-
-    // WOODPECKER TIME PROGRESS
-
-    const wood = readStorage(WOOD_KEY);
-
-    const history =
-      Array.isArray(wood.history)
-        ? wood.history
-        : [];
-
-    const timeChart =
-      document.getElementById("woodPerformanceChart");
-
+    const wood=readStorage(WOOD_KEY);
+    const history=Array.isArray(wood.history)?wood.history:[];
+    const timeChart=document.getElementById("woodPerformanceChart");
     timeChart.replaceChildren();
 
-    const recent = history
-      .filter(round=>
-        Number.isFinite(Number(round.milliseconds)) &&
-        Number(round.milliseconds)>0
-      )
-      .slice(-10);
+    const recent=history.filter(round=>
+      Number.isFinite(Number(round.milliseconds))&&Number(round.milliseconds)>0
+    ).slice(-10);
 
     if(!recent.length){
-
-      const empty = document.createElement("p");
-
-      empty.textContent =
-        "Complete a Woodpecker round to see your time progress.";
-
+      const empty=document.createElement("p");
+      empty.textContent="Complete a Woodpecker round to see your time progress.";
       timeChart.appendChild(empty);
       return;
     }
 
-    const times = recent.map(round=>Number(round.milliseconds));
-
-    const slowest = Math.max(...times,1);
+    const times=recent.map(round=>Number(round.milliseconds));
+    const slowest=Math.max(...times,1);
 
     recent.forEach((round,index)=>{
-
-      const column = document.createElement("div");
+      const column=document.createElement("div");
       column.className="performance-column";
-
-      const value = document.createElement("strong");
-      value.textContent=round.time || formatTime(Number(round.milliseconds));
-
-      const bar = document.createElement("div");
+      const value=document.createElement("strong");
+      value.textContent=round.time||formatTime(Number(round.milliseconds));
+      const bar=document.createElement("div");
       bar.className="performance-bar";
-
-      bar.style.height =
-        Math.max(
-          5,
-          Number(round.milliseconds)/slowest*100
-        )+"%";
-
-      const label = document.createElement("small");
+      bar.style.height=Math.max(5,Number(round.milliseconds)/slowest*100)+"%";
+      const label=document.createElement("small");
       label.textContent="R"+(index+1);
-
       column.append(value,bar,label);
       timeChart.appendChild(column);
     });
   }
 
+  async function renderDeckOverview(){
+    const newEl=document.getElementById("woodDeckNew");
+    const learningEl=document.getElementById("woodDeckLearning");
+    const graduatedEl=document.getElementById("woodDeckGraduated");
 
-  // ORIGINAL SEVEN-DAY DASHBOARD CHART
+    try{
+      const response=await fetch("puzzles.json",{cache:"no-store"});
+      if(!response.ok)throw new Error("Puzzle database unavailable");
+      const puzzles=await response.json();
+      if(!Array.isArray(puzzles))throw new Error("Invalid puzzle database");
+
+      const wood=readStorage(WOOD_KEY);
+      const counts=wood.puzzleRoundCounts&&typeof wood.puzzleRoundCounts==="object"
+        ?wood.puzzleRoundCounts:{};
+
+      let learning=0,graduated=0,seen=0;
+      Object.keys(counts).forEach(id=>{
+        const count=Math.max(0,Number(counts[id])||0);
+        if(count>0){
+          seen++;
+          if(count>=3)graduated++;
+          else learning++;
+        }
+      });
+
+      newEl.textContent=Math.max(0,puzzles.length-seen);
+      learningEl.textContent=learning;
+      graduatedEl.textContent=graduated;
+    }catch(error){
+      newEl.textContent="—";
+      learningEl.textContent="—";
+      graduatedEl.textContent="—";
+      console.warn("Could not calculate Woodpecker deck overview:",error);
+    }
+  }
 
   function render(){
+    const data=readProgress();
+    const solved=Array.isArray(data.solvedIds)?data.solvedIds.length:0;
+    const noHint=Array.isArray(data.noHintIds)?data.noHintIds.length:0;
+    const attempts=Math.max(0,Number(data.totalAttempts)||0);
+    const correct=Math.max(0,Number(data.correctMoves)||0);
 
-    const data = readProgress();
-
-    const solved =
-      Array.isArray(data.solvedIds)
-        ? data.solvedIds.length
-        : 0;
-
-    const noHint =
-      Array.isArray(data.noHintIds)
-        ? data.noHintIds.length
-        : 0;
-
-    const attempts = Math.max(
-      0,
-      Number(data.totalAttempts)||0
-    );
-
-    const correct = Math.max(
-      0,
-      Number(data.correctMoves)||0
-    );
-
-    document.getElementById("dashSolved").textContent =
-      solved;
-
-    document.getElementById("dashNoHint").textContent =
-      noHint;
-
-    document.getElementById("dashAccuracy").textContent =
+    document.getElementById("dashSolved").textContent=solved;
+    document.getElementById("dashNoHint").textContent=noHint;
+    document.getElementById("dashAccuracy").textContent=
       (attempts?Math.round(correct/attempts*100):0)+"%";
+    document.getElementById("dashStreak").textContent=currentStreak(data.solvedDates);
 
-    document.getElementById("dashStreak").textContent =
-      currentStreak(data.solvedDates);
-
-
-    const chart =
-      document.getElementById("progressChart");
-
+    const chart=document.getElementById("progressChart");
     chart.replaceChildren();
-
-    const counts =
-      data.dailySolved && typeof data.dailySolved==="object"
-        ? data.dailySolved
-        : {};
-
-    const days = [];
+    const counts=data.dailySolved&&typeof data.dailySolved==="object"
+      ?data.dailySolved:{};
+    const days=[];
 
     for(let offset=6;offset>=0;offset--){
-
-      const date = new Date();
-
+      const date=new Date();
       date.setHours(0,0,0,0);
       date.setDate(date.getDate()-offset);
-
       days.push({
-        date:date,
-        count:Math.max(
-          0,
-          Number(counts[dateKey(date)])||0
-        )
+        date,
+        count:Math.max(0,Number(counts[dateKey(date)])||0)
       });
     }
 
-    const max = Math.max(
-      1,
-      ...days.map(day=>day.count)
-    );
-
+    const max=Math.max(1,...days.map(day=>day.count));
     days.forEach(day=>{
-
-      const column = document.createElement("div");
+      const column=document.createElement("div");
       column.className="chart-day";
-
-      const value = document.createElement("strong");
+      const value=document.createElement("strong");
       value.textContent=day.count;
-
-      const track = document.createElement("div");
+      const track=document.createElement("div");
       track.className="chart-bar-track";
-
-      const bar = document.createElement("div");
+      const bar=document.createElement("div");
       bar.className="chart-bar";
-
-      bar.style.height =
-        (day.count?Math.max(5,day.count/max*100):2)+"%";
-
-      bar.title =
-        day.count+" puzzle"+
-        (day.count===1?"":"s")+" solved";
-
+      bar.style.height=(day.count?Math.max(5,day.count/max*100):2)+"%";
+      bar.title=day.count+" puzzle"+(day.count===1?"":"s")+" solved";
       track.appendChild(bar);
-
-      const label = document.createElement("small");
-
-      label.textContent =
-        day.date.toLocaleDateString(
-          undefined,
-          {weekday:"short"}
-        );
-
+      const label=document.createElement("small");
+      label.textContent=day.date.toLocaleDateString(undefined,{weekday:"short"});
       column.append(value,track,label);
       chart.appendChild(column);
     });
@@ -1419,49 +733,27 @@ body{
     renderProfile();
   }
 
-
-  // REFRESH ALL FEATURES
-
   function renderNewFeatures(){
     renderTrainingHistory();
     renderPerformance();
+    renderDeckOverview();
   }
-
-
-  // INITIAL RENDER
 
   render();
   renderNewFeatures();
 
-
-  // REFRESH WHEN DATA CHANGES IN OTHER PUZZLEFORGE PAGES
-
   window.addEventListener("storage",function(event){
-
-    if(
-      event.key===KEY ||
-      event.key===PROFILE_KEY ||
-      event.key===WOOD_KEY ||
-      event.key===null
-    ){
-
+    if(event.key===KEY||event.key===PROFILE_KEY||event.key===WOOD_KEY||event.key===null){
       render();
       renderNewFeatures();
     }
   });
 
-
-  // REFRESH WHEN RETURNING TO DASHBOARD
-
   window.addEventListener("focus",function(){
-
     render();
     renderNewFeatures();
   });
-
-
 })();
 </script>
-
 </body>
 </html>
