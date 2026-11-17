@@ -41,11 +41,14 @@ body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-
 .profile-avatar svg{width:43px;height:43px;fill:none;stroke:#e5e7eb;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .profile-fields{display:grid;gap:13px}
 .profile-fields label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
-.profile-fields input{width:100%;background:#0e121a;color:var(--text);border:1px solid #343b48;border-radius:8px;padding:12px;font:inherit;outline:none}
-.profile-fields input:focus{border-color:var(--gold)}
+.profile-fields input,.upload-fields input,.upload-fields textarea,.upload-fields select{
+  width:100%;background:#0e121a;color:var(--text);border:1px solid #343b48;border-radius:8px;padding:12px;font:inherit;outline:none
+}
+.profile-fields input:focus,.upload-fields input:focus,.upload-fields textarea:focus,.upload-fields select:focus{border-color:var(--gold)}
 .profile-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .action-btn{background:var(--gold);color:#111;border:0;border-radius:8px;padding:10px 17px;font-weight:700;cursor:pointer}
 .action-btn:hover{filter:brightness(1.1)}
+.action-btn:disabled{opacity:.5;cursor:not-allowed}
 .profile-message{font-size:12px;color:#a9c99b}
 .profile-note{color:var(--muted);font-size:11px;margin-top:14px}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:26px 0}
@@ -95,16 +98,22 @@ body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-
 .auth-dialog{width:min(100%,420px);background:#171b24;border:1px solid #343b48;border-radius:16px;padding:23px;box-shadow:0 20px 70px #0009}
 .auth-dialog h2{font-size:20px;margin:0 0 5px}
 .auth-dialog>p{font-size:13px;color:var(--muted);margin:0 0 18px}
-.auth-dialog label{display:block;font-size:12px;color:var(--muted);margin:12px 0 6px}
-.auth-dialog input{width:100%;background:#0e121a;color:var(--text);border:1px solid #343b48;border-radius:8px;padding:12px;font:inherit}
-.auth-dialog input:focus{outline:1px solid var(--gold);border-color:var(--gold)}
 .auth-form-actions{display:grid;gap:9px;margin-top:17px}
 .auth-form-actions button{width:100%;padding:11px}
-.auth-divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px;margin:13px 0}
-.auth-divider:before,.auth-divider:after{content:"";height:1px;background:var(--line);flex:1}
 .auth-message{font-size:12px;min-height:18px;margin-top:12px;color:#a9c99b}
 .auth-close{float:right;background:none;border:0;color:var(--muted);font-size:22px;cursor:pointer}
-.auth-switch{border:0;background:none;color:#d7c17b;text-decoration:underline;cursor:pointer;font:inherit;font-size:12px;margin-top:12px}
+
+/* Library uploader */
+.upload-fields{display:grid;gap:12px;margin-top:18px}
+.upload-fields label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+.upload-fields textarea{min-height:76px;resize:vertical}
+.upload-fields .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.upload-note{font-size:12px;color:var(--muted);line-height:1.5}
+.upload-message{font-size:12px;min-height:18px;color:#a9c99b}
+.library-list{display:grid;gap:9px;margin-top:16px}
+.library-item{padding:12px;background:#10141d;border:1px solid var(--line);border-radius:9px}
+.library-item strong{display:block;font-size:13px}
+.library-item small{display:block;color:var(--muted);margin-top:4px}
 @media(max-width:900px){.sidebar{width:228px;flex-basis:228px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.content-grid{grid-template-columns:1fr}}
 @media(max-width:620px){
   .app{display:block}
@@ -124,6 +133,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-
   .performance-chart{gap:5px}
   .auth-actions{justify-content:flex-start}
   .auth-user{max-width:130px}
+  .upload-fields .field-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -186,7 +196,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-
     </div>
     <div class="auth-actions" id="authActions">
       <span class="auth-user" id="authUserLabel">Browsing as guest</span>
-      <button class="auth-btn" id="openAuthBtn" type="button">Log In / Sign Up</button>
+      <button class="auth-btn primary" id="openAuthBtn" type="button">Continue with Google</button>
       <button class="auth-btn" id="logoutBtn" type="button" hidden>Log Out</button>
     </div>
   </div>
@@ -230,9 +240,8 @@ body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-
         </div>
       </div>
     </div>
-    <div class="profile-note">
-      Your profile and training records are stored in this browser on this device.
-      They do not automatically sync across different devices.
+    <div class="profile-note" id="profileNote">
+      Guest data is saved in this browser. Sign in with Google to sync your training data across devices.
     </div>
   </section>
 
@@ -290,528 +299,805 @@ body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-
 
   <section class="card" id="library" style="margin-top:16px">
     <h2>Library</h2>
-    <p>Your chess resources and puzzle collections will be organized here.</p>
+    <p>Browse public puzzles and contribute your own chess puzzles.</p>
+
+    <div class="upload-fields">
+      <div>
+        <label for="uploadFen">Puzzle FEN</label>
+        <textarea id="uploadFen" placeholder="Paste the starting FEN position"></textarea>
+      </div>
+      <div>
+        <label for="uploadMoves">Solution moves (UCI)</label>
+        <input id="uploadMoves" type="text" placeholder="Example: e2e4 e7e5 g1f3">
+        <div class="upload-note">Enter moves separated by spaces. Example: e2e4 e7e5 g1f3.</div>
+      </div>
+      <div class="field-grid">
+        <div>
+          <label for="uploadRating">Puzzle rating</label>
+          <input id="uploadRating" type="number" min="1" max="4000" placeholder="Example: 1500">
+        </div>
+        <div>
+          <label for="uploadThemes">Themes</label>
+          <input id="uploadThemes" type="text" placeholder="fork, pin, mate">
+        </div>
+      </div>
+      <div>
+        <label for="uploadGameUrl">Original game URL (optional)</label>
+        <input id="uploadGameUrl" type="url" placeholder="https://lichess.org/...">
+      </div>
+      <div class="profile-actions">
+        <button class="action-btn" id="uploadPuzzleBtn" type="button">Upload Public Puzzle</button>
+        <span class="upload-message" id="uploadMessage"></span>
+      </div>
+      <div class="upload-note" id="uploadLoginNote">
+        You can browse public puzzles as a guest. Sign in with Google to upload a puzzle.
+      </div>
+    </div>
+
+    <div class="library-list" id="publicPuzzleList">
+      <p class="upload-note">Loading public puzzles…</p>
+    </div>
   </section>
 </main>
 </div>
 
-<!-- Authentication modal -->
+<!-- Google authentication modal -->
 <div class="auth-overlay" id="authOverlay" role="dialog" aria-modal="true" aria-labelledby="authTitle">
   <div class="auth-dialog">
     <button class="auth-close" id="closeAuthBtn" type="button" aria-label="Close">&times;</button>
     <h2 id="authTitle">Welcome to PuzzleForge</h2>
-    <p id="authSubtitle">Sign in to save puzzles and sync your training journey. You can keep browsing as a guest.</p>
-    <form id="authForm">
-      <label for="authEmail">Email address</label>
-      <input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" required>
-      <label for="authPassword">Password</label>
-      <input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="At least 6 characters" required>
-      <div class="auth-form-actions">
-        <button class="auth-btn primary" id="emailAuthBtn" type="submit">Log In</button>
-      </div>
-    </form>
-    <div class="auth-divider">OR</div>
-    <button class="auth-btn" id="googleAuthBtn" type="button" style="width:100%">Continue with Google</button>
-    <button class="auth-switch" id="authModeBtn" type="button">New to PuzzleForge? Create an account</button>
+    <p>Sign in with your Google account to sync your profile, puzzle progress and Woodpecker records across devices.</p>
+    <div class="auth-form-actions">
+      <button class="auth-btn primary" id="googleAuthBtn" type="button">Continue with Google</button>
+    </div>
     <div class="auth-message" id="authMessage" role="status" aria-live="polite"></div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Firebase compatibility SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+<!-- Shared PuzzleForge Firebase layer -->
+<script src="firebase-cloud.js"></script>
 
 <script>
 (function(){
-  // Supabase configuration
-  const SUPABASE_URL="https://hyyxlwmaqusjrhlluing.supabase.co";
-  const SUPABASE_ANON_KEY="sb_publishable_oMxm01hOZDMh-YG0mZsfNQ_fbaoavfs";
+"use strict";
 
-  const supabaseClient=window.supabase
-    ?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+const $=id=>document.getElementById(id);
 
-  const authOverlay=document.getElementById("authOverlay");
-  const authForm=document.getElementById("authForm");
-  const authMessage=document.getElementById("authMessage");
-  const authModeBtn=document.getElementById("authModeBtn");
-  const emailAuthBtn=document.getElementById("emailAuthBtn");
-  let authMode="login";
+const KEY="puzzleforge_progress_v1";
+const PROFILE_KEY="puzzleforge_profile_v1";
+const WOOD_KEY="puzzleforge_woodpecker_v1";
 
-  function showAuthMessage(message,isError){
-    authMessage.textContent=message;
-    authMessage.style.color=isError?"#e5a09a":"#a9c99b";
+let currentUser=null;
+let publicPuzzles=[];
+let authInitialized=false;
+
+const authOverlay=$("authOverlay");
+const authMessage=$("authMessage");
+
+function showAuthMessage(message,isError){
+  authMessage.textContent=message;
+  authMessage.style.color=isError?"#e5a09a":"#a9c99b";
+}
+
+function openAuth(){
+  authOverlay.classList.add("open");
+  showAuthMessage("",false);
+}
+
+function closeAuth(){
+  authOverlay.classList.remove("open");
+}
+
+$("openAuthBtn").addEventListener("click",openAuth);
+$("closeAuthBtn").addEventListener("click",closeAuth);
+
+authOverlay.addEventListener("click",event=>{
+  if(event.target===authOverlay)closeAuth();
+});
+
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape")closeAuth();
+});
+
+$("googleAuthBtn").addEventListener("click",async()=>{
+  if(!window.PF){
+    showAuthMessage("Firebase could not load. Please refresh the page.",true);
+    return;
   }
 
-  function openAuth(){
-    authOverlay.classList.add("open");
-    showAuthMessage("",false);
-    document.getElementById("authEmail").focus();
+  const button=$("googleAuthBtn");
+  button.disabled=true;
+  showAuthMessage("Connecting to Google…",false);
+
+  try{
+    await window.PF.signIn();
+    showAuthMessage("Signed in successfully.",false);
+    closeAuth();
+  }catch(error){
+    console.error("Google sign-in error:",error);
+    showAuthMessage(error.message||"Google sign-in failed. Please try again.",true);
+  }finally{
+    button.disabled=false;
   }
+});
 
-  function closeAuth(){authOverlay.classList.remove("open");}
+$("logoutBtn").addEventListener("click",async()=>{
+  if(!window.PF)return;
 
-  function setAuthMode(mode){
-    authMode=mode;
-    const signup=mode==="signup";
-    document.getElementById("authTitle").textContent=signup
-      ?"Create your PuzzleForge account":"Welcome to PuzzleForge";
-    document.getElementById("authSubtitle").textContent=signup
-      ?"Create an account to save puzzles and sync your training journey."
-      :"Sign in to save puzzles and sync your training journey. You can keep browsing as a guest.";
-    emailAuthBtn.textContent=signup?"Create Account":"Log In";
-    authModeBtn.textContent=signup
-      ?"Already have an account? Log in"
-      :"New to PuzzleForge? Create an account";
-    document.getElementById("authPassword").autocomplete=signup
-      ?"new-password":"current-password";
-    showAuthMessage("",false);
+  try{
+    await window.PF.signOut();
+  }catch(error){
+    console.error("Sign-out error:",error);
+    window.alert("Could not log out: "+(error.message||"Please try again."));
   }
+});
 
-  function renderAuthState(user){
-    const label=document.getElementById("authUserLabel");
-    const openBtn=document.getElementById("openAuthBtn");
-    const logoutBtn=document.getElementById("logoutBtn");
+function renderAuthState(user){
+  currentUser=user||null;
 
-    if(user){
-      label.textContent=user.user_metadata?.full_name||user.email||"Signed in";
-      openBtn.hidden=true;
-      logoutBtn.hidden=false;
-      closeAuth();
-    }else{
-      label.textContent="Browsing as guest";
-      openBtn.hidden=false;
-      logoutBtn.hidden=true;
-    }
-  }
+  $("authUserLabel").textContent=user
+    ?(user.displayName||user.email||"Signed in")
+    :"Browsing as guest";
 
-  document.getElementById("openAuthBtn").addEventListener("click",openAuth);
-  document.getElementById("closeAuthBtn").addEventListener("click",closeAuth);
+  $("openAuthBtn").hidden=!!user;
+  $("logoutBtn").hidden=!user;
 
-  authOverlay.addEventListener("click",event=>{
-    if(event.target===authOverlay)closeAuth();
-  });
+  $("profileNote").textContent=user
+    ?"Your profile and training records are synced with your Google account. You can access them on another device by signing in with the same account."
+    :"Guest data is saved in this browser. Sign in with Google to sync your training data across devices.";
 
-  document.addEventListener("keydown",event=>{
-    if(event.key==="Escape")closeAuth();
-  });
+  $("uploadPuzzleBtn").disabled=!user;
+  $("uploadLoginNote").textContent=user
+    ?"Your uploaded puzzles will be public and available to other PuzzleForge users."
+    :"You can browse public puzzles as a guest. Sign in with Google to upload a puzzle.";
 
-  authModeBtn.addEventListener("click",()=>{
-    setAuthMode(authMode==="login"?"signup":"login");
-  });
-
-  document.getElementById("googleAuthBtn").addEventListener("click",async()=>{
-    if(!supabaseClient){
-      showAuthMessage("Authentication could not load. Please refresh the page.",true);
-      return;
-    }
-    showAuthMessage("Connecting to Google…",false);
-    const {error}=await supabaseClient.auth.signInWithOAuth({
-      provider:"google",
-      options:{
-        redirectTo:"https://shayaankabir180.github.io/PuzzleForge/"
-      }
-    });
-    if(error)showAuthMessage(error.message,true);
-  });
-
-  authForm.addEventListener("submit",async event=>{
-    event.preventDefault();
-
-    if(!supabaseClient){
-      showAuthMessage("Authentication could not load. Please refresh the page.",true);
-      return;
-    }
-
-    const email=document.getElementById("authEmail").value.trim();
-    const password=document.getElementById("authPassword").value;
-
-    emailAuthBtn.disabled=true;
-    showAuthMessage(authMode==="signup"?"Creating your account…":"Signing you in…",false);
-
-    try{
-      if(authMode==="signup"){
-        const {data,error}=await supabaseClient.auth.signUp({
-          email,
-          password,
-          options:{
-            emailRedirectTo:"https://shayaankabir180.github.io/PuzzleForge/"
-          }
-        });
-
-        if(error)throw error;
-
-        if(data.session){
-          showAuthMessage("Account created. You are now signed in.",false);
-        }else{
-          showAuthMessage("Account created! Check your email and confirm your address, then log in.",false);
-        }
-      }else{
-        const {error}=await supabaseClient.auth.signInWithPassword({email,password});
-        if(error)throw error;
-        showAuthMessage("Signed in successfully.",false);
-      }
-    }catch(error){
-      showAuthMessage(error.message||"Something went wrong. Please try again.",true);
-    }finally{
-      emailAuthBtn.disabled=false;
-    }
-  });
-
-  document.getElementById("logoutBtn").addEventListener("click",async()=>{
-    if(!supabaseClient)return;
-    const {error}=await supabaseClient.auth.signOut();
-    if(error)window.alert("Could not log out: "+error.message);
-  });
-
-  if(supabaseClient){
-    supabaseClient.auth.getSession().then(({data,error})=>{
-      if(error)console.warn("Could not restore session:",error);
-      renderAuthState(data?.session?.user||null);
-    });
-
-    supabaseClient.auth.onAuthStateChange((_event,session)=>{
-      renderAuthState(session?.user||null);
-    });
-  }else{
-    document.getElementById("authUserLabel").textContent="Authentication unavailable";
-  }
-
-  // Existing PuzzleForge dashboard functionality
-  const KEY="puzzleforge_progress_v1";
-  const PROFILE_KEY="puzzleforge_profile_v1";
-  const WOOD_KEY="puzzleforge_woodpecker_v1";
-
-  function readStorage(key){
-    try{return JSON.parse(localStorage.getItem(key)||"{}");}
-    catch(e){return {};}
-  }
-
-  function readProgress(){return readStorage(KEY);}
-
-  function dateKey(date){
-    return date.getFullYear()+"-"+
-      String(date.getMonth()+1).padStart(2,"0")+"-"+
-      String(date.getDate()).padStart(2,"0");
-  }
-
-  function currentStreak(dates){
-    const set=new Set(Array.isArray(dates)?dates:[]);
-    const today=new Date();
-    let cursor=new Date(today.getFullYear(),today.getMonth(),today.getDate());
-    if(!set.has(dateKey(cursor)))cursor.setDate(cursor.getDate()-1);
-    let streak=0;
-    while(set.has(dateKey(cursor))){
-      streak++;
-      cursor.setDate(cursor.getDate()-1);
-    }
-    return streak;
-  }
-
-  function formatTime(milliseconds){
-    if(!Number.isFinite(milliseconds)||milliseconds<0)return "—";
-    const totalSeconds=Math.floor(milliseconds/1000);
-    const minutes=Math.floor(totalSeconds/60);
-    const seconds=totalSeconds%60;
-    return String(minutes).padStart(2,"0")+":"+String(seconds).padStart(2,"0");
-  }
-
-  function validNonNegative(value){
-    return value!==null&&value!==undefined&&value!==""&&
-      Number.isFinite(Number(value))&&Number(value)>=0;
-  }
-
-  function renderProfile(){
-    const profile=readStorage(PROFILE_KEY);
-    const fullNameInput=document.getElementById("profileFullName");
-    const usernameInput=document.getElementById("profileUsername");
-
-    if(document.activeElement!==fullNameInput)fullNameInput.value=profile.fullName||"";
-    if(document.activeElement!==usernameInput)usernameInput.value=profile.username||"";
-
-    const wood=readStorage(WOOD_KEY);
-    const history=Array.isArray(wood.history)?wood.history:[];
-    const lifetime=wood.lifetimeStats&&typeof wood.lifetimeStats==="object"
-      ?wood.lifetimeStats:null;
-
-    const rounds=lifetime&&validNonNegative(lifetime.rounds)
-      ?Number(lifetime.rounds):history.length;
-
-    const totalPuzzles=lifetime&&validNonNegative(lifetime.puzzles)
-      ?Number(lifetime.puzzles)
-      :history.reduce((total,round)=>total+Math.max(0,Number(round.count)||0),0);
-
-    const validTimes=history.map(round=>Number(round.milliseconds))
-      .filter(time=>Number.isFinite(time)&&time>0);
-
-    const fallbackBest=validTimes.length?Math.min(...validTimes):null;
-    const bestTime=lifetime&&validNonNegative(lifetime.bestMilliseconds)
-      ?Number(lifetime.bestMilliseconds):fallbackBest;
-
-    const validMistakes=history.map(round=>Number(round.mistakes))
-      .filter(value=>Number.isFinite(value)&&value>=0);
-
-    const fallbackMistakes=validMistakes.length?Math.min(...validMistakes):null;
-    const fewestMistakes=lifetime&&validNonNegative(lifetime.fewestMistakes)
-      ?Number(lifetime.fewestMistakes):fallbackMistakes;
-
-    document.getElementById("woodRounds").textContent=rounds;
-    document.getElementById("woodPuzzles").textContent=totalPuzzles;
-    document.getElementById("woodBest").textContent=bestTime===null?"—":formatTime(bestTime);
-    document.getElementById("woodMistakes").textContent=fewestMistakes===null?"—":fewestMistakes;
-  }
-
-  document.getElementById("saveProfile").addEventListener("click",function(){
-    const fullName=document.getElementById("profileFullName").value.trim();
-    let username=document.getElementById("profileUsername").value.trim();
-    username=username.replace(/^@+/,"");
-    const message=document.getElementById("profileMessage");
-
-    if(!fullName||!username){
-      message.style.color="#e5a09a";
-      message.textContent="Please enter both your name and username.";
-      return;
-    }
-
-    try{
-      localStorage.setItem(PROFILE_KEY,JSON.stringify({fullName,username}));
-      message.style.color="#a9c99b";
-      message.textContent="Profile saved successfully!";
-    }catch(e){
-      message.style.color="#e5a09a";
-      message.textContent="Could not save profile. Check browser storage.";
-    }
-  });
-
-  function renderTrainingHistory(){
-    const container=document.getElementById("trainingHistoryList");
-    const progress=readProgress();
-    const wood=readStorage(WOOD_KEY);
-    const daily=progress.dailySolved&&typeof progress.dailySolved==="object"
-      ?progress.dailySolved:{};
-    const history=Array.isArray(wood.history)?wood.history:[];
-    const records=[];
-
-    Object.keys(daily).forEach(date=>{
-      const count=Math.max(0,Number(daily[date])||0);
-      if(count>0){
-        records.push({
-          date:date,type:"Puzzle Contriving",
-          detail:count+" puzzles completed",sortDate:date
-        });
-      }
-    });
-
-    history.forEach(round=>{
-      const validDate=round.date?new Date(round.date):null;
-      const dateLabel=validDate&&!isNaN(validDate.getTime())
-        ?validDate.toLocaleDateString():"Date unavailable";
-      records.push({
-        date:dateLabel,type:"Woodpecker Round",
-        detail:(Number(round.count)||0)+" puzzles · "+
-          (Number(round.mistakes)||0)+" mistakes · "+
-          (round.time||"Time unavailable"),
-        sortDate:validDate&&!isNaN(validDate.getTime())?validDate.getTime():0
-      });
-    });
-
-    records.sort((a,b)=>{
-      const timeA=typeof a.sortDate==="number"?a.sortDate:new Date(a.sortDate).getTime();
-      const timeB=typeof b.sortDate==="number"?b.sortDate:new Date(b.sortDate).getTime();
-      return timeB-timeA;
-    });
-
-    container.replaceChildren();
-
-    if(!records.length){
-      const empty=document.createElement("p");
-      empty.textContent="No training records yet.";
-      container.appendChild(empty);
-      return;
-    }
-
-    records.slice(0,15).forEach(record=>{
-      const item=document.createElement("div");
-      item.className="history-item";
-      const left=document.createElement("div");
-      const title=document.createElement("strong");
-      title.textContent=record.type;
-      const detail=document.createElement("div");
-      detail.className="history-detail";
-      detail.textContent=record.detail;
-      left.append(title,detail);
-      const date=document.createElement("span");
-      date.textContent=record.date;
-      item.append(left,date);
-      container.appendChild(item);
-    });
-  }
-
-  function renderPerformance(){
-    const progress=readProgress();
-    const daily=progress.dailySolved&&typeof progress.dailySolved==="object"
-      ?progress.dailySolved:{};
-    const chart=document.getElementById("performanceChart");
-    chart.replaceChildren();
-
-    const days=[];
-    for(let offset=6;offset>=0;offset--){
-      const date=new Date();
-      date.setHours(0,0,0,0);
-      date.setDate(date.getDate()-offset);
-      days.push({date,count:Math.max(0,Number(daily[dateKey(date)])||0)});
-    }
-
-    const max=Math.max(1,...days.map(day=>day.count));
-    days.forEach(day=>{
-      const column=document.createElement("div");
-      column.className="performance-column";
-      const value=document.createElement("strong");
-      value.textContent=day.count;
-      const bar=document.createElement("div");
-      bar.className="performance-bar";
-      bar.style.height=(day.count?Math.max(4,day.count/max*100):2)+"%";
-      const label=document.createElement("small");
-      label.textContent=day.date.getDate()+"/"+(day.date.getMonth()+1);
-      column.append(value,bar,label);
-      chart.appendChild(column);
-    });
-
-    const wood=readStorage(WOOD_KEY);
-    const history=Array.isArray(wood.history)?wood.history:[];
-    const timeChart=document.getElementById("woodPerformanceChart");
-    timeChart.replaceChildren();
-
-    const recent=history.filter(round=>
-      Number.isFinite(Number(round.milliseconds))&&Number(round.milliseconds)>0
-    ).slice(-10);
-
-    if(!recent.length){
-      const empty=document.createElement("p");
-      empty.textContent="Complete a Woodpecker round to see your time progress.";
-      timeChart.appendChild(empty);
-      return;
-    }
-
-    const times=recent.map(round=>Number(round.milliseconds));
-    const slowest=Math.max(...times,1);
-
-    recent.forEach((round,index)=>{
-      const column=document.createElement("div");
-      column.className="performance-column";
-      const value=document.createElement("strong");
-      value.textContent=round.time||formatTime(Number(round.milliseconds));
-      const bar=document.createElement("div");
-      bar.className="performance-bar";
-      bar.style.height=Math.max(5,Number(round.milliseconds)/slowest*100)+"%";
-      const label=document.createElement("small");
-      label.textContent="R"+(index+1);
-      column.append(value,bar,label);
-      timeChart.appendChild(column);
-    });
-  }
-
-  async function renderDeckOverview(){
-    const newEl=document.getElementById("woodDeckNew");
-    const learningEl=document.getElementById("woodDeckLearning");
-    const graduatedEl=document.getElementById("woodDeckGraduated");
-
-    try{
-      const response=await fetch("puzzles.json",{cache:"no-store"});
-      if(!response.ok)throw new Error("Puzzle database unavailable");
-      const puzzles=await response.json();
-      if(!Array.isArray(puzzles))throw new Error("Invalid puzzle database");
-
-      const wood=readStorage(WOOD_KEY);
-      const counts=wood.puzzleRoundCounts&&typeof wood.puzzleRoundCounts==="object"
-        ?wood.puzzleRoundCounts:{};
-
-      let learning=0,graduated=0,seen=0;
-      Object.keys(counts).forEach(id=>{
-        const count=Math.max(0,Number(counts[id])||0);
-        if(count>0){
-          seen++;
-          if(count>=3)graduated++;
-          else learning++;
-        }
-      });
-
-      newEl.textContent=Math.max(0,puzzles.length-seen);
-      learningEl.textContent=learning;
-      graduatedEl.textContent=graduated;
-    }catch(error){
-      newEl.textContent="—";
-      learningEl.textContent="—";
-      graduatedEl.textContent="—";
-      console.warn("Could not calculate Woodpecker deck overview:",error);
-    }
-  }
-
-  function render(){
-    const data=readProgress();
-    const solved=Array.isArray(data.solvedIds)?data.solvedIds.length:0;
-    const noHint=Array.isArray(data.noHintIds)?data.noHintIds.length:0;
-    const attempts=Math.max(0,Number(data.totalAttempts)||0);
-    const correct=Math.max(0,Number(data.correctMoves)||0);
-
-    document.getElementById("dashSolved").textContent=solved;
-    document.getElementById("dashNoHint").textContent=noHint;
-    document.getElementById("dashAccuracy").textContent=
-      (attempts?Math.round(correct/attempts*100):0)+"%";
-    document.getElementById("dashStreak").textContent=currentStreak(data.solvedDates);
-
-    const chart=document.getElementById("progressChart");
-    chart.replaceChildren();
-    const counts=data.dailySolved&&typeof data.dailySolved==="object"
-      ?data.dailySolved:{};
-    const days=[];
-
-    for(let offset=6;offset>=0;offset--){
-      const date=new Date();
-      date.setHours(0,0,0,0);
-      date.setDate(date.getDate()-offset);
-      days.push({date,count:Math.max(0,Number(counts[dateKey(date)])||0)});
-    }
-
-    const max=Math.max(1,...days.map(day=>day.count));
-    days.forEach(day=>{
-      const column=document.createElement("div");
-      column.className="chart-day";
-      const value=document.createElement("strong");
-      value.textContent=day.count;
-      const track=document.createElement("div");
-      track.className="chart-bar-track";
-      const bar=document.createElement("div");
-      bar.className="chart-bar";
-      bar.style.height=(day.count?Math.max(5,day.count/max*100):2)+"%";
-      bar.title=day.count+" puzzle"+(day.count===1?"":"s")+" solved";
-      track.appendChild(bar);
-      const label=document.createElement("small");
-      label.textContent=day.date.toLocaleDateString(undefined,{weekday:"short"});
-      column.append(value,track,label);
-      chart.appendChild(column);
-    });
-
-    renderProfile();
-  }
-
-  function renderNewFeatures(){
-    renderTrainingHistory();
-    renderPerformance();
-    renderDeckOverview();
-  }
+  if(user)closeAuth();
 
   render();
   renderNewFeatures();
+  loadPublicPuzzles();
+}
 
-  window.addEventListener("storage",function(event){
-    if(event.key===KEY||event.key===PROFILE_KEY||event.key===WOOD_KEY||event.key===null){
-      render();
-      renderNewFeatures();
+function readStorage(key){
+  try{
+    return JSON.parse(localStorage.getItem(key)||"{}");
+  }catch(error){
+    return {};
+  }
+}
+
+function writeStorage(key,value){
+  try{
+    localStorage.setItem(key,JSON.stringify(value));
+    if(window.PF&&typeof window.PF.scheduleSync==="function"){
+      window.PF.scheduleSync();
+    }
+    return true;
+  }catch(error){
+    console.error("Could not save local data:",error);
+    return false;
+  }
+}
+
+function readProgress(){
+  return readStorage(KEY);
+}
+
+function dateKey(date){
+  return date.getFullYear()+"-"+
+    String(date.getMonth()+1).padStart(2,"0")+"-"+
+    String(date.getDate()).padStart(2,"0");
+}
+
+function currentStreak(dates){
+  const set=new Set(Array.isArray(dates)?dates:[]);
+  const today=new Date();
+  let cursor=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+
+  if(!set.has(dateKey(cursor)))cursor.setDate(cursor.getDate()-1);
+
+  let streak=0;
+  while(set.has(dateKey(cursor))){
+    streak++;
+    cursor.setDate(cursor.getDate()-1);
+  }
+  return streak;
+}
+
+function formatTime(milliseconds){
+  if(!Number.isFinite(milliseconds)||milliseconds<0)return "—";
+  const totalSeconds=Math.floor(milliseconds/1000);
+  const minutes=Math.floor(totalSeconds/60);
+  const seconds=totalSeconds%60;
+  return String(minutes).padStart(2,"0")+":"+String(seconds).padStart(2,"0");
+}
+
+function validNonNegative(value){
+  return value!==null&&value!==undefined&&value!==""&&
+    Number.isFinite(Number(value))&&Number(value)>=0;
+}
+
+function renderProfile(){
+  const profile=readStorage(PROFILE_KEY);
+  const fullNameInput=$("profileFullName");
+  const usernameInput=$("profileUsername");
+
+  if(document.activeElement!==fullNameInput){
+    fullNameInput.value=profile.fullName||"";
+  }
+  if(document.activeElement!==usernameInput){
+    usernameInput.value=profile.username||"";
+  }
+
+  const wood=readStorage(WOOD_KEY);
+  const history=Array.isArray(wood.history)?wood.history:[];
+  const lifetime=wood.lifetimeStats&&typeof wood.lifetimeStats==="object"
+    ?wood.lifetimeStats:null;
+
+  const rounds=lifetime&&validNonNegative(lifetime.rounds)
+    ?Number(lifetime.rounds):history.length;
+
+  const totalPuzzles=lifetime&&validNonNegative(lifetime.puzzles)
+    ?Number(lifetime.puzzles)
+    :history.reduce((total,round)=>total+Math.max(0,Number(round.count)||0),0);
+
+  const validTimes=history.map(round=>Number(round.milliseconds))
+    .filter(time=>Number.isFinite(time)&&time>0);
+
+  const fallbackBest=validTimes.length?Math.min(...validTimes):null;
+  const bestTime=lifetime&&validNonNegative(lifetime.bestMilliseconds)
+    ?Number(lifetime.bestMilliseconds):fallbackBest;
+
+  const validMistakes=history.map(round=>Number(round.mistakes))
+    .filter(value=>Number.isFinite(value)&&value>=0);
+
+  const fallbackMistakes=validMistakes.length?Math.min(...validMistakes):null;
+  const fewestMistakes=lifetime&&validNonNegative(lifetime.fewestMistakes)
+    ?Number(lifetime.fewestMistakes):fallbackMistakes;
+
+  $("woodRounds").textContent=rounds;
+  $("woodPuzzles").textContent=totalPuzzles;
+  $("woodBest").textContent=bestTime===null?"—":formatTime(bestTime);
+  $("woodMistakes").textContent=fewestMistakes===null?"—":fewestMistakes;
+}
+
+$("saveProfile").addEventListener("click",function(){
+  const fullName=$("profileFullName").value.trim();
+  let username=$("profileUsername").value.trim();
+  username=username.replace(/^@+/,"");
+  const message=$("profileMessage");
+
+  if(!fullName||!username){
+    message.style.color="#e5a09a";
+    message.textContent="Please enter both your name and username.";
+    return;
+  }
+
+  const saved=writeStorage(PROFILE_KEY,{fullName,username});
+
+  if(saved){
+    message.style.color="#a9c99b";
+    message.textContent=currentUser
+      ?"Profile saved. Cloud sync scheduled."
+      :"Profile saved on this device.";
+  }else{
+    message.style.color="#e5a09a";
+    message.textContent="Could not save profile. Check browser storage.";
+  }
+});
+
+function renderTrainingHistory(){
+  const container=$("trainingHistoryList");
+  const progress=readProgress();
+  const wood=readStorage(WOOD_KEY);
+
+  const daily=progress.dailySolved&&typeof progress.dailySolved==="object"
+    ?progress.dailySolved:{};
+
+  const history=Array.isArray(wood.history)?wood.history:[];
+  const records=[];
+
+  Object.keys(daily).forEach(date=>{
+    const count=Math.max(0,Number(daily[date])||0);
+    if(count>0){
+      records.push({
+        date:date,
+        type:"Puzzle Contriving",
+        detail:count+" puzzles completed",
+        sortDate:date
+      });
     }
   });
 
-  window.addEventListener("focus",function(){
-    render();
-    renderNewFeatures();
+  history.forEach(round=>{
+    const validDate=round.date?new Date(round.date):null;
+    const dateLabel=validDate&&!isNaN(validDate.getTime())
+      ?validDate.toLocaleDateString():"Date unavailable";
+
+    records.push({
+      date:dateLabel,
+      type:"Woodpecker Round",
+      detail:(Number(round.count)||0)+" puzzles · "+
+        (Number(round.mistakes)||0)+" mistakes · "+
+        (round.time||"Time unavailable"),
+      sortDate:validDate&&!isNaN(validDate.getTime())
+        ?validDate.getTime():0
+    });
   });
+
+  records.sort((a,b)=>{
+    const timeA=typeof a.sortDate==="number"
+      ?a.sortDate:new Date(a.sortDate).getTime();
+    const timeB=typeof b.sortDate==="number"
+      ?b.sortDate:new Date(b.sortDate).getTime();
+    return timeB-timeA;
+  });
+
+  container.replaceChildren();
+
+  if(!records.length){
+    const empty=document.createElement("p");
+    empty.textContent="No training records yet.";
+    container.appendChild(empty);
+    return;
+  }
+
+  records.slice(0,15).forEach(record=>{
+    const item=document.createElement("div");
+    item.className="history-item";
+
+    const left=document.createElement("div");
+    const title=document.createElement("strong");
+    title.textContent=record.type;
+
+    const detail=document.createElement("div");
+    detail.className="history-detail";
+    detail.textContent=record.detail;
+
+    left.append(title,detail);
+
+    const date=document.createElement("span");
+    date.textContent=record.date;
+
+    item.append(left,date);
+    container.appendChild(item);
+  });
+}
+
+function renderPerformance(){
+  const progress=readProgress();
+  const daily=progress.dailySolved&&typeof progress.dailySolved==="object"
+    ?progress.dailySolved:{};
+
+  const chart=$("performanceChart");
+  chart.replaceChildren();
+
+  const days=[];
+  for(let offset=6;offset>=0;offset--){
+    const date=new Date();
+    date.setHours(0,0,0,0);
+    date.setDate(date.getDate()-offset);
+    days.push({
+      date:date,
+      count:Math.max(0,Number(daily[dateKey(date)])||0)
+    });
+  }
+
+  const max=Math.max(1,...days.map(day=>day.count));
+
+  days.forEach(day=>{
+    const column=document.createElement("div");
+    column.className="performance-column";
+
+    const value=document.createElement("strong");
+    value.textContent=day.count;
+
+    const bar=document.createElement("div");
+    bar.className="performance-bar";
+    bar.style.height=(day.count?Math.max(4,day.count/max*100):2)+"%";
+
+    const label=document.createElement("small");
+    label.textContent=day.date.getDate()+"/"+(day.date.getMonth()+1);
+
+    column.append(value,bar,label);
+    chart.appendChild(column);
+  });
+
+  const wood=readStorage(WOOD_KEY);
+  const history=Array.isArray(wood.history)?wood.history:[];
+  const timeChart=$("woodPerformanceChart");
+  timeChart.replaceChildren();
+
+  const recent=history.filter(round=>
+    Number.isFinite(Number(round.milliseconds))&&Number(round.milliseconds)>0
+  ).slice(-10);
+
+  if(!recent.length){
+    const empty=document.createElement("p");
+    empty.textContent="Complete a Woodpecker round to see your time progress.";
+    timeChart.appendChild(empty);
+    return;
+  }
+
+  const times=recent.map(round=>Number(round.milliseconds));
+  const slowest=Math.max(...times,1);
+
+  recent.forEach((round,index)=>{
+    const column=document.createElement("div");
+    column.className="performance-column";
+
+    const value=document.createElement("strong");
+    value.textContent=round.time||formatTime(Number(round.milliseconds));
+
+    const bar=document.createElement("div");
+    bar.className="performance-bar";
+    bar.style.height=Math.max(5,Number(round.milliseconds)/slowest*100)+"%";
+
+    const label=document.createElement("small");
+    label.textContent="R"+(index+1);
+
+    column.append(value,bar,label);
+    timeChart.appendChild(column);
+  });
+}
+
+async function getAllPuzzles(){
+  let base=[];
+
+  try{
+    const response=await fetch("puzzles.json",{cache:"no-store"});
+    if(response.ok){
+      const data=await response.json();
+      if(Array.isArray(data))base=data;
+    }
+  }catch(error){
+    console.warn("Could not load puzzles.json:",error);
+  }
+
+  let uploaded=[];
+
+  if(window.PF&&typeof window.PF.getPublicPuzzles==="function"){
+    try{
+      uploaded=await window.PF.getPublicPuzzles();
+      if(!Array.isArray(uploaded))uploaded=[];
+    }catch(error){
+      console.warn("Could not load public uploaded puzzles:",error);
+    }
+  }
+
+  const combined=[...base,...uploaded];
+  const seen=new Set();
+
+  return combined.filter(puzzle=>{
+    if(!puzzle||!puzzle.fen||!Array.isArray(puzzle.moves))return false;
+
+    const id=String(puzzle.id||puzzle.fen);
+    if(seen.has(id))return false;
+
+    seen.add(id);
+    return true;
+  });
+}
+
+async function renderDeckOverview(){
+  const newEl=$("woodDeckNew");
+  const learningEl=$("woodDeckLearning");
+  const graduatedEl=$("woodDeckGraduated");
+
+  try{
+    const puzzles=await getAllPuzzles();
+    const wood=readStorage(WOOD_KEY);
+
+    const counts=wood.puzzleRoundCounts&&typeof wood.puzzleRoundCounts==="object"
+      ?wood.puzzleRoundCounts:{};
+
+    let learning=0,graduated=0,seen=0;
+
+    Object.keys(counts).forEach(id=>{
+      const count=Math.max(0,Number(counts[id])||0);
+
+      if(count>0){
+        seen++;
+        if(count>=3)graduated++;
+        else learning++;
+      }
+    });
+
+    newEl.textContent=Math.max(0,puzzles.length-seen);
+    learningEl.textContent=learning;
+    graduatedEl.textContent=graduated;
+  }catch(error){
+    newEl.textContent="—";
+    learningEl.textContent="—";
+    graduatedEl.textContent="—";
+    console.warn("Could not calculate Woodpecker deck overview:",error);
+  }
+}
+
+function render(){
+  const data=readProgress();
+
+  const solved=Array.isArray(data.solvedIds)?data.solvedIds.length:0;
+  const noHint=Array.isArray(data.noHintIds)?data.noHintIds.length:0;
+  const attempts=Math.max(0,Number(data.totalAttempts)||0);
+  const correct=Math.max(0,Number(data.correctMoves)||0);
+
+  $("dashSolved").textContent=solved;
+  $("dashNoHint").textContent=noHint;
+  $("dashAccuracy").textContent=
+    (attempts?Math.round(correct/attempts*100):0)+"%";
+  $("dashStreak").textContent=currentStreak(data.solvedDates);
+
+  const chart=$("progressChart");
+  chart.replaceChildren();
+
+  const counts=data.dailySolved&&typeof data.dailySolved==="object"
+    ?data.dailySolved:{};
+
+  const days=[];
+
+  for(let offset=6;offset>=0;offset--){
+    const date=new Date();
+    date.setHours(0,0,0,0);
+    date.setDate(date.getDate()-offset);
+    days.push({
+      date:date,
+      count:Math.max(0,Number(counts[dateKey(date)])||0)
+    });
+  }
+
+  const max=Math.max(1,...days.map(day=>day.count));
+
+  days.forEach(day=>{
+    const column=document.createElement("div");
+    column.className="chart-day";
+
+    const value=document.createElement("strong");
+    value.textContent=day.count;
+
+    const track=document.createElement("div");
+    track.className="chart-bar-track";
+
+    const bar=document.createElement("div");
+    bar.className="chart-bar";
+    bar.style.height=(day.count?Math.max(5,day.count/max*100):2)+"%";
+    bar.title=day.count+" puzzle"+(day.count===1?"":"s")+" solved";
+
+    track.appendChild(bar);
+
+    const label=document.createElement("small");
+    label.textContent=day.date.toLocaleDateString(undefined,{weekday:"short"});
+
+    column.append(value,track,label);
+    chart.appendChild(column);
+  });
+
+  renderProfile();
+}
+
+function renderNewFeatures(){
+  renderTrainingHistory();
+  renderPerformance();
+  renderDeckOverview();
+}
+
+/* Public puzzle library */
+function renderPublicPuzzles(){
+  const container=$("publicPuzzleList");
+  container.replaceChildren();
+
+  if(!publicPuzzles.length){
+    const empty=document.createElement("p");
+    empty.className="upload-note";
+    empty.textContent="No community-uploaded puzzles yet.";
+    container.appendChild(empty);
+    return;
+  }
+
+  publicPuzzles.forEach(puzzle=>{
+    const item=document.createElement("div");
+    item.className="library-item";
+
+    const title=document.createElement("strong");
+    title.textContent="Puzzle · Rating "+(puzzle.rating||"Unrated");
+
+    const detail=document.createElement("small");
+    const themes=Array.isArray(puzzle.themes)?puzzle.themes.join(", "):"";
+    detail.textContent=(themes?"Themes: "+themes+" · ":"")+
+      "Community puzzle";
+
+    item.append(title,detail);
+
+    if(currentUser&&puzzle.ownerId===currentUser.uid){
+      const remove=document.createElement("button");
+      remove.type="button";
+      remove.className="auth-btn";
+      remove.style.marginTop="9px";
+      remove.textContent="Delete my puzzle";
+
+      remove.addEventListener("click",async()=>{
+        if(!window.confirm("Delete this puzzle?"))return;
+
+        try{
+          await window.PF.deletePuzzle(puzzle.id);
+          await loadPublicPuzzles();
+        }catch(error){
+          window.alert(error.message||"Could not delete puzzle.");
+        }
+      });
+
+      item.appendChild(remove);
+    }
+
+    container.appendChild(item);
+  });
+}
+
+async function loadPublicPuzzles(){
+  if(!window.PF||typeof window.PF.getPublicPuzzles!=="function"){
+    $("publicPuzzleList").textContent="Firebase library is not available.";
+    return;
+  }
+
+  try{
+    const data=await window.PF.getPublicPuzzles();
+    publicPuzzles=Array.isArray(data)?data:[];
+    renderPublicPuzzles();
+  }catch(error){
+    console.error("Public puzzle loading error:",error);
+    $("publicPuzzleList").textContent="Could not load community puzzles.";
+  }
+}
+
+function setUploadMessage(message,isError){
+  const el=$("uploadMessage");
+  el.textContent=message;
+  el.style.color=isError?"#e5a09a":"#a9c99b";
+}
+
+$("uploadPuzzleBtn").addEventListener("click",async()=>{
+  if(!currentUser){
+    openAuth();
+    setUploadMessage("Sign in with Google before uploading a puzzle.",true);
+    return;
+  }
+
+  const fen=$("uploadFen").value.trim();
+  const movesText=$("uploadMoves").value.trim();
+  const ratingValue=$("uploadRating").value.trim();
+  const themesText=$("uploadThemes").value.trim();
+  const gameUrl=$("uploadGameUrl").value.trim();
+
+  if(!fen||!movesText||!ratingValue){
+    setUploadMessage("Please provide FEN, solution moves and rating.",true);
+    return;
+  }
+
+  const rating=Number(ratingValue);
+  if(!Number.isInteger(rating)||rating<1||rating>4000){
+    setUploadMessage("Rating must be an integer between 1 and 4000.",true);
+    return;
+  }
+
+  const moves=movesText.split(/[\s,]+/).filter(Boolean);
+  if(moves.length<2||moves.some(move=>!/^[a-h][1-8][a-h][1-8][qrbnQRBN]?$/.test(move))){
+    setUploadMessage("Enter at least two valid UCI moves, separated by spaces.",true);
+    return;
+  }
+
+  if(gameUrl){
+    try{
+      const parsed=new URL(gameUrl);
+      if(!["http:","https:"].includes(parsed.protocol)){
+        throw new Error("Invalid URL");
+      }
+    }catch(error){
+      setUploadMessage("Please enter a valid game URL.",true);
+      return;
+    }
+  }
+
+  const themes=themesText
+    .split(",")
+    .map(theme=>theme.trim())
+    .filter(Boolean);
+
+  const button=$("uploadPuzzleBtn");
+  button.disabled=true;
+  setUploadMessage("Uploading your puzzle…",false);
+
+  try{
+    await window.PF.uploadPuzzle({
+      fen:fen,
+      moves:moves,
+      rating:rating,
+      themes:themes,
+      gameUrl:gameUrl
+    });
+
+    $("uploadFen").value="";
+    $("uploadMoves").value="";
+    $("uploadRating").value="";
+    $("uploadThemes").value="";
+    $("uploadGameUrl").value="";
+
+    setUploadMessage("Puzzle uploaded successfully and is now public.",false);
+    await loadPublicPuzzles();
+    await renderDeckOverview();
+  }catch(error){
+    console.error("Puzzle upload error:",error);
+    setUploadMessage(error.message||"Puzzle upload failed. Please try again.",true);
+  }finally{
+    button.disabled=!currentUser;
+  }
+});
+
+/* Dashboard refresh and Firebase events */
+function refreshDashboard(){
+  render();
+  renderNewFeatures();
+}
+
+window.addEventListener("storage",event=>{
+  if(event.key===KEY||event.key===PROFILE_KEY||event.key===WOOD_KEY||event.key===null){
+    refreshDashboard();
+  }
+});
+
+window.addEventListener("focus",refreshDashboard);
+
+window.addEventListener("puzzleforge:auth",event=>{
+  const user=event.detail&&Object.prototype.hasOwnProperty.call(event.detail,"user")
+    ?event.detail.user
+    :(window.PF?window.PF.user:null);
+
+  renderAuthState(user);
+});
+
+window.addEventListener("puzzleforge:cloud-synced",()=>{
+  refreshDashboard();
+});
+
+window.addEventListener("puzzleforge:sync-error",event=>{
+  console.warn("PuzzleForge cloud sync error:",event.detail||"Unknown error");
+});
+
+/* Start page */
+async function initialize(){
+  render();
+  renderNewFeatures();
+  await loadPublicPuzzles();
+
+  if(!window.PF){
+    $("authUserLabel").textContent="Authentication unavailable";
+    $("openAuthBtn").disabled=true;
+    $("uploadPuzzleBtn").disabled=true;
+    $("uploadLoginNote").textContent=
+      "Firebase could not load. Check that firebase-cloud.js exists in the repository root.";
+    return;
+  }
+
+  try{
+    if(window.PF.authReady&&typeof window.PF.authReady.then==="function"){
+      await window.PF.authReady;
+    }
+
+    currentUser=window.PF.user||null;
+    renderAuthState(currentUser);
+    authInitialized=true;
+  }catch(error){
+    console.error("Firebase initialization error:",error);
+    $("authUserLabel").textContent="Authentication unavailable";
+  }
+}
+
+initialize();
+
 })();
 </script>
 </body>
