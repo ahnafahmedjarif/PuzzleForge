@@ -233,6 +233,110 @@ const symbols = {
 
 const STORAGE_KEY = "puzzleforge_progress_v1";
 
+
+/* ---------------- CHESS MOVE SOUNDS ---------------- */
+
+// Audio is initialized only when the user makes a move.
+// This also works around browser autoplay restrictions.
+let audioContext = null;
+
+function playChessSound(type = "move") {
+  try {
+    const AudioContextClass =
+      window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) return;
+
+    if (!audioContext) {
+      audioContext = new AudioContextClass();
+    }
+
+    const ctx = audioContext;
+
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(error => {
+        console.warn("Audio could not resume:", error);
+      });
+    }
+
+    const now = ctx.currentTime;
+
+    function tone(freq, start, duration, volume = 0.07, wave = "sine") {
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      oscillator.type = wave;
+      oscillator.frequency.setValueAtTime(freq, now + start);
+
+      gain.gain.setValueAtTime(0.001, now + start);
+      gain.gain.exponentialRampToValueAtTime(
+        volume,
+        now + start + 0.008
+      );
+      gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        now + start + duration
+      );
+
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+
+      oscillator.start(now + start);
+      oscillator.stop(now + start + duration + 0.02);
+    }
+
+    switch (type) {
+      case "move":
+        // Soft piece movement click
+        tone(420, 0, 0.065, 0.065, "triangle");
+        tone(180, 0.015, 0.055, 0.025, "sine");
+        break;
+
+      case "capture":
+        // Slightly stronger capture sound
+        tone(310, 0, 0.09, 0.09, "triangle");
+        tone(150, 0.025, 0.12, 0.045, "sine");
+        break;
+
+      case "check":
+        // Two-note check alert
+        tone(650, 0, 0.11, 0.07, "sine");
+        tone(850, 0.12, 0.13, 0.065, "sine");
+        break;
+
+      case "wrong":
+        // Descending error sound
+        tone(220, 0, 0.16, 0.08, "sawtooth");
+        tone(145, 0.12, 0.2, 0.07, "sawtooth");
+        break;
+
+      case "success":
+        // Ascending puzzle completion sound
+        tone(523, 0, 0.16, 0.07);
+        tone(659, 0.14, 0.16, 0.07);
+        tone(784, 0.28, 0.24, 0.08);
+        tone(1047, 0.48, 0.3, 0.07);
+        break;
+    }
+
+  } catch (error) {
+    console.warn("Chess sound could not play:", error);
+  }
+}
+
+function playMoveSound(move) {
+  if (!move) return;
+
+  if (game.in_check()) {
+    playChessSound("check");
+  } else if (move.captured) {
+    playChessSound("capture");
+  } else {
+    playChessSound("move");
+  }
+}
+
+
 /* Stockfish */
 let stockfishWorker = null;
 let engineReady = false;
@@ -578,7 +682,7 @@ function makeExplanation(beforeResult,afterResult,moverColor,afterFen){
     }else if(reply.captured){
       reason="This move captures your "+pieceName(reply.captured)+", winning material.";
     }else{
-      reason="This move is the engine's strongest reply. It creates a concrete threat and leaves your position at a disadvantage.";
+      reason="This move is the engine's strongest reply. It creates a concrete threat and leaves you at a disadvantage.";
     }
   }
 
@@ -865,6 +969,7 @@ function startPuzzle(index){
       throw new Error("Invalid puzzle moves.");
     }
 
+    // The initial setup move is intentionally silent.
     const setupMove=applyUci(moves[0]);
 
     if(!setupMove){
@@ -1008,6 +1113,9 @@ function handleClick(square){
       });
 
       if(move){
+        // Play the appropriate sound for the correct move.
+        playMoveSound(move);
+
         recordMoveAttempt(true);
 
         lastMove={
@@ -1045,6 +1153,9 @@ function handleClick(square){
     });
 
     if(wrongMove){
+      // Play an error sound for an incorrect move.
+      playChessSound("wrong");
+
       recordMoveAttempt(false);
 
       const afterFen=game.fen();
@@ -1112,6 +1223,9 @@ function playOpponentMove(){
     return;
   }
 
+  // Play the appropriate sound for the opponent's move too.
+  playMoveSound(move);
+
   lastMove={
     from:move.from,
     to:move.to
@@ -1129,6 +1243,9 @@ function playOpponentMove(){
 }
 
 function finishPuzzle(){
+  // Play the completion sound once when the puzzle is solved.
+  playChessSound("success");
+
   puzzleSolved=true;
   opponentThinking=false;
   wrongMovePending=false;
