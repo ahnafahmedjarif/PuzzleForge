@@ -23,67 +23,94 @@ h1{font-size:30px;margin-bottom:8px}
 .top-info{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:15px}
 .rating{color:#d7bd70;font-weight:bold}
 
-/* Permanent solved badge */
 .solved-badge{
-  display:none;
-  color:#75f0a4;
-  background:#173a2a;
-  border:1px solid #28734a;
-  padding:5px 9px;
-  border-radius:7px;
-  font-size:12px;
-  font-weight:bold;
+  display:none;color:#75f0a4;background:#173a2a;
+  border:1px solid #28734a;padding:5px 9px;
+  border-radius:7px;font-size:12px;font-weight:bold;
 }
 .solved-badge.visible{display:inline-block}
 
-.filter-wrap{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  flex-wrap:wrap;
-  margin-bottom:15px;
-}
-.filter-wrap label{
-  color:#aab4c3;
-  font-size:13px;
-  font-weight:bold;
-}
+.filter-wrap{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:15px}
+.filter-wrap label{color:#aab4c3;font-size:13px;font-weight:bold}
 #ratingFilter{
-  min-width:155px;
-  padding:10px 12px;
-  border:1px solid #465166;
-  border-radius:8px;
-  background:#222936;
-  color:#f1f3f7;
-  font-size:14px;
-  outline:none;
-  cursor:pointer;
+  min-width:155px;padding:10px 12px;border:1px solid #465166;
+  border-radius:8px;background:#222936;color:#f1f3f7;
+  font-size:14px;outline:none;cursor:pointer;
 }
 #ratingFilter:focus{border-color:#b6a05a}
 #ratingFilter option{background:#222936;color:#f1f3f7}
 
 .board-wrap{width:min(100%,560px);margin:auto}
-.board{width:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));border:3px solid #343c49;border-radius:6px;overflow:hidden}
-.square-coordinate{position:absolute;color:#263b2e;font-size:clamp(8px,1.35vw,11px);font-weight:700;line-height:1;z-index:4;pointer-events:none;text-shadow:0 0 2px rgba(255,255,255,.35)}
+.board{
+  width:100%;aspect-ratio:1/1;display:grid;
+  grid-template-columns:repeat(8,minmax(0,1fr));
+  grid-template-rows:repeat(8,minmax(0,1fr));
+  border:3px solid #343c49;border-radius:6px;overflow:hidden;
+  touch-action:pan-y;
+}
+.square-coordinate{
+  position:absolute;color:#263b2e;
+  font-size:clamp(8px,1.35vw,11px);font-weight:700;
+  line-height:1;z-index:4;pointer-events:none;
+  text-shadow:0 0 2px rgba(255,255,255,.35)
+}
 .square-coordinate.rank{top:2px;left:3px}
 .square-coordinate.file{right:3px;bottom:2px}
-.square{width:100%;height:100%;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;user-select:none}
+.square{
+  width:100%;height:100%;min-width:0;min-height:0;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;cursor:grab;user-select:none;
+  -webkit-user-select:none;
+}
+.square:active{cursor:grabbing}
 .light{background:#e5e1d5}
 .dark{background:#789477}
 .square.selected{background:#e6d45b}
 .square.last-move{background:#c9c45b}
 .square.hint{background:#e6bd42}
-.piece-image{width:92%;height:92%;object-fit:contain;display:block;pointer-events:none;user-select:none;position:relative;z-index:2;filter:drop-shadow(0 1px 1px rgba(0,0,0,.22))}
-.square.possible::after{content:"";position:absolute;width:25%;height:25%;border-radius:50%;background:#263b2e99;pointer-events:none}
-.square.capture::after{content:"";position:absolute;inset:3px;border:5px solid #263b2e88;border-radius:50%;pointer-events:none}
+.piece-image{
+  width:92%;height:92%;object-fit:contain;display:block;
+  pointer-events:none;user-select:none;position:relative;
+  z-index:2;filter:drop-shadow(0 1px 1px rgba(0,0,0,.22));
+  -webkit-user-drag:none;
+}
+.square.possible::after{
+  content:"";position:absolute;width:25%;height:25%;
+  border-radius:50%;background:#263b2e99;pointer-events:none
+}
+.square.capture::after{
+  content:"";position:absolute;inset:3px;
+  border:5px solid #263b2e88;border-radius:50%;
+  pointer-events:none
+}
+
+/* PC drag-and-drop visual feedback */
+.square.drag-over{
+  box-shadow:inset 0 0 0 5px rgba(255,220,70,.9);
+}
+.square.dragging-source{
+  opacity:.55;
+}
+
 .controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
-button{padding:12px 15px;border:1px solid #465166;border-radius:8px;background:#303a4b;color:white;cursor:pointer;font-size:14px}
+button{
+  padding:12px 15px;border:1px solid #465166;
+  border-radius:8px;background:#303a4b;color:white;
+  cursor:pointer;font-size:14px
+}
 button:hover{background:#46546b}
 button:disabled{opacity:.45;cursor:not-allowed}
 .primary{background:#b6a05a;color:#111;font-weight:bold;border:none}
-.status{color:#fff;font-size:16px;font-weight:bold;margin-top:18px;line-height:1.6;min-height:55px;padding:10px;border-radius:9px;background:#222936}
+.status{
+  color:#fff;font-size:16px;font-weight:bold;margin-top:18px;
+  line-height:1.6;min-height:55px;padding:10px;
+  border-radius:9px;background:#222936
+}
 .status.wrong{color:#ff7777;background:#3b2025;border:1px solid #74343b}
-.status.success{color:#75f0a4;background:#173a2a;border:1px solid #28734a;font-size:20px;text-align:center;padding:17px 10px}
+.status.success{
+  color:#75f0a4;background:#173a2a;border:1px solid #28734a;
+  font-size:20px;text-align:center;padding:17px 10px
+}
 .stat{background:#222936;padding:14px;border-radius:9px;margin-top:12px}
 .stat small{color:#9da7b6}
 .stat strong{display:block;font-size:20px;margin-top:5px}
@@ -91,6 +118,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .progress-fill{height:100%;width:0%;background:#b6a05a;transition:width .3s}
 .themes{color:#aab4c3;font-size:12px;line-height:1.6;margin-top:12px}
 .note{color:#929baa;font-size:12px;line-height:1.5;margin-top:18px}
+
 @media(max-width:720px){
  .layout{grid-template-columns:1fr}
  body{padding:12px}
@@ -161,17 +189,14 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <small>Puzzles Solved</small>
     <strong id="solved">0 / 280</strong>
   </div>
-
   <div class="stat">
     <small>Solved Without Hint</small>
     <strong id="noHint">0</strong>
   </div>
-
   <div class="stat">
     <small>Hints Used</small>
     <strong id="hintsUsed">0</strong>
   </div>
-
   <div class="stat">
     <small>Completion</small>
     <strong id="percentage">0%</strong>
@@ -179,12 +204,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <div class="progress-fill" id="progressFill"></div>
     </div>
   </div>
-
   <div class="stat">
     <small>Current Turn</small>
     <strong id="turn">--</strong>
   </div>
-
   <div class="stat">
     <small>Game Status</small>
     <strong id="gameStatus">Loading</strong>
@@ -200,7 +223,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
 </div>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -212,8 +234,6 @@ const boardElement = document.getElementById("board");
 
 const STORAGE_KEY = "puzzleforge_progress_v1";
 
-/* Permanent solved IDs for the currently signed-in account.
-   This is deliberately separate from local solvedIds. */
 let cloudSolvedIds = new Set();
 let solvedIdsUserUid = null;
 let solvedIdsLoading = false;
@@ -256,6 +276,163 @@ let dailySolved = {};
 let wrongMoveTimer = null;
 let wrongMovePreviousLastMove = null;
 
+/* ---------------- PC DRAG SYSTEM ---------------- */
+
+/*
+  Mouse drag-and-drop is enabled for desktop.
+  Touch users retain the original click/tap-to-move system.
+*/
+
+let dragState = null;
+let suppressNextClick = false;
+
+function getSquareFromElement(element){
+  const square = element?.closest(".square");
+  return square ? square.dataset.square : null;
+}
+
+function clearDragVisuals(){
+  boardElement.querySelectorAll(".drag-over,.dragging-source")
+    .forEach(el=>{
+      el.classList.remove("drag-over","dragging-source");
+    });
+}
+
+function cancelPieceDrag(){
+  if(!dragState) return;
+
+  dragState = null;
+  clearDragVisuals();
+
+  selected = null;
+  legalTargets = [];
+
+  renderBoard();
+}
+
+function handleDragStart(event){
+  // Only use mouse dragging. Touch remains tap-to-move.
+  if(event.pointerType !== "mouse") return;
+  if(!event.isPrimary || event.button !== 0) return;
+
+  if(
+    puzzleSolved ||
+    opponentThinking ||
+    wrongMovePending ||
+    !currentPuzzle
+  ) return;
+
+  const square = getSquareFromElement(event.target);
+  if(!square) return;
+
+  const piece = game.get(square);
+
+  if(!piece || piece.color !== game.turn()) return;
+
+  event.preventDefault();
+
+  dragState = {
+    from: square,
+    pointerId: event.pointerId
+  };
+
+  // Capture on the board so pointerup is received even
+  // when the pointer moves outside the original square.
+  try{
+    boardElement.setPointerCapture(event.pointerId);
+  }catch(e){}
+
+  selectPiece(square);
+
+  const source = boardElement.querySelector(
+    `[data-square="${square}"]`
+  );
+
+  if(source) source.classList.add("dragging-source");
+}
+
+function handleDragMove(event){
+  if(!dragState || event.pointerId !== dragState.pointerId) return;
+
+  event.preventDefault();
+
+  clearDragVisuals();
+
+  const element = document.elementFromPoint(
+    event.clientX,
+    event.clientY
+  );
+
+  const targetSquare = getSquareFromElement(element);
+
+  if(!targetSquare || targetSquare === dragState.from) return;
+
+  const targetElement = boardElement.querySelector(
+    `[data-square="${targetSquare}"]`
+  );
+
+  if(targetElement && legalTargets.includes(targetSquare)){
+    targetElement.classList.add("drag-over");
+  }
+}
+
+function handleDragEnd(event){
+  if(!dragState || event.pointerId !== dragState.pointerId) return;
+
+  event.preventDefault();
+
+  const from = dragState.from;
+
+  const element = document.elementFromPoint(
+    event.clientX,
+    event.clientY
+  );
+
+  const to = getSquareFromElement(element);
+
+  dragState = null;
+  clearDragVisuals();
+
+  // Prevent the browser-generated click from executing
+  // the same move a second time.
+  suppressNextClick = true;
+
+  setTimeout(()=>{
+    suppressNextClick = false;
+  },0);
+
+  if(!to){
+    selected = null;
+    legalTargets = [];
+    renderBoard();
+    return;
+  }
+
+  // Handle the move through the same original puzzle logic.
+  if(to === from){
+    selected = null;
+    legalTargets = [];
+    renderBoard();
+    return;
+  }
+
+  handleClick(to);
+}
+
+boardElement.addEventListener("pointerdown",handleDragStart);
+boardElement.addEventListener("pointermove",handleDragMove);
+boardElement.addEventListener("pointerup",handleDragEnd);
+
+boardElement.addEventListener("pointercancel",()=>{
+  cancelPieceDrag();
+});
+
+boardElement.addEventListener("lostpointercapture",()=>{
+  if(dragState){
+    cancelPieceDrag();
+  }
+});
+
 
 /* ---------------- CLOUD / ACCOUNT ---------------- */
 
@@ -295,13 +472,11 @@ function updateSolvedBadge(){
 
   const id = String(currentPuzzle.id);
 
-  // Signed-in users use only their own Firestore solved list.
-  // Guests use only their browser's local solved list.
   const isSolved = PF && PF.user
     ? cloudSolvedIds.has(id)
     : solvedIds.includes(id);
 
-  badge.classList.toggle("visible", isSolved);
+  badge.classList.toggle("visible",isSolved);
 }
 
 async function loadCloudSolvedPuzzles(user){
@@ -323,13 +498,12 @@ async function loadCloudSolvedPuzzles(user){
   try{
     const ids = await PF.getSolvedPuzzleIds();
 
-    // Ignore results if the account changed while loading.
     if(!PF.user || PF.user.uid !== uid) return;
 
     cloudSolvedIds = new Set(ids.map(String));
 
   }catch(error){
-    console.error("Could not load account solved puzzles:", error);
+    console.error("Could not load account solved puzzles:",error);
     setMessage(
       "Could not load your saved solved-puzzle list. Please refresh or try again.",
       "wrong"
@@ -342,7 +516,7 @@ async function loadCloudSolvedPuzzles(user){
   }
 }
 
-window.addEventListener("puzzleforge:auth", event=>{
+window.addEventListener("puzzleforge:auth",event=>{
   const user = event.detail?.user || (window.PF && PF.user) || null;
 
   updateAccountStatus(user);
@@ -359,7 +533,6 @@ window.addEventListener("puzzleforge:auth", event=>{
 
 window.addEventListener("puzzleforge:cloud-synced",()=>{
   updateAccountStatus((window.PF && PF.user) || null);
-
   loadProgress();
   updateStats();
 });
@@ -427,7 +600,7 @@ function saveProgress(){
   };
 
   try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
   }catch(error){
     console.error("Could not save local progress:",error);
   }
@@ -459,9 +632,9 @@ function applyUci(uci){
   if(!uci || uci.length<4) return null;
 
   return game.move({
-    from: uci.substring(0,2),
-    to: uci.substring(2,4),
-    promotion: uci.length>4 ? uci[4] : "q"
+    from:uci.substring(0,2),
+    to:uci.substring(2,4),
+    promotion:uci.length>4 ? uci[4] : "q"
   });
 }
 
@@ -581,17 +754,17 @@ function uciToSan(fen,uci){
     const temp = new Chess(fen);
 
     const move = temp.move({
-      from: uci.slice(0,2),
-      to: uci.slice(2,4),
-      promotion: uci.length>4 ? uci[4] : "q"
+      from:uci.slice(0,2),
+      to:uci.slice(2,4),
+      promotion:uci.length>4 ? uci[4] : "q"
     });
 
     return move ? {
-      san: move.san,
-      flags: move.flags,
-      captured: move.captured || null,
-      checkmate: temp.in_checkmate(),
-      check: temp.in_check()
+      san:move.san,
+      flags:move.flags,
+      captured:move.captured || null,
+      checkmate:temp.in_checkmate(),
+      check:temp.in_check()
     } : null;
 
   }catch(e){
@@ -601,12 +774,8 @@ function uciToSan(fen,uci){
 
 function pieceName(piece){
   return ({
-    p:"pawn",
-    n:"knight",
-    b:"bishop",
-    r:"rook",
-    q:"queen",
-    k:"king"
+    p:"pawn",n:"knight",b:"bishop",
+    r:"rook",q:"queen",k:"king"
   })[piece] || "piece";
 }
 
@@ -755,6 +924,7 @@ function applyRatingFilter(){
     selected = null;
     legalTargets = [];
     hintSquare = null;
+    dragState = null;
 
     if(wrongMoveTimer){
       clearTimeout(wrongMoveTimer);
@@ -794,9 +964,9 @@ function normalizePuzzle(puzzle){
 
   return {
     ...puzzle,
-    id: String(puzzle.id || ("community-"+puzzle.fen+"-"+puzzle.moves.join("-"))),
-    rating: Number(puzzle.rating) || 1500,
-    themes: Array.isArray(puzzle.themes) ? puzzle.themes : []
+    id:String(puzzle.id || ("community-"+puzzle.fen+"-"+puzzle.moves.join("-"))),
+    rating:Number(puzzle.rating) || 1500,
+    themes:Array.isArray(puzzle.themes) ? puzzle.themes : []
   };
 }
 
@@ -887,6 +1057,9 @@ function startPuzzle(index){
     wrongMoveTimer = null;
   }
 
+  dragState = null;
+  clearDragVisuals();
+
   const activeIndex = (index+activePuzzles.length)%activePuzzles.length;
   currentPuzzle = activePuzzles[activeIndex];
 
@@ -926,8 +1099,8 @@ function startPuzzle(index){
     }
 
     lastMove = {
-      from: setupMove.from,
-      to: setupMove.to
+      from:setupMove.from,
+      to:setupMove.to
     };
 
     puzzleMoveIndex = 1;
@@ -977,6 +1150,9 @@ function renderBoard(){
       const squareName = "abcdefgh"[col]+(8-row);
       const piece = position[row][col];
 
+      // Used by the drag system to identify the square.
+      square.dataset.square = squareName;
+
       if(selected===squareName) square.classList.add("selected");
 
       if(lastMove && (
@@ -997,12 +1173,8 @@ function renderBoard(){
         const pieceCode = piece.type.toUpperCase();
 
         const pieceNames = {
-          k:"King",
-          q:"Queen",
-          r:"Rook",
-          b:"Bishop",
-          n:"Knight",
-          p:"Pawn"
+          k:"King",q:"Queen",r:"Rook",
+          b:"Bishop",n:"Knight",p:"Pawn"
         };
 
         const el = document.createElement("img");
@@ -1029,6 +1201,7 @@ function renderBoard(){
       }
 
       square.addEventListener("click",()=>{
+        if(suppressNextClick) return;
         handleClick(squareName);
       });
 
@@ -1065,17 +1238,17 @@ function handleClick(square){
     if(selected===expectedFrom && square===expectedTo){
 
       const move = game.move({
-        from: selected,
-        to: square,
-        promotion: expected.length>4 ? expected[4] : "q"
+        from:selected,
+        to:square,
+        promotion:expected.length>4 ? expected[4] : "q"
       });
 
       if(move){
         recordMoveAttempt(true);
 
         lastMove = {
-          from: move.from,
-          to: move.to
+          from:move.from,
+          to:move.to
         };
 
         selected = null;
@@ -1102,9 +1275,9 @@ function handleClick(square){
     const moverColor = game.turn();
 
     const wrongMove = game.move({
-      from: selected,
-      to: square,
-      promotion: "q"
+      from:selected,
+      to:square,
+      promotion:"q"
     });
 
     if(wrongMove){
@@ -1117,8 +1290,8 @@ function handleClick(square){
         : null;
 
       lastMove = {
-        from: wrongMove.from,
-        to: wrongMove.to
+        from:wrongMove.from,
+        to:wrongMove.to
       };
 
       selected = null;
@@ -1176,8 +1349,8 @@ function playOpponentMove(){
   }
 
   lastMove = {
-    from: move.from,
-    to: move.to
+    from:move.from,
+    to:move.to
   };
 
   puzzleMoveIndex++;
@@ -1218,8 +1391,6 @@ async function finishPuzzle(){
 
   saveProgress();
 
-  // Update the permanent account-specific solved list.
-  // Never upload the guest's entire local solvedIds array.
   if(window.PF && PF.user &&
      typeof PF.markPuzzleSolved==="function"){
 
@@ -1228,7 +1399,6 @@ async function finishPuzzle(){
     try{
       await PF.markPuzzleSolved(id);
 
-      // Only update the visible list if the same account is still active.
       if(PF.user && PF.user.uid===uid){
         cloudSolvedIds.add(id);
         solvedIdsUserUid = uid;
@@ -1335,6 +1505,7 @@ function restartPuzzle(){
 
 function flipBoard(){
   flipped = !flipped;
+  dragState = null;
   renderBoard();
 }
 
@@ -1368,7 +1539,6 @@ async function initializePuzzleArena(){
 
       updateAccountStatus(PF.user||null);
 
-      // Load this account's permanent solved IDs.
       if(PF.user){
         await loadCloudSolvedPuzzles(PF.user);
       }
