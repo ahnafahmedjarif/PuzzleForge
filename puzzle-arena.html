@@ -22,6 +22,39 @@ h1{font-size:30px;margin-bottom:8px}
 .card{background:#1a1f29;border:1px solid #303846;border-radius:14px;padding:16px}
 .top-info{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:15px}
 .rating{color:#d7bd70;font-weight:bold}
+
+/* Rating filter */
+.filter-wrap{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  flex-wrap:wrap;
+  margin-bottom:15px;
+}
+.filter-wrap label{
+  color:#aab4c3;
+  font-size:13px;
+  font-weight:bold;
+}
+#ratingFilter{
+  min-width:155px;
+  padding:10px 12px;
+  border:1px solid #465166;
+  border-radius:8px;
+  background:#222936;
+  color:#f1f3f7;
+  font-size:14px;
+  outline:none;
+  cursor:pointer;
+}
+#ratingFilter:focus{
+  border-color:#b6a05a;
+}
+#ratingFilter option{
+  background:#222936;
+  color:#f1f3f7;
+}
+
 .board-wrap{width:min(100%,560px);margin:auto}
 .board{width:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));border:3px solid #343c49;border-radius:6px;overflow:hidden}
 .square-coordinate{position:absolute;color:#263b2e;font-size:clamp(8px,1.35vw,11px);font-weight:700;line-height:1;z-index:4;pointer-events:none;text-shadow:0 0 2px rgba(255,255,255,.35)}
@@ -97,6 +130,23 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <div class="top-info">
     <strong id="puzzleNumber">Loading puzzles...</strong>
     <span class="rating" id="rating">Rating: --</span>
+  </div>
+
+  <!-- Rating Filter -->
+  <div class="filter-wrap">
+    <label for="ratingFilter">Filter by Rating:</label>
+    <select id="ratingFilter">
+      <option value="all">All Ratings</option>
+      <option value="1600-1699">1600–1699</option>
+      <option value="1700-1799">1700–1799</option>
+      <option value="1800-1899">1800–1899</option>
+      <option value="1900-1999">1900–1999</option>
+      <option value="2000-2099">2000–2099</option>
+      <option value="2100-2199">2100–2199</option>
+      <option value="2200-2299">2200–2299</option>
+      <option value="2300-2399">2300–2399</option>
+      <option value="2400-2500">2400–2500</option>
+    </select>
   </div>
 
   <div class="board-wrap">
@@ -191,6 +241,7 @@ let engineFailed = false;
 let engineQueue = Promise.resolve();
 
 let puzzles = [];
+let activePuzzles = [];
 let currentIndex = 0;
 let currentPuzzle = null;
 
@@ -327,6 +378,7 @@ function saveProgress(){
 }
 
 function updateStats(){
+  // Progress always uses the complete database, not the filtered list.
   const total=puzzles.length||280;
   const solved=solvedIds.length;
   const percent=total?Math.round(solved/total*100):0;
@@ -610,6 +662,75 @@ async function explainWrongMove(beforeFen,afterFen,moverColor){
 }
 
 
+/* ---------------- RATING FILTER ---------------- */
+
+function getFilteredPuzzles(){
+  const filter=document.getElementById("ratingFilter").value;
+
+  if(filter==="all"){
+    return puzzles;
+  }
+
+  const range=filter.split("-").map(Number);
+  const minRating=range[0];
+  const maxRating=range[1];
+
+  return puzzles.filter(puzzle=>{
+    const rating=Number(puzzle.rating);
+
+    return Number.isFinite(rating)&&
+      rating>=minRating&&
+      rating<=maxRating;
+  });
+}
+
+function applyRatingFilter(){
+  const previousPuzzleId=currentPuzzle
+    ?String(currentPuzzle.id)
+    :null;
+
+  activePuzzles=getFilteredPuzzles();
+
+  if(!activePuzzles.length){
+    currentPuzzle=null;
+    puzzleSolved=false;
+    opponentThinking=false;
+    selected=null;
+    legalTargets=[];
+    hintSquare=null;
+
+    if(wrongMoveTimer){
+      clearTimeout(wrongMoveTimer);
+      wrongMoveTimer=null;
+    }
+
+    document.getElementById("puzzleNumber").textContent=
+      "No puzzles in this rating range";
+
+    document.getElementById("rating").textContent="Rating: --";
+    document.getElementById("themes").textContent="";
+    document.getElementById("gameStatus").textContent="No Puzzles";
+
+    setMessage("No puzzles found in the selected rating range.","wrong");
+
+    boardElement.innerHTML="";
+    document.getElementById("turn").textContent="--";
+
+    return;
+  }
+
+  // Keep the current puzzle if it is also present in the new range.
+  let newIndex=previousPuzzleId
+    ?activePuzzles.findIndex(p=>String(p.id)===previousPuzzleId)
+    :-1;
+
+  // Otherwise start from the first puzzle in the selected range.
+  if(newIndex<0)newIndex=0;
+
+  startPuzzle(newIndex);
+}
+
+
 /* ---------------- LOAD PUZZLES ---------------- */
 
 function normalizePuzzle(puzzle){
@@ -666,10 +787,26 @@ async function loadPuzzles(){
       throw new Error("No valid puzzles were found.");
     }
 
+    // Keep the saved global puzzle index for compatibility with old progress.
     currentIndex=Math.min(currentIndex,puzzles.length-1);
 
     updateStats();
-    startPuzzle(currentIndex);
+
+    // Apply the selected rating filter after all puzzles are loaded.
+    activePuzzles=getFilteredPuzzles();
+
+    if(!activePuzzles.length){
+      applyRatingFilter();
+    }else{
+      // Restore the previously saved puzzle if it belongs to the selected list.
+      const savedPuzzle=puzzles[currentIndex];
+      const restoredIndex=savedPuzzle
+        ?activePuzzles.findIndex(p=>String(p.id)===String(savedPuzzle.id))
+        :-1;
+
+      startPuzzle(restoredIndex>=0?restoredIndex:0);
+    }
+
     startStockfish();
 
   }catch(error){
@@ -688,15 +825,22 @@ async function loadPuzzles(){
 /* ---------------- PUZZLE PLAY ---------------- */
 
 function startPuzzle(index){
-  if(!puzzles.length)return;
+  if(!activePuzzles.length)return;
 
   if(wrongMoveTimer){
     clearTimeout(wrongMoveTimer);
     wrongMoveTimer=null;
   }
 
-  currentIndex=(index+puzzles.length)%puzzles.length;
-  currentPuzzle=puzzles[currentIndex];
+  // currentIndex remains the original index in the complete puzzles array.
+  const activeIndex=(index+activePuzzles.length)%activePuzzles.length;
+  currentPuzzle=activePuzzles[activeIndex];
+
+  currentIndex=puzzles.findIndex(
+    puzzle=>String(puzzle.id)===String(currentPuzzle.id)
+  );
+
+  if(currentIndex<0)currentIndex=0;
 
   puzzleMoveIndex=0;
   selected=null;
@@ -736,7 +880,7 @@ function startPuzzle(index){
     flipped=game.turn()==="b";
 
     document.getElementById("puzzleNumber").textContent=
-      "Puzzle "+(currentIndex+1)+" / "+puzzles.length;
+      "Puzzle "+(activeIndex+1)+" / "+activePuzzles.length;
 
     document.getElementById("rating").textContent=
       "Rating: "+currentPuzzle.rating;
@@ -1059,25 +1203,41 @@ function getHint(){
 }
 
 function previousPuzzle(){
-  if(!puzzles.length)return;
+  if(!activePuzzles.length)return;
+
+  const activeIndex=activePuzzles.findIndex(
+    puzzle=>currentPuzzle&&String(puzzle.id)===String(currentPuzzle.id)
+  );
+
+  const index=activeIndex<0?0:activeIndex;
 
   startPuzzle(
-    (currentIndex-1+puzzles.length)%puzzles.length
+    (index-1+activePuzzles.length)%activePuzzles.length
   );
 }
 
 function nextPuzzle(){
-  if(!puzzles.length)return;
+  if(!activePuzzles.length)return;
+
+  const activeIndex=activePuzzles.findIndex(
+    puzzle=>currentPuzzle&&String(puzzle.id)===String(currentPuzzle.id)
+  );
+
+  const index=activeIndex<0?0:activeIndex;
 
   startPuzzle(
-    (currentIndex+1)%puzzles.length
+    (index+1)%activePuzzles.length
   );
 }
 
 function restartPuzzle(){
-  if(!puzzles.length)return;
+  if(!activePuzzles.length)return;
 
-  startPuzzle(currentIndex);
+  const activeIndex=activePuzzles.findIndex(
+    puzzle=>currentPuzzle&&String(puzzle.id)===String(currentPuzzle.id)
+  );
+
+  startPuzzle(activeIndex<0?0:activeIndex);
 }
 
 function flipBoard(){
@@ -1101,6 +1261,10 @@ function updateInfo(){
 
 
 /* ---------------- STARTUP ---------------- */
+
+document.getElementById("ratingFilter").addEventListener("change",()=>{
+  applyRatingFilter();
+});
 
 async function initializePuzzleArena(){
   // Wait for Firebase authentication and initial cloud sync
