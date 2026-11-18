@@ -332,6 +332,54 @@
     await ref.delete();
   }
 
+  /* ---------------- USER-SPECIFIC SOLVED PUZZLES ---------------- */
+
+  function solvedPuzzleDocId(puzzleId) {
+    return encodeURIComponent(String(puzzleId))
+      .replace(/\./g, "%2E");
+  }
+
+  async function getSolvedPuzzleIds() {
+    const ref = await userDoc();
+
+    const snapshot = await ref
+      .collection("solvedPuzzles")
+      .get();
+
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return String(data.puzzleId || doc.id);
+    });
+  }
+
+  async function markPuzzleSolved(puzzleId) {
+    const id = String(puzzleId || "").trim();
+
+    if (!id) {
+      throw new Error("A valid puzzle ID is required.");
+    }
+
+    const ref = await userDoc();
+
+    const puzzleRef = ref
+      .collection("solvedPuzzles")
+      .doc(solvedPuzzleDocId(id));
+
+    await db.runTransaction(async transaction => {
+      const snapshot = await transaction.get(puzzleRef);
+
+      // Existing solved records are never overwritten.
+      if (!snapshot.exists) {
+        transaction.set(puzzleRef, {
+          puzzleId: id,
+          solvedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    });
+
+    return true;
+  }
+
   auth.onAuthStateChanged(async user => {
     currentUser = user || null;
     authReadyResolve(currentUser);
@@ -348,19 +396,27 @@
   window.PF = {
     auth,
     db,
+
     get user() {
       return currentUser;
     },
+
     authReady,
     signIn,
     signOut,
     syncNow,
     scheduleSync,
+
     getPublicPuzzles,
     uploadPuzzle,
     deletePuzzle,
+
+    getSolvedPuzzleIds,
+    markPuzzleSolved,
+
     readLocal,
     writeLocal,
+
     keys: {
       progress: PROGRESS_KEY,
       profile: PROFILE_KEY,
