@@ -27,50 +27,128 @@ jobs:
             https://database.lichess.org/lichess_db_puzzle.csv.zst \
             -o puzzles.csv.zst
 
-      - name: Extract 280 puzzles rated 1950-2050
+      - name: Build PuzzleForge database
         run: |
-          zstd -dc puzzles.csv.zst | python3 -c '
-          import csv, json, sys
+          cat > build_database.py <<'PY'
+          import csv
+          import json
+          import os
+          import random
+          import shutil
+          import sys
+
+          ORIGINAL_FILE = "puzzles-original.json"
+          OUTPUT_FILE = "puzzles.json"
+
+          OLD_COUNT = 280
+          NEW_COUNT = 50480
+          FINAL_COUNT = 50760
+
+          MIN_RATING = 1600
+          MAX_RATING = 2500
+
+          # Preserve the original 280 puzzles on the first run.
+          if not os.path.exists(ORIGINAL_FILE):
+              if not os.path.exists(OUTPUT_FILE):
+                  raise SystemExit("puzzles.json not found!")
+
+              shutil.copy2(OUTPUT_FILE, ORIGINAL_FILE)
+              print("Created permanent backup of original puzzles.")
+
+          with open(ORIGINAL_FILE, "r", encoding="utf-8") as f:
+              original = json.load(f)
+
+          if not isinstance(original, list) or len(original) != OLD_COUNT:
+              raise SystemExit(
+                  f"Expected exactly {OLD_COUNT} original puzzles. "
+                  f"Found {len(original) if isinstance(original, list) else 'invalid data'}."
+              )
+
+          original_ids = {str(p["id"]) for p in original}
+
+          if len(original_ids) != OLD_COUNT:
+              raise SystemExit("Duplicate IDs in original puzzles!")
+
+          # Reservoir sampling gives a representative random sample
+          # from all eligible Lichess puzzles.
+          rng = random.Random(20261118)
+          reservoir = []
+          eligible_count = 0
 
           reader = csv.DictReader(sys.stdin)
-          puzzles = []
 
           for row in reader:
               try:
                   rating = int(row["Rating"])
-              except (ValueError, KeyError):
-                  continue
+                  puzzle_id = row["PuzzleId"]
 
-              if 1950 <= rating <= 2050:
-                  puzzles.append({
-                      "id": row["PuzzleId"],
+                  if not MIN_RATING <= rating <= MAX_RATING:
+                      continue
+
+                  if puzzle_id in original_ids:
+                      continue
+
+                  puzzle = {
+                      "id": puzzle_id,
                       "fen": row["FEN"],
                       "moves": row["Moves"].split(),
                       "rating": rating,
                       "themes": row["Themes"].split(),
                       "gameUrl": row["GameUrl"]
-                  })
+                  }
 
-                  if len(puzzles) == 280:
-                      break
+                  eligible_count += 1
 
-          if len(puzzles) < 280:
+                  if len(reservoir) < NEW_COUNT:
+                      reservoir.append(puzzle)
+                  else:
+                      j = rng.randrange(eligible_count)
+                      if j < NEW_COUNT:
+                          reservoir[j] = puzzle
+
+              except (ValueError, KeyError, TypeError):
+                  continue
+
+          if len(reservoir) != NEW_COUNT:
               raise SystemExit(
-                  f"Only found {len(puzzles)} puzzles; expected 280."
+                  f"Only selected {len(reservoir)} puzzles; "
+                  f"expected {NEW_COUNT}."
               )
 
-          with open("puzzles.json", "w") as f:
-              json.dump(puzzles, f, indent=2)
+          new_ids = {p["id"] for p in reservoir}
 
-          print(f"Created {len(puzzles)} puzzles.")
-          '
+          if len(new_ids) != NEW_COUNT:
+              raise SystemExit("Duplicate IDs found in selected puzzles!")
+
+          if original_ids.intersection(new_ids):
+              raise SystemExit("New puzzles overlap with original puzzles!")
+
+          combined = original + reservoir
+
+          if len(combined) != FINAL_COUNT:
+              raise SystemExit("Final puzzle count is incorrect!")
+
+          temp_file = OUTPUT_FILE + ".tmp"
+
+          with open(temp_file, "w", encoding="utf-8") as f:
+              json.dump(combined, f, ensure_ascii=False, separators=(",", ":"))
+
+          os.replace(temp_file, OUTPUT_FILE)
+
+          print(f"Eligible Lichess puzzles: {eligible_count}")
+          print(f"Original puzzles preserved: {len(original)}")
+          print(f"New puzzles selected: {len(reservoir)}")
+          print(f"Final database total: {len(combined)}")
+          PY
+
+          zstd -dc puzzles.csv.zst | python3 build_database.py
 
       - name: Remove downloaded database
-        run: rm -f puzzles.csv.zst
+        run: |
+          rm -f puzzles.csv.zst build_database.py
 
-      - name: Commit puzzle database
+      - name: Commit updated puzzle database
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Add 280 chess puzzles"
-          file_pattern: puzzles.json
-          
+          commit_message: "Add 50,480 Lichess puzzles"
+          file_pattern: puzzles.json puzzles-original.json
